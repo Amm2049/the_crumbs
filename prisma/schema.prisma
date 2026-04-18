@@ -1,0 +1,152 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// The Crumbs — Bakery E-Commerce
+// Prisma Schema (v1 — Credentials Auth Only, No Payment)
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING    // Order placed — waiting for admin review
+  PROCESSING // Admin confirmed — being prepared in the kitchen
+  READY      // Ready for pickup / out for delivery
+  DELIVERED  // Completed successfully
+  CANCELLED  // Cancelled by admin or customer
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// USER
+// Represents both customers and admins. No OAuth in v1 — password is required.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  image     String?
+  password  String     // Bcrypt hashed password
+  role      Role       @default(CUSTOMER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  orders    Order[]
+  cartItems CartItem[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CATEGORY
+// Groups products (e.g. Cakes, Breads, Pastries, Cookies).
+// A category can have many products (One-to-Many).
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique  // URL-friendly name, e.g. "chocolate-cakes"
+  description String?
+  image       String?            // Cloudinary URL
+  createdAt   DateTime  @default(now())
+
+  products    Product[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRODUCT
+// Core entity. Belongs to one Category. Supports multiple images (Cloudinary).
+// onDelete: Restrict on category — cannot delete a category that has products.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique  // URL-friendly name for the product page
+  description String
+  price       Float
+  stock       Int       @default(0)
+  images      String[]           // Array of Cloudinary URLs
+  isAvailable Boolean   @default(true) // Admin can hide products from storefront
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ORDER
+// Created when a customer places an order. Total is a price snapshot.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Order {
+  id        String      @id @default(cuid())
+  status    OrderStatus @default(PENDING)
+  total     Float       // Total snapshotted at time of order — does not change
+  notes     String?     // Optional customer delivery/pickup instructions
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+
+  items     OrderItem[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ORDER ITEM
+// A single line item inside an Order.
+// Price is SNAPSHOTTED from Product.price at time of ordering —
+// so future price changes do NOT affect historical orders.
+// onDelete: Cascade — deleting an order removes all its items.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model OrderItem {
+  id       String  @id @default(cuid())
+  quantity Int
+  price    Float   // Price snapshot at time of order
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CART ITEM
+// DB-backed cart. Users must be logged in to add items.
+// @@unique([userId, productId]) ensures no duplicate rows —
+// adding the same product again should UPDATE quantity instead.
+// onDelete: Cascade — deleting a user removes their cart.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model CartItem {
+  id        String   @id @default(cuid())
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}

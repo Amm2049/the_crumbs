@@ -44,3 +44,7 @@
  *   - Error messages under each field using errors.fieldName?.message
  *   - Link to /register: "Don't have an account? Sign up"
  */
+
+export default function LoginPage() {
+  return <div>Login Page — implement me!</div>
+}

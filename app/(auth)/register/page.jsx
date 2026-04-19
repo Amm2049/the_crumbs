@@ -46,3 +46,7 @@
  *   - Same centered card style as login page
  *   - Link to /login: "Already have an account? Sign in"
  */
+
+export default function RegisterPage() {
+  return <div>Register Page — implement me!</div>
+}

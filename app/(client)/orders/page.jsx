@@ -40,3 +40,7 @@
  *   //   - Empty state: "You haven't placed any orders yet"
  * }
  */
+
+export default function OrdersPage() {
+  return <div>Orders — implement me!</div>
+}

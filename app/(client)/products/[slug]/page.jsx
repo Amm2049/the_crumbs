@@ -39,3 +39,7 @@
  *   //   because it calls the cart API and needs useState for loading state
  * }
  */
+
+export default function ProductDetailPage() {
+  return <div>Product Detail — implement me!</div>
+}

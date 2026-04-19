@@ -28,3 +28,7 @@
  *   )
  * }
  */
+
+export default function AdminCustomersPage() {
+  return <div>Admin Customers — implement me!</div>
+}

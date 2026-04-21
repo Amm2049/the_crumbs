@@ -1,46 +1,110 @@
-/**
- * app/(client)/orders/page.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- * Customer Order History Page  →  URL: /orders
- * Protected by middleware — redirects to /login if not authenticated.
- *
- * Shows the logged-in customer's past orders with status badges.
- *
- * HOW TO IMPLEMENT:
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * import { auth } from '@/lib/auth'
- * import db from '@/lib/db'
- * import { redirect } from 'next/navigation'
- *
- * export const metadata = { title: 'My Orders — The Crumbs' }
- *
- * export default async function OrdersPage() {
- *   // STEP 1 — Get session (server-side)
- *   const session = await auth()
- *   if (!session) redirect('/login')
- *
- *   // STEP 2 — Fetch user's orders
- *   const orders = await db.order.findMany({
- *     where: { userId: session.user.id },
- *     include: {
- *       items: {
- *         include: { product: { select: { name: true, images: true } } },
- *       },
- *     },
- *     orderBy: { createdAt: 'desc' },
- *   })
- *
- *   // STEP 3 — Render each order as a card showing:
- *   //   - Order ID (shortened: order.id.slice(0, 8))
- *   //   - Date placed
- *   //   - Status badge (color-coded by status)
- *   //   - List of items (product name × quantity)
- *   //   - Order total
- *   //   - Empty state: "You haven't placed any orders yet"
- * }
- */
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-export default function OrdersPage() {
-  return <div>Orders — implement me!</div>
+import { auth } from '@/lib/auth'
+import db from '@/lib/db'
+
+export const metadata = {
+  title: 'My Orders | The Crumbs',
+}
+
+const statusClasses = {
+  PENDING: 'bg-yellow-100 text-yellow-800',
+  PROCESSING: 'bg-blue-100 text-blue-800',
+  READY: 'bg-indigo-100 text-indigo-800',
+  DELIVERED: 'bg-green-100 text-green-800',
+  CANCELLED: 'bg-red-100 text-red-700',
+}
+
+function formatDate(value) {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(value))
+}
+
+export default async function OrdersPage() {
+  const session = await auth()
+
+  if (!session) {
+    redirect('/login')
+  }
+
+  let orders = []
+
+  try {
+    orders = await db.order.findMany({
+      where: { userId: session.user.id },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  } catch {
+    orders = []
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="mx-auto w-full max-w-4xl px-4 py-14 text-center sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-extrabold text-[#4D321E]">My Orders</h1>
+        <p className="mt-3 text-[#7A5D4B]">You have not placed any orders yet.</p>
+        <Link
+          href="/products"
+          className="mt-6 inline-flex rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-600"
+        >
+          Start Shopping
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-5xl space-y-4 px-4 py-8 sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-extrabold text-[#4D321E]">My Orders</h1>
+
+      {orders.map((order) => (
+        <article key={order.id} className="rounded-2xl border border-amber-100 bg-white p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-[#6B4C3B]">Order #{order.id.slice(0, 8)}</p>
+              <p className="text-xs text-[#8A6D5E]">Placed on {formatDate(order.createdAt)}</p>
+            </div>
+
+            <span
+              className={[
+                'rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide',
+                statusClasses[order.status] || 'bg-gray-100 text-gray-700',
+              ].join(' ')}
+            >
+              {order.status}
+            </span>
+          </div>
+
+          <ul className="mt-4 space-y-2 text-sm text-[#5B4333]">
+            {order.items.map((item) => (
+              <li key={item.id} className="flex items-center justify-between">
+                <span>{item.product?.name || 'Product'}</span>
+                <span>x{item.quantity}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-4 border-t border-amber-100 pt-3 text-right">
+            <p className="text-sm text-[#6B4C3B]">Total</p>
+            <p className="text-lg font-extrabold text-[#4D321E]">${Number(order.total ?? 0).toFixed(2)}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  )
 }

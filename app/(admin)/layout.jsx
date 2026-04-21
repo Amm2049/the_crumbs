@@ -33,6 +33,22 @@
  * }
  */
 
-export default function AdminLayout({ children }) {
-  return <div>{children}</div>
+import { redirect } from 'next/navigation'
+
+import Sidebar from '@/components/admin/Sidebar'
+import { auth } from '@/lib/auth'
+
+export default async function AdminLayout({ children }) {
+  const session = await auth()
+
+  if (!session || session.user?.role !== 'ADMIN') {
+    redirect('/')
+  }
+
+  return (
+    <div className="min-h-screen bg-[#FFFEF8] text-[#3F2A1D] md:flex">
+      <Sidebar />
+      <main className="flex-1 p-4 sm:p-6">{children}</main>
+    </div>
+  )
 }

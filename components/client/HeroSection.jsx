@@ -1,40 +1,46 @@
-/**
- * components/client/HeroSection.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- * Landing Page Hero Banner — Server Component (no interactivity needed)
- *
- * HOW TO IMPLEMENT:
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * import Link from 'next/link'
- * import { Button } from '@/components/ui/button'
- *
- * export default function HeroSection() {
- *   return (
- *     <section className="relative bg-gradient-to-r from-amber-50 to-orange-100 py-20 px-4">
- *       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
- *         <div>
- *           <h1 className="text-5xl font-bold leading-tight">
- *             Fresh Baked<br />with Love 🥐
- *           </h1>
- *           <p className="text-lg text-muted-foreground mt-4">
- *             Artisan cakes, breads, pastries and cookies baked fresh every day.
- *           </p>
- *           <div className="flex gap-4 mt-8">
- *             <Link href="/products">
- *               <Button size="lg">Shop Now</Button>
- *             </Link>
- *             <Link href="/register">
- *               <Button variant="outline" size="lg">Create Account</Button>
- *             </Link>
- *           </div>
- *         </div>
- *         {/* Hero image — use next/image with a bakery photo from Cloudinary or public folder *\/}
- *         <div className="hidden md:block">
- *           {/* <Image src="..." alt="Fresh pastries" width={500} height={400} className="rounded-2xl" /> *\/}
- *         </div>
- *       </div>
- *     </section>
- *   )
- * }
- */
+﻿import Link from 'next/link'
+
+import { Button } from '@/components/ui/button'
+
+export default function HeroSection() {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 md:grid-cols-2">
+        <div>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">Fresh Daily</p>
+          <h1 className="text-4xl font-extrabold leading-tight text-[#4D321E] sm:text-5xl">
+            Fresh bakery classics baked for your table
+          </h1>
+          <p className="mt-4 max-w-xl text-base text-[#7A5D4B] sm:text-lg">
+            Browse cakes, breads, pastries, and cookies made in small batches and ready for pickup or delivery.
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/products">
+              <Button size="lg" className="bg-amber-500 text-white hover:bg-amber-600">
+                Shop Products
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button size="lg" variant="outline" className="border-amber-300 bg-white/70 hover:bg-amber-50">
+                Create Account
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="rounded-3xl border border-amber-200/80 bg-white/70 p-6 shadow-[0_20px_60px_rgba(217,119,6,0.15)] backdrop-blur-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">Featured Today</p>
+            <ul className="mt-4 space-y-3 text-sm text-[#6B4C3B] sm:text-base">
+              <li>- Brown Butter Cookies</li>
+              <li>- Chocolate Ganache Cake</li>
+              <li>- Sourdough Country Loaf</li>
+              <li>- Cinnamon Morning Rolls</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

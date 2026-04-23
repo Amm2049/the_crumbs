@@ -1,6 +1,7 @@
 {
   "name": "the-crumbs",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,6 +15,7 @@
   "dependencies": {
     "@base-ui/react": "^1.4.0",
     "@prisma/client": "^7.7.0",
+    "@prisma/extension-accelerate": "^3.0.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

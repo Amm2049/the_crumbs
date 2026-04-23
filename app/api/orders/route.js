@@ -1,41 +1,85 @@
-/**
- * app/api/orders/route.js
- * ─────────────────────────────────────────────────────────────────────────────
- * Orders API — Collection Endpoints
- *
- * GET  /api/orders  → Fetch orders
- *   - ADMIN: fetch ALL orders (include user info, items, product names)
- *     Support optional ?status=PENDING filter
- *   - CUSTOMER: fetch only orders belonging to session.user.id
- *   - Differentiate by checking session.user.role
- *   - Include: user (name, email), items (with product name + image)
- *   - Order by: createdAt descending (newest first)
- *
- * POST /api/orders  → Place a new order (logged-in users only)
- *   - Must be logged in (any role)
- *   - Steps:
- *     1. Get session — reject if not logged in (401)
- *     2. Fetch user's CartItems from DB (include product for price + stock)
- *     3. Validate: cart is not empty, all products are still available,
- *        all products have sufficient stock
- *     4. Calculate total: sum of (cartItem.quantity * product.price)
- *     5. Create Order + OrderItems in a Prisma transaction ($transaction):
- *        a. db.order.create() with items embedded via nested create
- *        b. For each cart item, reduce product stock:
- *           db.product.update({ data: { stock: { decrement: quantity } } })
- *        c. Clear the user's cart: db.cartItem.deleteMany({ where: { userId } })
- *     6. Return the created order with 201 status
- *
- * HOW TO IMPLEMENT:
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * import { NextResponse } from 'next/server'
- * import { auth } from '@/lib/auth'
- * import db from '@/lib/db'
- *
- * export async function GET(request) { ... }
- * export async function POST(request) {
- *   // Use db.$transaction([...]) to run multiple operations atomically
- *   // If any step fails, ALL steps are rolled back automatically
- * }
- */
+import db from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { handleGetAll, handleApiError, response } from "@/lib/api-helper";
+
+export async function GET() {
+    const session = await auth();
+    const isAdmin = session.user.role === 'ADMIN';
+
+    return handleGetAll(db.order, {
+        where: isAdmin ? {} : { userId: session.user.id },
+        include: {
+            user: { select: { name: true, email: true } },
+            items: { include: { product: { select: { name: true, images: true } } } },
+        },
+        orderBy: { createdAt: 'desc' },
+    });
+}
+
+export async function POST() {
+    const session = await auth();
+    const userId = session.user.id;
+
+    try {
+        const order = await db.$transaction(async (tx) => {
+            // Fetch cart items inside transaction
+            const cartItems = await tx.cartItem.findMany({
+                where: { userId },
+                include: { product: true },
+            });
+
+            if (cartItems.length === 0) {
+                throw new Error('CART_EMPTY');
+            }
+
+            // validate the availability of products and calculate the total amount
+            let total = 0;
+            const orderItemsData = [];
+
+            for (const item of cartItems) {
+                if (!item.product.isAvailable || item.quantity > item.product.stock) {
+                    throw new Error(`STOCK_ERROR:${item.product.name}`);
+                }
+
+                total += item.quantity * item.product.price;
+                orderItemsData.push({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.product.price,
+                });
+
+                // stock will be deducted after order is created
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { decrement: item.quantity } },
+                });
+            }
+
+            // Create the order
+            const newOrder = await tx.order.create({
+                data: {
+                    userId,
+                    total,
+                    items: { create: orderItemsData },
+                },
+            });
+
+            // Clear user cart
+            await tx.cartItem.deleteMany({ where: { userId } });
+
+            return newOrder;
+        });
+
+        return response(order, 201);
+    } catch (error) {
+        if (error.message === 'CART_EMPTY') {
+            return response({ error: 'Cart is empty' }, 400);
+        }
+        if (error.message.startsWith('STOCK_ERROR:')) {
+            const productName = error.message.split(':')[1];
+            return response({ error: `Product "${productName}" is unavailable or out of stock` }, 400);
+        }
+        return handleApiError(error);
+    }
+}
+

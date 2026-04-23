@@ -1,31 +1,27 @@
-import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
+// register new user account
 import db from '@/lib/db'
+import bcrypt from 'bcryptjs'
+import { response, handleApiError } from '@/lib/utils'
 
-export async function POST(request) {
+export async function POST(request){
   try {
-    const { name, email, password } = await request.json()
+    const {name, email, password} = await request.json()
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
+    if (!name || !email || !password){
+      return response({ error: 'Missing required fields'}, 400)
     }
-
-    const existing = await db.user.findUnique({ where: { email } })
-    if (existing) {
-      return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
-    }
-
+    
     const hashedPassword = await bcrypt.hash(password, 10)
 
     const user = await db.user.create({
-      data: { name, email, password: hashedPassword },
+      data: { name, email, password: hashedPassword }
     })
 
-    return NextResponse.json(
+    return response(
       { id: user.id, name: user.name, email: user.email },
-      { status: 201 }
+      201
     )
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (error){
+    return handleApiError(error, { P2002: 'Email already in use' })
   }
-}
+}

@@ -8,7 +8,7 @@
 ---
 
 ## 🔵 PHASE 1 — Foundation
-
+d
 > These files have no dependencies. Start here — everything else imports from them.
 
 ---
@@ -187,7 +187,7 @@ export const config = {
 
 ---
 
-## 🟢 PHASE 2 — Auth API
+## 🟢 PHASE 2 — Auth API 
 
 > The register endpoint is the only custom auth route. Login is handled automatically by Auth.js.
 

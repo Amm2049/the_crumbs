@@ -19,3 +19,10 @@
 - **Prisma 7 Constructor Change:** Learned that Prisma's `engine type "client"` now requires `adapter` or `accelerateUrl`; fixed by initializing Prisma with `PrismaPg + pg Pool` in `lib/db.js`.
 - **Dependency Alignment:** Added `@prisma/adapter-pg` and `pg` to match Prisma 7 runtime requirements and eliminate startup constructor errors.
 - **Dev Server Process Management:** Confirmed that duplicate `next dev` processes can force port fallback; terminating the old PID restores normal startup on port `3000`.
+
+### April 22, 2026
+
+- **Refined Database Seeding**: Successfully implemented a high-fidelity seed script using professional **Unsplash images** and detailed metadata for all products and categories.
+- **Prisma 7 Seed Configuration**: Resolved seeding issues by explicitly configuring the `seed` command in `prisma.config.ts` to use `node ./prisma/seed.js`.
+- **Smart Admin Redirection**: Optimized the login flow to automatically redirect Admins to the dashboard while keeping Customers on the storefront using `window.location.href`.
+- **Admin UX Toggle**: Added a "Dashboard" shortcut to the main Navbar for admins and a "View Storefront" link to the Admin Sidebar to allow seamless switching between management and shopping modes.

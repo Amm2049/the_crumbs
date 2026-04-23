@@ -1,5 +1,6 @@
-﻿'use client'
+'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Package, ShoppingBag, Tag, Users } from 'lucide-react'
@@ -26,7 +27,13 @@ export default function Sidebar() {
   return (
     <aside className="border-amber-100 bg-[#FFFDF2] md:min-h-screen md:w-64 md:border-r">
       <div className="border-b border-amber-100 px-4 py-4 md:border-b-0">
-        <p className="text-lg font-extrabold tracking-tight text-[#5C3A21]">The Crumbs Admin</p>
+        <div className="inline-flex items-center gap-1">
+          <Image src="/the-crumbs-logo.png" alt="The Crumbs" width={320} height={92} className="h-12 w-auto" />
+          <div className="leading-tight">
+            <p className="whitespace-nowrap text-base font-extrabold tracking-tight text-[#5C3A21]">The Crumbs</p>
+            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#8A6D5E]">Admin</span>
+          </div>
+        </div>
       </div>
 
       <nav className="flex gap-2 overflow-x-auto px-3 py-3 md:flex-col md:gap-1 md:px-4 md:py-4">
@@ -50,6 +57,16 @@ export default function Sidebar() {
             </Link>
           )
         })}
+
+        <div className="mt-4 border-t border-amber-100 pt-4">
+          <Link
+            href="/"
+            className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-amber-700 transition-colors hover:bg-amber-100/70"
+          >
+            <ShoppingBag size={18} />
+            <span>View Storefront</span>
+          </Link>
+        </div>
       </nav>
     </aside>
   )

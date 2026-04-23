@@ -1,58 +1,72 @@
-﻿'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
-import { LogOut, ShoppingCart, User } from 'lucide-react'
-import useSWR from 'swr'
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { LogOut, ShoppingCart, User } from "lucide-react";
+import useSWR from "swr";
 
 const fetcher = async (url) => {
-  const response = await fetch(url)
+  const response = await fetch(url);
   // Keep navbar stable even when cart API is not ready yet.
-  if (!response.ok) return []
+  if (!response.ok) return [];
 
-  const payload = await response.json()
-  return Array.isArray(payload) ? payload : []
-}
+  const payload = await response.json();
+  return Array.isArray(payload) ? payload : [];
+};
 
 function getNavLinkClass(pathname, href) {
   // Root route needs an exact match; other links can match nested paths.
-  const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
+  const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return [
-    'text-sm font-semibold transition-colors',
-    isActive ? 'text-amber-700' : 'text-[#6B4C3B] hover:text-amber-700',
-  ].join(' ')
+    "text-sm font-semibold transition-colors",
+    isActive ? "text-amber-700" : "text-[#6B4C3B] hover:text-amber-700",
+  ].join(" ");
 }
 
 export default function Navbar() {
-  const pathname = usePathname()
-  const { data: session } = useSession()
+  const pathname = usePathname();
+  const { data: session } = useSession();
 
   // Only fetch cart data for authenticated users.
-  const { data: cartItems } = useSWR(session ? '/api/cart' : null, fetcher, {
+  const { data: cartItems } = useSWR(session ? "/api/cart" : null, fetcher, {
     revalidateOnFocus: false,
-  })
+  });
 
   // Show total quantity, not just number of cart rows.
   const cartCount =
     cartItems?.reduce((sum, item) => {
-      const quantity = Number(item?.quantity)
-      return sum + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
-    }, 0) ?? 0
+      const quantity = Number(item?.quantity);
+      return sum + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1);
+    }, 0) ?? 0;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-amber-100 bg-[#FFFDF2]/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-xl font-extrabold tracking-tight text-[#5C3A21]">
-          The Crumbs
+      <div className="mx-auto  flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="inline-flex items-center gap-1">
+          <Image
+            src="/the-crumbs-logo.png"
+            alt="The Crumbs"
+            width={420}
+            height={120}
+            priority
+            className="h-14 w-auto sm:h-16"
+          />
+          <span className="whitespace-nowrap text-lg font-extrabold tracking-tight text-[#5C3A21] sm:text-xl">
+            The Crumbs
+          </span>
         </Link>
 
         <div className="hidden items-center gap-6 md:flex">
-          <Link href="/" className={getNavLinkClass(pathname, '/')}>
+          <Link href="/" className={getNavLinkClass(pathname, "/")}>
             Home
           </Link>
-          <Link href="/products" className={getNavLinkClass(pathname, '/products')}>
+          <Link
+            href="/products"
+            className={getNavLinkClass(pathname, "/products")}
+          >
             Shop
           </Link>
         </div>
@@ -84,12 +98,21 @@ export default function Navbar() {
 
               <button
                 type="button"
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => signOut({ callbackUrl: "/" })}
                 className="inline-flex items-center gap-1 rounded-full border border-amber-200 px-3 py-1.5 text-xs font-semibold text-[#6B4C3B] transition-colors hover:bg-amber-100/80 hover:text-amber-700 sm:text-sm"
               >
                 <LogOut size={16} />
                 <span className="hidden sm:inline">Sign Out</span>
               </button>
+
+              {session.user.role === "ADMIN" && (
+                <Link
+                  href="/admin/dashboard"
+                  className="hidden items-center gap-1 rounded-full bg-amber-700 px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-amber-800 sm:inline-flex sm:text-sm"
+                >
+                  Dashboard
+                </Link>
+              )}
             </>
           ) : (
             <>
@@ -110,5 +133,5 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

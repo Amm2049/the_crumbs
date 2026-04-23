@@ -11,6 +11,11 @@ const quicksand = Quicksand({
 export const metadata = {
   title: "The Crumbs | Bakery",
   description: "Freshly baked goods every day.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({ children }) {

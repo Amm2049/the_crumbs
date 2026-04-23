@@ -36,8 +36,9 @@ export default function LoginPage() {
       if (result?.error) {
         setAuthError('Oops! Invalid email or password. Please try again.')
       } else {
-        router.push('/')
-        router.refresh()
+        // Redirect to admin dashboard if the user is an admin
+        // We use window.location because router.push doesn't always trigger a full session refresh
+        window.location.href = data.email === 'admin@thecrumbs.com' ? '/admin/dashboard' : '/'
       }
     } catch (error) {
       setAuthError('Something went wrong. Please try again later.')

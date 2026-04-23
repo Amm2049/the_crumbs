@@ -20,3 +20,7 @@
  *   return <ProductForm categories={categories} mode="create" />
  * }
  */
+
+export default function NewProductPage() {
+  return <div>New Product — implement me!</div>
+}

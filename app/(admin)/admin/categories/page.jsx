@@ -31,3 +31,7 @@
  *   )
  * }
  */
+
+export default function AdminCategoriesPage() {
+  return <div>Admin Categories — implement me!</div>
+}

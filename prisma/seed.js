@@ -1,55 +1,67 @@
-/**
- * prisma/seed.js
- * ─────────────────────────────────────────────────────────────────────────────
- * Database Seed Script
- * Run with: npx prisma db seed
- * (requires "prisma": { "seed": "node prisma/seed.js" } in package.json)
- *
- * This script creates:
- *   - 1 Admin user
- *   - 4 Product categories
- *   - 12 Sample products (3 per category)
- *
- * HOW TO IMPLEMENT:
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * STEP 1 — Imports
- *   import { PrismaClient } from '@/lib/generated/prisma'
- *   import bcrypt from 'bcryptjs'
- *
- *   NOTE: For a plain Node.js script you may need a relative import instead:
- *   import { PrismaClient } from '../lib/generated/prisma/index.js'
- *
- *   const db = new PrismaClient()
- *
- * STEP 2 — Main seed function (async)
- *   async function main() {
- *
- *     // ── Admin User ──────────────────────────────────────────────────────
- *     // Hash the password with bcrypt (saltRounds = 10 is standard)
- *     // Use db.user.upsert() so re-running the seed doesn't create duplicates
- *     // Credentials: email = 'admin@thecrumbs.com', password = 'Admin123!'
- *
- *     // ── Categories ──────────────────────────────────────────────────────
- *     // Create 4 categories using db.category.createMany()
- *     // Suggested categories: Cakes, Breads, Pastries, Cookies
- *     // Use skipDuplicates: true to avoid errors on re-run
- *     // Each category needs: name, slug, description
- *
- *     // ── Products ────────────────────────────────────────────────────────
- *     // For each category, create 3 products using db.product.createMany()
- *     // Each product needs: name, slug, description, price, stock, categoryId
- *     // Leave images as [] for now (Cloudinary links added via admin UI)
- *     // Use skipDuplicates: true
- *   }
- *
- * STEP 3 — Run and handle errors
- *   main()
- *     .catch((e) => {
- *       console.error(e)
- *       process.exit(1)
- *     })
- *     .finally(async () => {
- *       await db.$disconnect()
- *     })
- */
+import 'dotenv/config'
+import db from '../lib/db.js'
+import bcrypt from 'bcryptjs'
+
+async function main() {
+  // Admin user
+  const hashedPassword = await bcrypt.hash('Admin123!', 10)
+  await db.user.upsert({
+    where: { email: 'admin@thecrumbs.com' },
+    update: {},
+    create: {
+      name: 'Admin',
+      email: 'admin@thecrumbs.com',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  })
+
+  // Categories
+  const categoriesData = [
+    { name: 'Bread', slug: 'bread' },
+    { name: 'Cakes', slug: 'cakes' },
+    { name: 'Cookies', slug: 'cookies' },
+    { name: 'Pastries', slug: 'pastries' },
+  ]
+
+  const categories = {}
+  for (const cat of categoriesData) {
+    const created = await db.category.upsert({
+      where: { slug: cat.slug },
+      update: {},
+      create: cat,
+    })
+    categories[cat.slug] = created.id
+  }
+
+  // 12 products across 4 categories
+  const products = [
+    { name: 'Sourdough Loaf',        slug: 'sourdough-loaf',        price: 8.99,  stock: 20, categoryId: categories['bread'] },
+    { name: 'Whole Wheat Loaf',       slug: 'whole-wheat-loaf',       price: 6.99,  stock: 15, categoryId: categories['bread'] },
+    { name: 'Baguette',               slug: 'baguette',               price: 3.99,  stock: 30, categoryId: categories['bread'] },
+    { name: 'Chocolate Cake',         slug: 'chocolate-cake',         price: 24.99, stock: 10, categoryId: categories['cakes'] },
+    { name: 'Vanilla Birthday Cake',  slug: 'vanilla-birthday-cake',  price: 29.99, stock: 8,  categoryId: categories['cakes'] },
+    { name: 'Carrot Cake',            slug: 'carrot-cake',            price: 22.99, stock: 12, categoryId: categories['cakes'] },
+    { name: 'Chocolate Chip Cookies', slug: 'chocolate-chip-cookies', price: 9.99,  stock: 50, categoryId: categories['cookies'] },
+    { name: 'Oatmeal Raisin Cookies', slug: 'oatmeal-raisin-cookies', price: 8.99,  stock: 40, categoryId: categories['cookies'] },
+    { name: 'Macarons Box',           slug: 'macarons-box',           price: 14.99, stock: 25, categoryId: categories['cookies'] },
+    { name: 'Croissant',              slug: 'croissant',              price: 3.49,  stock: 35, categoryId: categories['pastries'] },
+    { name: 'Cinnamon Roll',          slug: 'cinnamon-roll',          price: 4.99,  stock: 20, categoryId: categories['pastries'] },
+    { name: 'Almond Danish',          slug: 'almond-danish',          price: 4.49,  stock: 18, categoryId: categories['pastries'] },
+  ]
+
+  for (const product of products) {
+    await db.product.upsert({
+      where: { slug: product.slug },
+      update: {},
+      create: { ...product, description: `Fresh ${product.name} baked daily.`, images: [] },
+    })
+  }
+
+  console.log('✅ Seed complete')
+}
+
+main()
+  .catch(console.error)
+  .finally(() => db.$disconnect())
+  

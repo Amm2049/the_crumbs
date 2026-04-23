@@ -41,3 +41,7 @@
  *   // - Empty state: "Your cart is empty" with link to /products
  * }
  */
+
+export default function CartPage() {
+  return <div>Cart — implement me!</div>
+}

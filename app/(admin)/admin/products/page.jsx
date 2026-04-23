@@ -37,3 +37,7 @@
  * NOTE: ProductsTable should be a Client Component so it can handle
  * delete button clicks and call the DELETE API, then router.refresh() to re-fetch.
  */
+
+export default function AdminProductsPage() {
+  return <div>Admin Products — implement me!</div>
+}

@@ -41,3 +41,7 @@
  *   )
  * }
  */
+
+export default function ProductsPage() {
+  return <div>Products — implement me!</div>
+}

@@ -29,3 +29,7 @@
  *   return <ProductForm categories={categories} product={product} mode="edit" />
  * }
  */
+
+export default function EditProductPage() {
+  return <div>Edit Product — implement me!</div>
+}

@@ -1,5 +1,5 @@
 import CategoriesManager from '@/components/admin/CategoriesManager'
-import db from '@/lib/db'
+import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
   title: 'Categories | The Crumbs Admin',
@@ -10,9 +10,8 @@ export default async function AdminCategoriesPage() {
   let hasDataError = false
 
   try {
-    categories = await db.category.findMany({
-      include: { _count: { select: { products: true } } },
-      orderBy: { name: 'asc' },
+    categories = await apiGet('/api/admin/categories', {
+      cache: 'no-store',
     })
   } catch {
     hasDataError = true

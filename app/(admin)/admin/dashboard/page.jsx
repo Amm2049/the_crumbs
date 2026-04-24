@@ -2,7 +2,7 @@ import { DollarSign, Package, ShoppingBag, Users } from 'lucide-react'
 
 import OrdersTable from '@/components/admin/OrdersTable'
 import StatsCard from '@/components/admin/StatsCard'
-import db from '@/lib/db'
+import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
   title: 'Dashboard | The Crumbs Admin',
@@ -17,26 +17,15 @@ export default async function DashboardPage() {
   let hasDataError = false
 
   try {
-    const [ordersCount, productsCount, customersCount, revenueResult, recent] = await Promise.all([
-      db.order.count(),
-      db.product.count(),
-      db.user.count({ where: { role: 'CUSTOMER' } }),
-      db.order.aggregate({ _sum: { total: true } }),
-      db.order.findMany({
-        take: 8,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: { select: { name: true, email: true } },
-          items: true,
-        },
-      }),
-    ])
+    const data = await apiGet('/api/admin/dashboard', {
+      cache: 'no-store',
+    })
 
-    totalOrders = ordersCount
-    totalProducts = productsCount
-    totalCustomers = customersCount
-    totalRevenue = Number(revenueResult?._sum?.total ?? 0)
-    recentOrders = recent
+    totalOrders = data.totalOrders ?? 0
+    totalProducts = data.totalProducts ?? 0
+    totalCustomers = data.totalCustomers ?? 0
+    totalRevenue = Number(data.totalRevenue ?? 0)
+    recentOrders = Array.isArray(data.recentOrders) ? data.recentOrders : []
   } catch {
     hasDataError = true
   }

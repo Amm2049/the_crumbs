@@ -2,12 +2,17 @@ import db from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { handleGetAll, handleApiError, response } from "@/lib/api-helper";
 
-export async function GET() {
+export async function GET(request) {
     const session = await auth();
     const isAdmin = session.user.role === 'ADMIN';
+    const { searchParams } = request.nextUrl
+    const requestedStatus = searchParams.get('status')
 
     return handleGetAll(db.order, {
-        where: isAdmin ? {} : { userId: session.user.id },
+        where: {
+            ...(isAdmin ? {} : { userId: session.user.id }),
+            ...(requestedStatus ? { status: requestedStatus } : {}),
+        },
         include: {
             user: { select: { name: true, email: true } },
             items: { include: { product: { select: { name: true, images: true } } } },

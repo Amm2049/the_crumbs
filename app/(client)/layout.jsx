@@ -33,12 +33,14 @@
 
 import Footer from '@/components/client/Footer'
 import Navbar from '@/components/client/Navbar'
+import Decorations from '@/components/client/Decorations'
 
 export default function ClientLayout({ children }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col">
+      <Decorations />
       <Navbar />
-      <main className="flex-1">{children}</main>
+      <main className="relative z-10 flex-1">{children}</main>
       <Footer />
     </div>
   )

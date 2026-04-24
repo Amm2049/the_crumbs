@@ -1,4 +1,4 @@
-import db from '@/lib/db'
+import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
   title: 'Customers | The Crumbs Admin',
@@ -17,10 +17,8 @@ export default async function AdminCustomersPage() {
   let hasDataError = false
 
   try {
-    customers = await db.user.findMany({
-      where: { role: 'CUSTOMER' },
-      include: { _count: { select: { orders: true } } },
-      orderBy: { createdAt: 'desc' },
+    customers = await apiGet('/api/admin/customers', {
+      cache: 'no-store',
     })
   } catch {
     hasDataError = true

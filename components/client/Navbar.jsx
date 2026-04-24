@@ -49,7 +49,7 @@ export default function Navbar() {
           <Image
             src="/the-crumbs-logo.png"
             alt="The Crumbs"
-            width={420}
+            width={450}
             height={120}
             priority
             className="h-14 w-auto sm:h-16"
@@ -75,26 +75,39 @@ export default function Navbar() {
           {/* Auth-aware actions */}
           {session ? (
             <>
-              <Link
-                href="/cart"
-                aria-label="Cart"
-                className="relative rounded-full p-2 text-[#6B4C3B] hover:bg-amber-100/80 hover:text-amber-700"
-              >
-                <ShoppingCart size={20} />
-                {cartCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
+              {session.user.role !== "ADMIN" && (
+                <>
+                  <Link
+                    href="/cart"
+                    aria-label="Cart"
+                    className="relative rounded-full p-2 text-[#6B4C3B] hover:bg-amber-100/80 hover:text-amber-700"
+                  >
+                    <ShoppingCart size={20} />
+                    {cartCount > 0 && (
+                      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white">
+                        {cartCount}
+                      </span>
+                    )}
+                  </Link>
 
-              <Link
-                href="/orders"
-                aria-label="My orders"
-                className="rounded-full p-2 text-[#6B4C3B] hover:bg-amber-100/80 hover:text-amber-700"
-              >
-                <User size={20} />
-              </Link>
+                  <Link
+                    href="/orders"
+                    aria-label="My orders"
+                    className="rounded-full p-2 text-[#6B4C3B] hover:bg-amber-100/80 hover:text-amber-700"
+                  >
+                    <User size={20} />
+                  </Link>
+                </>
+              )}
+
+              {session.user.role === "ADMIN" && (
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center gap-1 rounded-full bg-amber-700 px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-amber-800 sm:text-sm"
+                >
+                  Dashboard
+                </Link>
+              )}
 
               <button
                 type="button"
@@ -104,15 +117,6 @@ export default function Navbar() {
                 <LogOut size={16} />
                 <span className="hidden sm:inline">Sign Out</span>
               </button>
-
-              {session.user.role === "ADMIN" && (
-                <Link
-                  href="/admin/dashboard"
-                  className="hidden items-center gap-1 rounded-full bg-amber-700 px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-amber-800 sm:inline-flex sm:text-sm"
-                >
-                  Dashboard
-                </Link>
-              )}
             </>
           ) : (
             <>

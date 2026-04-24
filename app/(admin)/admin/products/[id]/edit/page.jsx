@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import ProductForm from '@/components/admin/ProductForm'
-import db from '@/lib/db'
+import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
   title: 'Edit Product | The Crumbs Admin',
@@ -15,8 +15,12 @@ export default async function EditProductPage({ params }) {
 
   try {
     ;[product, categories] = await Promise.all([
-      db.product.findUnique({ where: { id } }),
-      db.category.findMany({ orderBy: { name: 'asc' } }),
+      apiGet(`/api/products/${id}`, {
+        cache: 'no-store',
+      }),
+      apiGet('/api/categories', {
+        next: { revalidate: 60 },
+      }),
     ])
   } catch {
     product = null

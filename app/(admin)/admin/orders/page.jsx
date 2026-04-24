@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import OrdersTable from '@/components/admin/OrdersTable'
-import db from '@/lib/db'
+import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
   title: 'Orders | The Crumbs Admin',
@@ -18,17 +18,9 @@ export default async function AdminOrdersPage({ searchParams }) {
   let hasDataError = false
 
   try {
-    orders = await db.order.findMany({
-      where: selectedStatus ? { status: selectedStatus } : undefined,
-      include: {
-        user: { select: { name: true, email: true } },
-        items: {
-          include: {
-            product: { select: { name: true } },
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
+    orders = await apiGet('/api/orders', {
+      searchParams: selectedStatus ? { status: selectedStatus } : undefined,
+      cache: 'no-store',
     })
   } catch {
     hasDataError = true

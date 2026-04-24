@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import ProductsTable from '@/components/admin/ProductsTable'
-import db from '@/lib/db'
+import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
   title: 'Products | The Crumbs Admin',
@@ -12,9 +12,8 @@ export default async function AdminProductsPage() {
   let hasDataError = false
 
   try {
-    products = await db.product.findMany({
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
+    products = await apiGet('/api/admin/products', {
+      cache: 'no-store',
     })
   } catch {
     hasDataError = true

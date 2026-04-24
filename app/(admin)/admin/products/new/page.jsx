@@ -1,5 +1,5 @@
 import ProductForm from '@/components/admin/ProductForm'
-import db from '@/lib/db'
+import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
   title: 'New Product | The Crumbs Admin',
@@ -10,7 +10,9 @@ export default async function NewProductPage() {
   let hasDataError = false
 
   try {
-    categories = await db.category.findMany({ orderBy: { name: 'asc' } })
+    categories = await apiGet('/api/categories', {
+      next: { revalidate: 60 },
+    })
   } catch {
     hasDataError = true
   }

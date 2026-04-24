@@ -1,32 +1,15 @@
 ﻿'use client'
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-
-export default function CategoryFilter({ categories }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-
-  const activeCategory = searchParams.get('category') ?? ''
-
-  const setCategory = (slug) => {
-    const params = new URLSearchParams(searchParams.toString())
-
-    if (slug) {
-      params.set('category', slug)
-    } else {
-      params.delete('category')
-    }
-
-    const queryString = params.toString()
-    router.push(queryString ? `${pathname}?${queryString}` : pathname)
-  }
-
+export default function CategoryFilter({
+  categories,
+  activeCategory = '',
+  onChangeCategory,
+}) {
   return (
     <div className="flex flex-wrap gap-2">
       <button
         type="button"
-        onClick={() => setCategory('')}
+        onClick={() => onChangeCategory?.('')}
         className={[
           'rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors',
           activeCategory
@@ -44,7 +27,7 @@ export default function CategoryFilter({ categories }) {
           <button
             key={category.id}
             type="button"
-            onClick={() => setCategory(category.slug)}
+            onClick={() => onChangeCategory?.(category.slug)}
             className={[
               'rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors',
               active

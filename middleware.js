@@ -27,8 +27,8 @@ export default auth((req) => {
     if (!isLoggedIn) return NextResponse.redirect(new URL('/login', nextUrl))
   }
 
-  //Admins cannot access the shopping cart (Frontend)
-  if (path === '/cart' && isAdmin) {
+  //Admins cannot access the shopping cart or frontend orders page
+  if ((path === '/cart' || path.startsWith('/orders')) && isAdmin) {
     return NextResponse.redirect(new URL('/admin/dashboard', nextUrl))
   }
 
@@ -64,6 +64,11 @@ export default auth((req) => {
 
     // Orders - Only Admin can update status
     if (path.startsWith('/api/orders/') && req.method === 'PATCH' && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 })
+    }
+
+    // Admin APIs
+    if (path.startsWith('/api/admin') && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 })
     }
 

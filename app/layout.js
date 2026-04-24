@@ -18,11 +18,17 @@ export const metadata = {
   },
 };
 
+import { ToastProvider } from "@/context/ToastContext";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${quicksand.variable} h-full antialiased`}>
       <body suppressHydrationWarning className={`${quicksand.className} min-h-full flex flex-col`}>
-        <NextAuthProvider>{children}</NextAuthProvider>
+        <NextAuthProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

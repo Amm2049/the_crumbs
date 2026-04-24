@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -13,6 +13,11 @@ export default function AddToCartButton({ productId, disabled = false }) {
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
+
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const isCustomer = session && !isAdmin
+
+  if (!isCustomer) return null
 
   useEffect(() => {
     if (status !== 'success') return

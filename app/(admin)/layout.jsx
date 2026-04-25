@@ -1,42 +1,9 @@
-/**
- * app/(admin)/layout.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- * Admin Dashboard Layout
- *
- * Wraps all /admin/* pages with a sidebar + top navbar.
- * Double-check auth here as a safety net (middleware.js is the primary guard).
- *
- * HOW TO IMPLEMENT:
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * import { auth } from '@/lib/auth'
- * import { redirect } from 'next/navigation'
- * import Sidebar from '@/components/admin/Sidebar'
- * import AdminNavbar from '@/components/admin/AdminNavbar'
- *
- * export default async function AdminLayout({ children }) {
- *   // Safety net: re-verify admin role on the server
- *   const session = await auth()
- *   if (!session || session.user.role !== 'ADMIN') redirect('/')
- *
- *   return (
- *     <div className="flex h-screen overflow-hidden">
- *       <Sidebar />
- *       <div className="flex flex-col flex-1 overflow-hidden">
- *         <AdminNavbar user={session.user} />
- *         <main className="flex-1 overflow-y-auto p-6">
- *           {children}
- *         </main>
- *       </div>
- *     </div>
- *   )
- * }
- */
-
 import { redirect } from 'next/navigation'
-
-import Sidebar from '@/components/admin/Sidebar'
 import { auth } from '@/lib/auth'
+import Sidebar from '@/components/admin/Sidebar'
+import AdminNavbar from '@/components/admin/AdminNavbar'
+import { ToastProvider } from '@/context/ToastContext'
+import { AdminProvider } from '@/context/AdminContext'
 
 export default async function AdminLayout({ children }) {
   const session = await auth()
@@ -46,9 +13,21 @@ export default async function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFEF8] text-[#3F2A1D] md:flex">
-      <Sidebar />
-      <main className="flex-1 p-4 sm:p-6">{children}</main>
-    </div>
+    <ToastProvider>
+      <AdminProvider>
+        <div className="flex h-screen overflow-hidden bg-[var(--background)] text-[var(--bakery-text)] transition-colors duration-500">
+          {/* Responsive Sidebar */}
+          <Sidebar />
+
+          {/* Right side content */}
+          <div className="flex flex-1 flex-col overflow-hidden lg:ml-64 transition-all duration-300">
+            <AdminNavbar />
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+              {children}
+            </main>
+          </div>
+        </div>
+      </AdminProvider>
+    </ToastProvider>
   )
 }

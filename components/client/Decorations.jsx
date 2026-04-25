@@ -24,50 +24,50 @@ const CroissantIcon = ({ size = 24, className = "" }) => (
 
 export default function Decorations() {
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none z-0">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden select-none z-0">
       {/* Soft Blobs */}
-      <div className="absolute top-[5%] -left-20 h-96 w-96 rounded-full bg-amber-100/30 blur-3xl" />
-      <div className="absolute top-[35%] -right-20 h-96 w-96 rounded-full bg-orange-100/20 blur-3xl" />
-      <div className="absolute bottom-[20%] left-1/4 h-80 w-80 rounded-full bg-rose-100/10 blur-3xl" />
-      <div className="absolute top-[70%] left-[-10%] h-64 w-64 rounded-full bg-amber-200/10 blur-3xl" />
+      <div className="absolute top-[5%] -left-20 h-96 w-96 rounded-full bg-amber-100/30 dark:bg-amber-900/10 blur-3xl" />
+      <div className="absolute top-[35%] -right-20 h-96 w-96 rounded-full bg-orange-100/20 dark:bg-orange-900/10 blur-3xl" />
+      <div className="absolute bottom-[20%] left-1/4 h-80 w-80 rounded-full bg-rose-100/10 dark:bg-rose-900/5 blur-3xl" />
+      <div className="absolute top-[70%] left-[-10%] h-64 w-64 rounded-full bg-amber-200/10 dark:bg-amber-900/5 blur-3xl" />
 
       {/* Floating Bakery Elements */}
       
       {/* Croissants */}
-      <div className="absolute top-[8%] left-[4%] text-amber-300/40 animate-float">
+      <div className="absolute top-[8%] left-[4%] text-amber-300/40 animate-float-around-1">
         <CroissantIcon size={52} className="rotate-12" />
       </div>
-      <div className="absolute bottom-[15%] right-[6%] text-amber-300/30 animate-sway delay-500">
+      <div className="absolute bottom-[15%] right-[6%] text-amber-300/30 animate-float-around-2 delay-500">
         <CroissantIcon size={44} className="-rotate-45" />
       </div>
 
       {/* Cakes */}
-      <div className="absolute top-[22%] right-[5%] text-rose-300/30 animate-float-slow delay-300">
+      <div className="absolute top-[22%] right-[5%] text-rose-300/30 animate-float-around-3 delay-300">
         <Cake size={48} className="-rotate-6" />
       </div>
-      <div className="absolute top-[55%] left-[2%] text-amber-200/40 animate-float delay-1000">
+      <div className="absolute top-[55%] left-[2%] text-amber-200/40 animate-float-around-1 delay-1000">
         <CakeSlice size={36} className="rotate-12" />
       </div>
 
       {/* Donuts */}
-      <div className="absolute top-[45%] right-[12%] text-orange-200/30 animate-sway">
+      <div className="absolute top-[45%] right-[12%] text-orange-200/30 animate-float-around-2">
         <Donut size={40} />
       </div>
-      <div className="absolute bottom-[40%] left-[5%] text-amber-200/30 animate-float-slow">
+      <div className="absolute bottom-[40%] left-[5%] text-amber-200/30 animate-float-around-3 delay-700">
         <Donut size={32} className="rotate-45" />
       </div>
 
       {/* Other Treats */}
-      <div className="absolute top-[65%] right-[3%] text-rose-200/30 animate-float delay-200">
+      <div className="absolute top-[65%] right-[3%] text-rose-200/30 animate-float-around-1 delay-200">
         <Cherry size={28} />
       </div>
       <div className="absolute top-[35%] left-[12%] text-amber-200/20 animate-soft-rotate">
         <Wheat size={44} />
       </div>
-      <div className="absolute bottom-[8%] left-[15%] text-orange-200/30 animate-sway delay-700">
+      <div className="absolute bottom-[8%] left-[15%] text-orange-200/30 animate-float-around-2 delay-700">
         <Coffee size={40} className="rotate-12" />
       </div>
-      <div className="absolute top-[85%] right-[15%] text-amber-200/20 animate-float-slow delay-400">
+      <div className="absolute top-[85%] right-[15%] text-amber-200/20 animate-float-around-3 delay-400">
         <Wheat size={52} className="-rotate-12" />
       </div>
 

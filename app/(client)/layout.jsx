@@ -37,8 +37,7 @@ import Decorations from '@/components/client/Decorations'
 
 export default function ClientLayout({ children }) {
   return (
-    <div className="relative min-h-screen flex flex-col">
-      <Decorations />
+    <div className="relative min-h-screen flex flex-col bg-[var(--background)] transition-colors duration-500">
       <Navbar />
       <main className="relative z-10 flex-1">{children}</main>
       <Footer />

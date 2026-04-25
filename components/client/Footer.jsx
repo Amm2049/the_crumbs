@@ -5,24 +5,24 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="mt-auto border-t border-amber-100 bg-[#FFFDF2] pt-16 pb-8">
+    <footer className="mt-auto border-t border-amber-100 dark:border-zinc-800 bg-[var(--bakery-bg)] pt-16 pb-8 transition-colors">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand Section */}
           <div className="space-y-4">
-            <h3 className="text-xl font-extrabold tracking-tight text-[#4D321E]">The Crumbs</h3>
-            <p className="text-sm leading-relaxed text-[#7A5D4B]">
-              Artisan cakes, breads, and pastries baked fresh daily in the heart of the city. 
+            <h3 className="text-xl font-extrabold tracking-tight text-[var(--bakery-text)]">The Crumbs</h3>
+            <p className="text-sm leading-relaxed text-[var(--bakery-text-muted)]">
+              Artisan cakes, breads, and pastries baked fresh daily in the heart of the city.
               We believe in honest ingredients and the simple joy of a warm treat.
             </p>
-            <div className="flex gap-4 text-[#6B4C3B]">
-              <Link href="#" title="Instagram" className="transition-colors hover:text-amber-600">
+            <div className="flex gap-4 text-[var(--bakery-text-muted)]">
+              <Link href="#" title="Instagram" className="transition-colors hover:text-amber-600 dark:hover:text-amber-400">
                 <Share2 size={20} />
               </Link>
-              <Link href="#" title="Facebook" className="transition-colors hover:text-amber-600">
+              <Link href="#" title="Facebook" className="transition-colors hover:text-amber-600 dark:hover:text-amber-400">
                 <MessageCircle size={20} />
               </Link>
-              <Link href="#" title="Twitter" className="transition-colors hover:text-amber-600">
+              <Link href="#" title="Twitter" className="transition-colors hover:text-amber-600 dark:hover:text-amber-400">
                 <Globe size={20} />
               </Link>
             </div>
@@ -30,8 +30,8 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[#4D321E]">Shop</h4>
-            <ul className="space-y-2 text-sm text-[#7A5D4B]">
+            <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--bakery-text)]">Shop</h4>
+            <ul className="space-y-2 text-sm text-[var(--bakery-text-muted)]">
               <li>
                 <Link href="/products" className="transition-colors hover:text-amber-700">All Products</Link>
               </li>
@@ -49,8 +49,8 @@ export default function Footer() {
 
           {/* Account */}
           <div>
-            <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[#4D321E]">Support</h4>
-            <ul className="space-y-2 text-sm text-[#7A5D4B]">
+            <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--bakery-text)]">Support</h4>
+            <ul className="space-y-2 text-sm text-[var(--bakery-text-muted)]">
               <li>
                 <Link href="/orders" className="transition-colors hover:text-amber-700">Track Order</Link>
               </li>
@@ -68,8 +68,8 @@ export default function Footer() {
 
           {/* Contact & Hours */}
           <div className="space-y-4">
-            <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[#4D321E]">Visit Us</h4>
-            <ul className="space-y-3 text-sm text-[#7A5D4B]">
+            <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--bakery-text)]">Visit Us</h4>
+            <ul className="space-y-3 text-sm text-[var(--bakery-text-muted)]">
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="mt-0.5 shrink-0 text-amber-700" />
                 <span>123 Baker Street, Flour District<br />Sugar City, SC 54321</span>
@@ -89,8 +89,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-amber-100 pt-8 text-center">
-          <p className="text-xs text-[#8A6D5E]">
+        <div className="mt-16 border-t border-amber-100 dark:border-zinc-800 pt-8 text-center">
+          <p className="text-xs text-[var(--bakery-text-muted)] opacity-70">
             &copy; {currentYear} The Crumbs Artisan Bakery. Crafted with love for pastry lovers.
           </p>
         </div>

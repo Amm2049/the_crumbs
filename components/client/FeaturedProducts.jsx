@@ -22,10 +22,10 @@ export default async function FeaturedProducts() {
       <ScrollReveal>
         <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1">
-            <h2 className="text-3xl font-extrabold text-[#4D321E]">
+            <h2 className="text-3xl font-extrabold text-[var(--bakery-text)]">
               Fresh Today
             </h2>
-            <p className="text-sm text-[#7A5D4B]">Our best sellers, baked just hours ago</p>
+            <p className="text-sm text-[var(--bakery-text-muted)]">Our best sellers, baked just hours ago</p>
           </div>
           <Link
             href="/products"

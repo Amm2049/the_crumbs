@@ -30,15 +30,15 @@ export default function CategoryShowcase() {
   return (
     <ScrollReveal className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
-        <h2 className="text-3xl font-extrabold text-[#4D321E]">Shop by Category</h2>
-        <p className="mt-2 text-[#7A5D4B]">Explore our range of handcrafted bakery delights</p>
+        <h2 className="text-3xl font-extrabold text-[var(--bakery-text)]">Shop by Category</h2>
+        <p className="mt-2 text-[var(--bakery-text-muted)]">Explore our range of handcrafted bakery delights</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
         {categories.map((category, i) => (
           <div
             key={category.id}
-            className={`group relative h-72 overflow-hidden rounded-3xl bg-amber-100 shadow-sm ${
+            className={`group relative h-72 overflow-hidden rounded-3xl bg-amber-100 dark:bg-zinc-800 shadow-sm ${
               i === 0 ? 'delay-100' : i === 1 ? 'delay-200' : i === 2 ? 'delay-300' : 'delay-400'
             }`}
           >

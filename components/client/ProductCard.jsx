@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 
 export default function ProductCard({ product }) {
   const router = useRouter()
-  const { cartItems, addToCart, updateQuantity, isAuthenticated, isAdmin } = useCart()
+  const { cartItems, addToCart, updateQuantity, isAuthenticated, isAdmin, isLoading } = useCart()
   
   const imageUrl = Array.isArray(product?.images) && product.images.length > 0 ? product.images[0] : ''
   const unavailable = !product?.isAvailable || Number(product?.stock ?? 0) < 1
@@ -29,9 +29,9 @@ export default function ProductCard({ product }) {
 
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-amber-100 bg-white transition-all hover:shadow-xl hover:shadow-amber-900/5">
+    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-all hover:shadow-xl hover:shadow-amber-900/5">
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="relative aspect-square overflow-hidden bg-amber-50">
+        <div className="relative aspect-square overflow-hidden bg-amber-50 dark:bg-zinc-800/50">
           {imageUrl ? (
             <div 
               className="h-full w-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110" 
@@ -47,14 +47,16 @@ export default function ProductCard({ product }) {
             /* Floating Cart Controls - Hidden for Admins */
             !isAdmin && (
               <div className="absolute bottom-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
-                {quantity > 0 ? (
+                {isLoading ? (
+                  <div className="h-10 w-10 animate-pulse rounded-full bg-amber-100/80 backdrop-blur-sm" />
+                ) : quantity > 0 ? (
                   <div 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       router.push('/cart');
                     }}
-                    className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 shadow-sm backdrop-blur-sm transition-all hover:bg-emerald-100 hover:scale-105 cursor-pointer"
+                    className="flex items-center gap-1.5 rounded-full border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/90 dark:bg-emerald-900/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 shadow-sm backdrop-blur-sm transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/40 hover:scale-105 cursor-pointer"
                   >
                     <CheckCircle size={12} strokeWidth={3} />
                     <span>In Cart</span>
@@ -78,12 +80,12 @@ export default function ProductCard({ product }) {
             <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600 sm:text-[10px]">
               {product?.category?.name || 'Handcrafted'}
             </p>
-            <p className="text-sm font-black text-[#4D321E] sm:text-base">${price.toFixed(2)}</p>
+            <p className="text-sm font-black text-[var(--bakery-text)] sm:text-base">${price.toFixed(2)}</p>
           </div>
-          <h3 className="text-sm font-bold text-[#4D321E] transition-colors group-hover:text-amber-800 sm:text-base truncate">
+          <h3 className="text-sm font-bold text-[var(--bakery-text)] transition-colors group-hover:text-amber-800 dark:group-hover:text-amber-400 sm:text-base truncate">
             {product?.name}
           </h3>
-          <p className="text-[10px] leading-relaxed text-[#7A5D4B] line-clamp-1 sm:text-[11px]">
+          <p className="text-[10px] leading-relaxed text-[var(--bakery-text-muted)] line-clamp-1 sm:text-[11px]">
             {product?.description || 'Freshly baked item.'}
           </p>
         </div>

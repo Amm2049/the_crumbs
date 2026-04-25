@@ -1,7 +1,7 @@
 export function Skeleton({ className, ...props }) {
   return (
     <div
-      className={["animate-pulse rounded-md bg-amber-100/60", className].join(" ")}
+      className={["animate-pulse rounded-md bg-amber-100/60 dark:bg-zinc-800/60", className].join(" ")}
       {...props}
     />
   );
@@ -9,8 +9,8 @@ export function Skeleton({ className, ...props }) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="rounded-3xl border border-amber-100 bg-white">
-      <div className="aspect-square w-full rounded-t-3xl bg-amber-50">
+    <div className="rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+      <div className="aspect-square w-full rounded-t-3xl bg-amber-50 dark:bg-zinc-800/50">
         <Skeleton className="h-full w-full rounded-none rounded-t-3xl" />
       </div>
       <div className="space-y-1.5 p-5">
@@ -27,7 +27,7 @@ export function ProductCardSkeleton() {
 
 export function HeroSkeleton() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 py-8">
+    <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950 py-8">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 grid items-center gap-10 md:grid-cols-2">
         <div className="space-y-4 text-center md:text-left">
           <Skeleton className="mx-auto md:mx-0 h-4 w-24" />
@@ -77,7 +77,7 @@ export function ProductDetailSkeleton() {
           </div>
         </div>
 
-        <div className="space-y-4 rounded-3xl border border-amber-100 bg-white p-6 sm:p-8">
+        <div className="space-y-4 rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 sm:p-8">
           <Skeleton className="h-6 w-24 rounded-full" />
           <Skeleton className="h-9 w-2/3" />
           <Skeleton className="h-8 w-32" />
@@ -102,7 +102,7 @@ export function CartSkeleton() {
       <div className="grid gap-8 lg:grid-cols-[1fr_350px] items-start">
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-3xl border border-amber-100 bg-white p-5">
+            <div key={i} className="rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <Skeleton className="h-20 w-20 shrink-0 rounded-2xl" />
                 <div className="min-w-0 flex-1 space-y-2">
@@ -119,7 +119,7 @@ export function CartSkeleton() {
           ))}
         </div>
 
-        <div className="rounded-3xl border border-amber-100 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
           <Skeleton className="h-7 w-36 mb-6" />
           <div className="space-y-4">
             <div className="flex justify-between">
@@ -143,7 +143,7 @@ export function OrdersSkeleton() {
     <div className="mx-auto w-full max-w-5xl space-y-4 px-4 py-8 sm:px-6 lg:px-8">
       <Skeleton className="h-9 w-48" />
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-2xl border border-amber-100 bg-white p-5">
+        <div key={i} className="rounded-2xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="space-y-2">
               <Skeleton className="h-4 w-40" />
@@ -175,7 +175,7 @@ export function AdminDashboardSkeleton() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-amber-100 bg-white p-5">
+          <div key={i} className="rounded-2xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="mt-3 h-8 w-20" />
           </div>
@@ -184,7 +184,7 @@ export function AdminDashboardSkeleton() {
 
       <div className="space-y-3">
         <Skeleton className="h-7 w-40" />
-        <div className="rounded-2xl border border-amber-100 bg-white p-5">
+        <div className="rounded-2xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-10 w-full" />
@@ -206,7 +206,7 @@ export function FeaturesSkeleton() {
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-3xl border border-amber-100/50 bg-white p-5">
+          <div key={i} className="rounded-3xl border border-amber-100/50 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
             <Skeleton className="mb-4 h-12 w-12 rounded-2xl" />
             <Skeleton className="h-6 w-32" />
             <div className="mt-2 space-y-2">

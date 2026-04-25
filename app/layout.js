@@ -12,23 +12,26 @@ export const metadata = {
   title: "The Crumbs | Bakery",
   description: "Freshly baked goods every day.",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
+    icon: "/the_crumbs_logo.png",
+    shortcut: "/the_crumbs_logo.png",
+    apple: "/the_crumbs_logo.png",
   },
 };
 
 import { ToastProvider } from "@/context/ToastContext";
+import { ThemeProvider } from "@/components/shared/ThemeProvider";
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${quicksand.variable} h-full antialiased`}>
-      <body suppressHydrationWarning className={`${quicksand.className} min-h-full flex flex-col`}>
-        <NextAuthProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </NextAuthProvider>
+    <html lang="en" className={`${quicksand.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className={`${quicksand.className} min-h-full flex flex-col`}>
+        <ThemeProvider>
+          <NextAuthProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </NextAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

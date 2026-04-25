@@ -1,24 +1,66 @@
 import db from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { handleGetAll, handleApiError, response } from "@/lib/api-helper";
+import { handleApiError, response } from "@/lib/api-helper";
 
 export async function GET(request) {
     const session = await auth();
     const isAdmin = session.user.role === 'ADMIN';
-    const { searchParams } = request.nextUrl
-    const requestedStatus = searchParams.get('status')
+    const { searchParams } = request.nextUrl;
+    const requestedStatus = searchParams.get('status');
+    const page  = Math.max(1, parseInt(searchParams.get('page')  ?? '1',  10));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '10', 10)));
+    const skip  = (page - 1) * limit;
 
-    return handleGetAll(db.order, {
-        where: {
-            ...(isAdmin ? {} : { userId: session.user.id }),
-            ...(requestedStatus ? { status: requestedStatus } : {}),
-        },
-        include: {
-            user: { select: { name: true, email: true } },
-            items: { include: { product: { select: { name: true, images: true } } } },
-        },
-        orderBy: { createdAt: 'desc' },
-    });
+    const year = searchParams.get('year');
+    const month = searchParams.get('month'); // 1-12
+    const day = searchParams.get('day');
+
+    const where = {
+        ...(isAdmin ? {} : { userId: session.user.id }),
+        ...(requestedStatus ? { status: requestedStatus } : {}),
+    };
+
+    // Date Filtering Logic
+    if (year) {
+        const y = parseInt(year);
+        let startDate, endDate;
+
+        if (month && day) {
+            startDate = new Date(y, parseInt(month) - 1, parseInt(day));
+            endDate = new Date(y, parseInt(month) - 1, parseInt(day) + 1);
+        } else if (month) {
+            startDate = new Date(y, parseInt(month) - 1, 1);
+            endDate = new Date(y, parseInt(month), 1);
+        } else {
+            startDate = new Date(y, 0, 1);
+            endDate = new Date(y + 1, 0, 1);
+        }
+
+        where.createdAt = {
+            gte: startDate,
+            lt: endDate,
+        };
+    }
+
+    try {
+        const [orders, total] = await Promise.all([
+            db.order.findMany({
+                where,
+                include: {
+                    user: { select: { name: true, email: true } },
+                    items: { include: { product: { select: { name: true, images: true, category: { select: { name: true } } } } } },
+                },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+            }),
+            db.order.count({ where }),
+        ]);
+
+        return response({ data: orders, total, page, totalPages: Math.ceil(total / limit) });
+    } catch (error) {
+        return handleApiError(error);
+    }
 }
 
 export async function POST() {

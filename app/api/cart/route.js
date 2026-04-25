@@ -19,10 +19,24 @@ export async function POST(request) {
 
     const product = await db.product.findUnique({ where: { id: productId } });
     if (!product || !product.isAvailable) {
-        return NextResponse.json({ error: "Product not available" }, { status: 400 });
+        return response({ error: "Product not available" }, 400);
     }
-    if (quantity > product.stock) {
-        return NextResponse.json({ error: "Insufficient stock" }, { status: 400 });
+
+    // Check if item already in cart
+    const existingItem = await db.cartItem.findUnique({
+        where: { userId_productId: { userId, productId } }
+    });
+
+    const currentQuantity = existingItem?.quantity || 0;
+    const totalRequested = currentQuantity + quantity;
+
+    if (totalRequested > product.stock) {
+        const remaining = product.stock - currentQuantity;
+        return response({ 
+            error: remaining > 0 
+                ? `Only ${remaining} more available (you have ${currentQuantity} in cart)` 
+                : `You already have the maximum available stock (${currentQuantity}) in your cart` 
+        }, 400);
     }
 
     return handleUpsert(db.cartItem, {

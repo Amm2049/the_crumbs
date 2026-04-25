@@ -10,6 +10,16 @@ export async function POST(request){
     if (!name || !email || !password){
       return response({ error: 'Missing required fields'}, 400)
     }
+
+    // Basic email regex
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(email)) {
+      return response({ error: 'Invalid email format' }, 400);
+    }
+
+    if (password.length < 8) {
+      return response({ error: 'Password must be at least 8 characters' }, 400);
+    }
     
     const hashedPassword = await bcrypt.hash(password, 10)
 

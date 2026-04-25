@@ -3,6 +3,7 @@ import HeroSection from "@/components/client/HeroSection";
 import Features from "@/components/client/Features";
 import CategoryShowcase from "@/components/client/CategoryShowcase";
 import FeaturedProducts from "@/components/client/FeaturedProducts";
+import Decorations from "@/components/client/Decorations";
 import { CategoryShowcaseSkeleton, FeaturedProductsSkeleton } from "@/components/shared/Skeletons";
 
 export const metadata = {
@@ -12,8 +13,11 @@ export const metadata = {
 
 export default function HomePage() {
   return (
-    <>
+    <div className="relative">
+      <Decorations />
       <HeroSection />
+      
+      {/* Subtle warm background for the rest of the page content */}
       <Features />
 
       <Suspense fallback={<CategoryShowcaseSkeleton />}>
@@ -23,6 +27,6 @@ export default function HomePage() {
       <Suspense fallback={<FeaturedProductsSkeleton />}>
         <FeaturedProducts />
       </Suspense>
-    </>
+    </div>
   );
 }

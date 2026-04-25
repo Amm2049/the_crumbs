@@ -1,5 +1,5 @@
 import Link from 'next/link'
-
+import { Plus } from 'lucide-react'
 import ProductsTable from '@/components/admin/ProductsTable'
 import { apiGet } from '@/lib/api-client'
 
@@ -7,41 +7,58 @@ export const metadata = {
   title: 'Products | The Crumbs Admin',
 }
 
-export default async function AdminProductsPage() {
+const LIMIT = 10
+
+export default async function AdminProductsPage({ searchParams }) {
+  const resolved = await searchParams
+  const page = Math.max(1, parseInt(resolved?.page ?? '1', 10))
+
   let products = []
+  let categories = []
+  let total = 0
+  let totalPages = 1
   let hasDataError = false
 
   try {
-    products = await apiGet('/api/admin/products', {
-      cache: 'no-store',
-    })
+    const [productsRes, categoriesRes] = await Promise.all([
+      apiGet('/api/admin/products', {
+        searchParams: { page: String(page), limit: String(LIMIT) },
+        cache: 'no-store',
+      }),
+      apiGet('/api/categories', { cache: 'no-store' }),
+    ])
+
+    products   = Array.isArray(productsRes?.data) ? productsRes.data : []
+    total      = productsRes?.total ?? 0
+    totalPages = productsRes?.totalPages ?? 1
+    categories = Array.isArray(categoriesRes) ? categoriesRes : []
   } catch {
     hasDataError = true
   }
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-extrabold text-[#4D321E]">Products</h1>
-          <p className="mt-1 text-sm text-[#7A5D4B]">Manage your menu, stock, and storefront visibility.</p>
-        </div>
-
-        <Link
-          href="/admin/products/new"
-          className="inline-flex rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-600"
-        >
-          + Add Product
-        </Link>
+      {/* Page header */}
+      <div className="px-1">
+        <h1 className="text-3xl font-extrabold text-[var(--bakery-text)]">Products</h1>
+        <p className="mt-1 text-sm text-[var(--bakery-text-muted)]">
+          Manage your menu, stock, and storefront visibility.
+        </p>
       </div>
 
-      {hasDataError ? (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-[#6B4C3B]">
-          Products data is not ready yet. This table will populate when DB/API is available.
+      {hasDataError && (
+        <p className="rounded-xl border border-amber-200 dark:border-zinc-700 bg-amber-50 dark:bg-zinc-800 px-4 py-3 text-sm font-medium text-[var(--bakery-text-muted)]">
+          Data is temporarily unavailable. Please try again later.
         </p>
-      ) : null}
+      )}
 
-      <ProductsTable products={products} />
+      <ProductsTable
+        products={products}
+        categories={categories}
+        page={page}
+        totalPages={totalPages}
+        total={total}
+      />
     </div>
   )
 }

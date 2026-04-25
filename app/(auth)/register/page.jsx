@@ -61,23 +61,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FFFdf2] relative overflow-hidden p-6 transition-colors duration-1000">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] relative overflow-hidden p-6 transition-colors duration-1000">
 
       {/* Playful Floating Background Elements (Different arrangement for register) */}
-      <div className={`absolute top-20 right-10 w-32 h-32 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob transition-all duration-1000 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
-      <div className={`absolute bottom-10 left-20 w-36 h-36 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob animation-delay-2000 transition-all duration-1000 delay-200 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
-      <div className={`absolute top-40 left-1/4 w-24 h-24 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob animation-delay-4000 transition-all duration-1000 delay-300 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
+      <div className={`absolute top-20 right-10 w-32 h-32 bg-amber-200 dark:bg-amber-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-60 dark:opacity-20 animate-blob transition-all duration-1000 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
+      <div className={`absolute bottom-10 left-20 w-36 h-36 bg-pink-200 dark:bg-rose-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-50 dark:opacity-20 animate-blob animation-delay-2000 transition-all duration-1000 delay-200 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
+      <div className={`absolute top-40 left-1/4 w-24 h-24 bg-orange-200 dark:bg-orange-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-50 animate-blob animation-delay-4000 transition-all duration-1000 delay-300 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
 
       {/* Main Register Card - Entrance Animation */}
       <div 
-        className={`w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(251,191,36,0.15)] p-10 relative z-10 border border-white/50 backdrop-blur-sm transform transition-all duration-700 ease-out ${
+        className={`w-full max-w-md bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-[0_8px_30px_rgb(251,191,36,0.15)] dark:shadow-none p-10 relative z-10 border border-white/50 dark:border-zinc-800 backdrop-blur-sm transform transition-all duration-700 ease-out ${
           isMounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}
       >
 
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-[#5C3A21] tracking-tight mb-2">Join us! 🎉</h1>
-          <p className="text-[#8A6D5E] font-medium text-sm">Create an account for fresh treats.</p>
+          <h1 className="text-4xl font-extrabold text-[var(--bakery-text)] tracking-tight mb-2">Join us! 🎉</h1>
+          <p className="text-[var(--bakery-text-muted)] font-medium text-sm">Create an account for fresh treats.</p>
         </div>
 
         {authError && (
@@ -162,9 +162,9 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-[#8A6D5E] font-medium">
+          <p className="text-sm text-[var(--bakery-text-muted)] font-medium">
             Already have an account?{' '}
-            <Link href="/login" className="text-amber-600 font-bold hover:text-amber-700 hover:underline underline-offset-4 transition-colors">
+            <Link href="/login" className="text-amber-600 dark:text-amber-500 font-bold hover:text-amber-700 dark:hover:text-amber-400 hover:underline underline-offset-4 transition-colors">
               Sign in
             </Link>
           </p>

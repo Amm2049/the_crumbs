@@ -46,22 +46,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FFFdf2] relative overflow-hidden p-6 transition-colors duration-1000">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] relative overflow-hidden p-6 transition-colors duration-1000">
 
       {/* Playful Floating Background Elements (Warmer Colors) */}
-      <div className={`absolute top-10 left-10 w-28 h-28 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob transition-all duration-1000 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
-      <div className={`absolute top-0 right-20 w-32 h-32 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob animation-delay-2000 transition-all duration-1000 delay-200 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
-      <div className={`absolute -bottom-8 left-40 w-28 h-28 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob animation-delay-4000 transition-all duration-1000 delay-300 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
+      <div className={`absolute top-10 left-10 w-28 h-28 bg-amber-300 dark:bg-amber-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-50 dark:opacity-20 animate-blob transition-all duration-1000 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
+      <div className={`absolute top-0 right-20 w-32 h-32 bg-yellow-200 dark:bg-yellow-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-60 dark:opacity-20 animate-blob animation-delay-2000 transition-all duration-1000 delay-200 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
+      <div className={`absolute -bottom-8 left-40 w-28 h-28 bg-orange-200 dark:bg-orange-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-50 dark:opacity-20 animate-blob animation-delay-4000 transition-all duration-1000 delay-300 ${isMounted ? 'scale-100' : 'scale-50 opacity-0'}`}></div>
 
       {/* Main Login Card - Entrance Animation */}
       <div
-        className={`w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(251,191,36,0.15)] p-10 relative z-10 border border-white/50 backdrop-blur-sm transform transition-all duration-700 ease-out ${isMounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        className={`w-full max-w-md bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-[0_8px_30px_rgb(251,191,36,0.15)] dark:shadow-none p-10 relative z-10 border border-white/50 dark:border-zinc-800 backdrop-blur-sm transform transition-all duration-700 ease-out ${isMounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}
       >
 
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-[#5C3A21] tracking-tight mb-2">Welcome Back!</h1>
-          <p className="text-[#8A6D5E] font-medium text-sm">Sign in to your sweet account.</p>
+          <h1 className="text-4xl font-extrabold text-[var(--bakery-text)] tracking-tight mb-2">Welcome Back!</h1>
+          <p className="text-[var(--bakery-text-muted)] font-medium text-sm">Sign in to your sweet account.</p>
         </div>
 
         {authError && (
@@ -114,9 +114,9 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-[#8A6D5E] font-medium">
+          <p className="text-sm text-[var(--bakery-text-muted)] font-medium">
             New here?{' '}
-            <Link href="/register" className="text-amber-600 font-bold hover:text-amber-700 hover:underline underline-offset-4 transition-colors">
+            <Link href="/register" className="text-amber-600 dark:text-amber-500 font-bold hover:text-amber-700 dark:hover:text-amber-400 hover:underline underline-offset-4 transition-colors">
               Join the bakery
             </Link>
           </p>

@@ -12,7 +12,7 @@ const fetcher = async (url) => {
 }
 
 export function useCart() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const { addToast } = useToast()
   const { data: cartItems = [], mutate, isLoading } = useSWR(
     session ? '/api/cart' : null, 
@@ -66,6 +66,7 @@ export function useCart() {
       )
     } catch (err) {
       addToast(err.message || 'Something went wrong with your order. 🍯', 'error')
+      throw err
     }
   }
 
@@ -124,8 +125,9 @@ export function useCart() {
     updateQuantity,
     removeItem,
     mutate,
-    isLoading: isLoading && !!session,
+    isLoading: (isLoading && !!session) || status === 'loading',
     isAuthenticated: !!session,
-    isAdmin: session?.user?.role === 'ADMIN'
+    isAdmin: session?.user?.role === 'ADMIN',
+    status
   }
 }

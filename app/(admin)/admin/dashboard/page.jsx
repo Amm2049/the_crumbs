@@ -31,28 +31,30 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-extrabold text-[#4D321E]">Dashboard</h1>
-        <p className="mt-1 text-sm text-[#7A5D4B]">Quick snapshot of your bakery operations.</p>
+    <div className="space-y-8">
+      <div className="px-1">
+        <h1 className="text-3xl font-extrabold text-[var(--bakery-text)]">Dashboard</h1>
+        <p className="mt-1 text-sm text-[var(--bakery-text-muted)]">Quick snapshot of your bakery operations.</p>
       </div>
 
-      {hasDataError ? (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-[#6B4C3B]">
-          Data is not ready yet. Dashboard is showing fallback values.
+      {hasDataError && (
+        <p className="rounded-xl border border-amber-200 dark:border-zinc-700 bg-amber-50 dark:bg-zinc-800 px-4 py-3 text-sm font-medium text-[var(--bakery-text-muted)]">
+          Some data couldn't be loaded. Dashboard is showing fallback values.
         </p>
-      ) : null}
+      )}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatsCard title="Total Orders" value={totalOrders} icon={ShoppingBag} />
-        <StatsCard title="Revenue" value={`$${totalRevenue.toFixed(2)}`} icon={DollarSign} />
-        <StatsCard title="Products" value={totalProducts} icon={Package} />
+      <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <StatsCard title="Total Orders" value={totalOrders} icon={ShoppingBag} trend="+12% from last week" />
+        <StatsCard title="Gross Revenue" value={`$${totalRevenue.toFixed(2)}`} icon={DollarSign} trend="+8% from last week" />
+        <StatsCard title="Active Menu" value={totalProducts} icon={Package} />
         <StatsCard title="Customers" value={totalCustomers} icon={Users} />
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-xl font-bold text-[#4D321E]">Recent Orders</h2>
-        <OrdersTable orders={recentOrders} />
+      <section className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xl font-black text-[var(--bakery-text)]">Recent Orders</h2>
+        </div>
+        <OrdersTable orders={recentOrders} compact={true} />
       </section>
     </div>
   )

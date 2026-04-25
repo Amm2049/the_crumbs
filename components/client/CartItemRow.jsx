@@ -28,10 +28,10 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
   }
 
   return (
-    <div className="group rounded-2xl border border-amber-100 bg-white p-4 transition-all hover:border-amber-200 hover:shadow-md">
+    <div className="group rounded-2xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 transition-all duration-300 hover:translate-x-1 hover:border-amber-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-amber-900/5">
       <div className="flex gap-4">
         {/* Product Image */}
-        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-amber-50 sm:h-20 sm:w-20">
+        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-amber-50 dark:bg-zinc-800 sm:h-20 sm:w-20">
           {imageUrl ? (
             <div
               className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
@@ -49,29 +49,29 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
         {/* Product Info & Controls */}
         <div className="flex flex-1 flex-col justify-between min-w-0 sm:flex-row sm:items-center sm:gap-4">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-bold text-[#4D321E] sm:text-lg">{product?.name || 'Product'}</p>
-            <p className="mt-0.5 text-sm font-medium text-[#7A5D4B]">${unitPrice.toFixed(2)} each</p>
+            <p className="truncate text-base font-bold text-[var(--bakery-text)] sm:text-lg">{product?.name || 'Product'}</p>
+            <p className="mt-0.5 text-sm font-medium text-[var(--bakery-text-muted)]">${unitPrice.toFixed(2)} each</p>
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 sm:mt-0 sm:justify-end">
             <div className="flex items-center gap-3">
-              <div className="inline-flex items-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50/50">
+              <div className="inline-flex items-center overflow-hidden rounded-xl border border-amber-200 dark:border-zinc-700 bg-amber-50/50 dark:bg-zinc-800/50">
                 <button
                   type="button"
                   onClick={() => handleUpdate(quantity - 1)}
-                  className="px-2.5 py-1.5 text-[#6B4C3B] transition-colors hover:bg-amber-100 disabled:opacity-30"
+                  className="px-2.5 py-1.5 text-[var(--bakery-text-muted)] transition-colors hover:bg-amber-100 dark:hover:bg-zinc-700 disabled:opacity-30"
                   disabled={quantity <= 1}
                   aria-label="Decrease quantity"
                 >
                   <Minus size={14} />
                 </button>
 
-                <span className="min-w-8 px-1 text-center text-sm font-bold text-[#5C3A21]">{quantity}</span>
+                <span className="min-w-8 px-1 text-center text-sm font-bold text-[var(--bakery-text)]">{quantity}</span>
 
                 <button
                   type="button"
                   onClick={() => handleUpdate(quantity + 1)}
-                  className="px-2.5 py-1.5 text-[#6B4C3B] transition-colors hover:bg-amber-100 disabled:opacity-30"
+                  className="px-2.5 py-1.5 text-[var(--bakery-text-muted)] transition-colors hover:bg-amber-100 dark:hover:bg-zinc-700 disabled:opacity-30"
                   disabled={maxStock > 0 && quantity >= maxStock}
                   aria-label="Increase quantity"
                 >
@@ -79,7 +79,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
                 </button>
               </div>
 
-              <p className="min-w-[70px] text-right text-base font-black text-amber-700 sm:text-[#4D321E]">
+              <p className="min-w-[70px] text-right text-base font-black text-amber-700 dark:text-amber-500 sm:text-[var(--bakery-text)]">
                 ${lineTotal.toFixed(2)}
               </p>
             </div>

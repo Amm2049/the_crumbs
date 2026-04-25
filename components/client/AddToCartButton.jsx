@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { ShoppingCart } from 'lucide-react'
+import { useCart } from '@/hooks/useCart'
 
 import { Button } from '@/components/ui/button'
 
-export default function AddToCartButton({ productId, disabled = false }) {
+export default function AddToCartButton({ productId, quantity = 1, disabled = false, className = "", isUpdate = false }) {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status: authStatus } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
@@ -17,7 +18,14 @@ export default function AddToCartButton({ productId, disabled = false }) {
   const isAdmin = session?.user?.role === 'ADMIN'
   const isCustomer = session && !isAdmin
 
-  if (!isCustomer) return null
+  if (authStatus === 'loading') {
+    return (
+      <div className={`h-14 w-full animate-pulse rounded-xl bg-amber-100/80 ${className}`} />
+    )
+  }
+
+  if (!isCustomer && session) return null
+  // For guest users, we show the button which redirects to login
 
   useEffect(() => {
     if (status !== 'success') return
@@ -28,6 +36,8 @@ export default function AddToCartButton({ productId, disabled = false }) {
 
     return () => clearTimeout(timeoutId)
   }, [status])
+
+  const { addToCart } = useCart()
 
   const handleAddToCart = async () => {
     setError('')
@@ -42,48 +52,27 @@ export default function AddToCartButton({ productId, disabled = false }) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: 1 }),
-      })
-
-      if (!response.ok) {
-        let message = 'Unable to add this item to the cart right now.'
-
-        try {
-          const payload = await response.json()
-          message = payload?.error || message
-        } catch {
-          // Ignore JSON parsing errors and use fallback message.
-        }
-
-        setStatus('error')
-        setError(message)
-        return
-      }
-
+      await addToCart(productId, Number(quantity))
       setStatus('success')
-      router.refresh()
-    } catch {
+    } catch (err) {
       setStatus('error')
-      setError('Network issue while adding to cart. Please try again.')
+      setError(err.message || 'Could not add to cart.')
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className}`}>
       <Button
         type="button"
         onClick={handleAddToCart}
         disabled={disabled || isLoading}
         size="lg"
-        className="bg-amber-500 text-white hover:bg-amber-600"
+        className={`w-full bg-amber-500 text-white hover:bg-amber-600 h-full ${className.includes('rounded') ? '' : 'rounded-xl'}`}
       >
         <ShoppingCart size={18} />
-        {isLoading ? 'Adding...' : status === 'success' ? 'Added to Cart' : 'Add to Cart'}
+        {isLoading ? 'Adding...' : status === 'success' ? 'Added to Cart' : (isUpdate ? 'Add More to Cart' : 'Add to Cart')}
       </Button>
 
       {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}

@@ -22,13 +22,13 @@ export default auth((req) => {
     if (!isAdmin) return NextResponse.redirect(new URL('/', nextUrl))
   }
 
-  //users cannot access cart and orders page if not logged in 
-  if (path === '/cart' || path.startsWith('/orders')) {
+  //users cannot access cart, orders, or profile page if not logged in 
+  if (path === '/cart' || path.startsWith('/orders') || path === '/profile') {
     if (!isLoggedIn) return NextResponse.redirect(new URL('/login', nextUrl))
   }
 
-  //Admins cannot access the shopping cart or frontend orders page
-  if ((path === '/cart' || path.startsWith('/orders')) && isAdmin) {
+  //Admins cannot access the shopping cart, frontend orders, or client profile page
+  if ((path === '/cart' || path.startsWith('/orders') || path === '/profile') && isAdmin) {
     return NextResponse.redirect(new URL('/admin/dashboard', nextUrl))
   }
 
@@ -80,5 +80,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/admin/:path*', '/cart', '/orders/:path*', '/login', '/register', '/api/:path*'],
+  matcher: ['/admin/:path*', '/cart', '/orders/:path*', '/profile', '/login', '/register', '/api/:path*'],
 }

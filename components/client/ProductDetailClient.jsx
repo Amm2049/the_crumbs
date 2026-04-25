@@ -39,7 +39,7 @@ export default function ProductDetailClient({ product }) {
             {activeImage ? (
               <div
                 className="h-full w-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url(${activeImage})` }}
+                style={{ backgroundImage: `url('${activeImage}')` }}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-amber-200">
@@ -65,7 +65,7 @@ export default function ProductDetailClient({ product }) {
                     : 'border-white dark:border-zinc-800 hover:border-amber-100 dark:hover:border-zinc-700 hover:scale-105 shadow-sm'
                     }`}
                 >
-                  <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
+                  <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
                 </button>
               ))}
             </div>

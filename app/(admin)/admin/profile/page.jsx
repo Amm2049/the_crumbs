@@ -188,8 +188,8 @@ export default function AdminProfilePage() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-4 text-sm font-black text-white shadow-lg shadow-amber-500/30 transition-all hover:bg-amber-600 active:scale-[0.98] disabled:opacity-50 mt-8 sm:mt-6"
+              disabled={isSubmitting || (name === (session?.user?.name || '') && image === (session?.user?.image || '') && !newPassword)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-4 text-sm font-black text-white shadow-lg shadow-amber-500/30 transition-all hover:bg-amber-600 active:scale-[0.98] disabled:opacity-50 disabled:grayscale-[0.5] mt-8 sm:mt-6"
             >
               {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
               Save Changes

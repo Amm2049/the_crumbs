@@ -35,7 +35,7 @@ export default function ProductCard({ product }) {
           {imageUrl ? (
             <div 
               className="h-full w-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110" 
-              style={{ backgroundImage: `url(${imageUrl})` }} 
+              style={{ backgroundImage: `url('${imageUrl}')` }} 
             />
           ) : null}
 

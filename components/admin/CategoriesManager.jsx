@@ -75,7 +75,7 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
             <div className="relative h-28 w-28 overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 shadow-inner ring-4 ring-white dark:ring-zinc-900">
               {image ? (
                 <>
-                  <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
+                  <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
                   <button
                     type="button"
                     onClick={() => setImage('')}
@@ -329,7 +329,7 @@ export default function CategoriesManager({ initialCategories = [] }) {
                       <td className="px-6 py-4">
                         <div className="h-12 w-12 overflow-hidden rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50 dark:bg-zinc-800 shadow-sm">
                           {cat.image ? (
-                            <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${cat.image})` }} />
+                            <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${cat.image}')` }} />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center text-amber-200">
                               <ImageIcon size={18} />

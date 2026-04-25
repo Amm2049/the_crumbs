@@ -317,8 +317,8 @@ export default function ProfileClient({ session: initialSession }) {
               <div className="flex flex-col items-center gap-4 pt-6 sm:flex-row">
                 <Button
                   type="submit"
-                  disabled={loading}
-                  className="h-14 w-full rounded-[1.25rem] bg-amber-600 text-base font-black shadow-lg shadow-amber-600/20 hover:bg-amber-700 active:scale-95 transition-all sm:w-auto sm:px-14"
+                  disabled={loading || (formData.name === (session?.user?.name || initialSession?.user?.name || "") && formData.image === (session?.user?.image || initialSession?.user?.image || "") && !formData.newPassword)}
+                  className="h-14 w-full rounded-[1.25rem] bg-amber-600 text-base font-black shadow-lg shadow-amber-600/20 hover:bg-amber-700 active:scale-95 transition-all sm:w-auto sm:px-14 disabled:opacity-50 disabled:grayscale-[0.5]"
                 >
                   {loading ? (
                     <>

@@ -318,7 +318,7 @@ export default function ProductForm({ categories = [], product, mode = 'create' 
             <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-amber-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
               {image ? (
                 <div className="relative h-full w-full">
-                  <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
+                  <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
                   <button
                     type="button"
                     onClick={() => setImage('')}

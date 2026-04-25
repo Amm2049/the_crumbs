@@ -138,12 +138,31 @@
   }
 }
 
-/* Standard Scrollbars */
+/* Hide Scrollbars Globally - Browser level */
 html, body {
-  scrollbar-gutter: stable;
+  scrollbar-width: none !important;     /* Firefox */
+  -ms-overflow-style: none !important;  /* IE and Edge */
 }
 
+html::-webkit-scrollbar, 
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;             /* Chrome, Safari and Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Utility to hide scrollbars on specific elements */
 @layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+
   @keyframes fadeUp {
     from {
       opacity: 0;

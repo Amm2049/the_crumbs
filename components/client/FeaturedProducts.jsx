@@ -8,7 +8,7 @@ export default async function FeaturedProducts() {
 
   try {
     featuredProducts = await apiGet("/api/products", {
-      searchParams: { take: 4 },
+      searchParams: { take: 5 },
       next: { revalidate: 60 },
     });
   } catch {
@@ -35,7 +35,7 @@ export default async function FeaturedProducts() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
           {featuredProducts.map((product, i) => (
             <div key={product.id} className={`animate-fade-up`} style={{ animationDelay: `${i * 100}ms` }}>
               <ProductCard product={product} />

@@ -240,7 +240,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                 <div className="relative h-32 w-32 overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 shadow-inner ring-4 ring-white dark:ring-zinc-900">
                   {image ? (
                     <>
-                      <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
+                      <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
                       <button type="button" onClick={() => setImage('')} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600">
                         <X size={14} />
                       </button>

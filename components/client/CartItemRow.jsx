@@ -35,7 +35,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
           {imageUrl ? (
             <div
               className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-              style={{ backgroundImage: `url(${imageUrl})` }}
+              style={{ backgroundImage: `url('${imageUrl}')` }}
               aria-label={product?.name || 'Product image'}
               role="img"
             />

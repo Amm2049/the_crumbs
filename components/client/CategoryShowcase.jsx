@@ -45,7 +45,7 @@ export default function CategoryShowcase() {
             {category.image && (
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: `url(${category.image})` }}
+                style={{ backgroundImage: `url('${category.image}')` }}
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#3F2A1D]/90 via-[#3F2A1D]/20 to-transparent" />

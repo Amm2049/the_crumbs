@@ -340,8 +340,8 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
         </div>
       )}
 
-      <div className="overflow-hidden rounded-3xl border border-amber-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-900/5">
-        <div className="overflow-x-auto">
+      <div className="rounded-3xl border border-amber-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-900/5 overflow-hidden">
+        <div className={`overflow-x-auto ${normalizedOrders.length > 0 && normalizedOrders.length < 5 ? 'min-h-[420px]' : ''}`}>
           <table className="min-w-full text-left text-sm">
             <thead className="bg-amber-50/40 dark:bg-zinc-800/50 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--bakery-text-muted)]">
               <tr>
@@ -354,7 +354,7 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                 <th className="px-6 py-4 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-amber-50">
+            <tbody className="divide-y divide-amber-50 dark:divide-zinc-800">
               {isPending ? (
                 Array.from({ length: compact ? 5 : 10 }).map((_, i) => <SkeletonRow key={i} compact={compact} />)
               ) : normalizedOrders.length === 0 ? (

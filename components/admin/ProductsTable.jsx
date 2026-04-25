@@ -152,7 +152,7 @@ export default function ProductsTable({ products = [], categories = [], page = 1
                           <div className="flex items-center gap-4">
                             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50 dark:bg-zinc-800 shadow-sm">
                               {imageUrl ? (
-                                <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${imageUrl})` }} />
+                                <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${imageUrl}')` }} />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center text-amber-200">
                                   <ImageIcon size={18} />

@@ -41,7 +41,7 @@ function ShopProductsContent() {
   const [error, setError] = useState('')
 
   const currentPage = Number(searchParams.get('page')) || 1
-  const itemsPerPage = 12
+  const itemsPerPage = 15
 
   useEffect(() => {
     let cancelled = false
@@ -182,7 +182,7 @@ function ShopProductsContent() {
       />
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -221,7 +221,7 @@ export default function ShopProductsClient() {
     <Suspense fallback={
       <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
         <div className="h-12 w-48 animate-pulse rounded-xl bg-amber-100 dark:bg-zinc-800" />
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}

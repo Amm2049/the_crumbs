@@ -51,7 +51,7 @@ function StatusBadge({ status }) {
 }
 
 // ─── Custom status status dropdown ───────────────────────────────────────────
-function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating }) {
+function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, onOpenChange }) {
   const [open, setOpen] = useState(false)
   const [openUp, setOpenUp] = useState(false)
   const ref = useRef(null)
@@ -64,13 +64,22 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating }) 
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect()
       const spaceBelow = window.innerHeight - rect.bottom
-      setOpenUp(spaceBelow < 250) // If less than 250px below, open UP
+      const spaceAbove = rect.top
+      // Only open up if there's significantly more space above AND not enough space below
+      setOpenUp(spaceBelow < 300 && spaceAbove > spaceBelow)
     }
+
+    onOpenChange?.(open)
 
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [open])
+    const scrollHandler = () => setOpen(false)
+    window.addEventListener('scroll', scrollHandler, true)
+    return () => {
+      document.removeEventListener('mousedown', handler)
+      window.removeEventListener('scroll', scrollHandler, true)
+    }
+  }, [open, onOpenChange])
 
   const handleSelect = (status) => {
     setOpen(false)
@@ -232,6 +241,7 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
   
   const [pendingOrderId, setPendingOrderId] = useState('')
   const [localStatus, setLocalStatus] = useState({})
+  const [openDropdownId, setOpenDropdownId] = useState(null)
   
   // Modal state
   const [selectedOrder, setSelectedOrder] = useState(null)
@@ -340,8 +350,8 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
         </div>
       )}
 
-      <div className="rounded-3xl border border-amber-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-900/5 overflow-hidden">
-        <div className={`overflow-x-auto ${normalizedOrders.length > 0 && normalizedOrders.length < 5 ? 'min-h-[420px]' : ''}`}>
+      <div className="rounded-3xl border border-amber-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-900/5">
+        <div className={`overflow-x-auto rounded-3xl ${normalizedOrders.length > 0 && normalizedOrders.length < 5 ? 'min-h-[420px]' : ''}`}>
           <table className="min-w-full text-left text-sm">
             <thead className="bg-amber-50/40 dark:bg-zinc-800/50 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--bakery-text-muted)]">
               <tr>
@@ -369,7 +379,7 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                     <tr
                       key={order.id}
                       onClick={() => openOrderDetails({ ...order, status: currentStatus })}
-                      className="group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30"
+                      className={`group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30 ${openDropdownId === order.id ? 'relative z-50' : ''}`}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -419,6 +429,7 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                             currentStatus={currentStatus}
                             onStatusChange={handleStatusChange}
                             isUpdating={isUpdating}
+                            onOpenChange={(isOpen) => setOpenDropdownId(isOpen ? order.id : null)}
                           />
                         </div>
                       </td>

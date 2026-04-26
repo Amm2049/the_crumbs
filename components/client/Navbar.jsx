@@ -55,7 +55,7 @@ export default function Navbar() {
               priority
             />
           </div>
-          <span className="whitespace-nowrap text-xl font-black tracking-tight text-[var(--bakery-text)] sm:text-2xl">
+          <span className="hidden whitespace-nowrap text-xl font-black tracking-tight text-[var(--bakery-text)] sm:inline sm:text-2xl">
             The <span className="text-amber-600">Crumbs</span>
           </span>
         </Link>
@@ -155,16 +155,16 @@ export default function Navbar() {
               )}
             </>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Link
                 href="/login"
-                className="px-4 py-2 text-sm font-black text-[var(--bakery-text-muted)] transition-colors hover:text-amber-700"
+                className="px-2 py-2 text-xs font-black text-[var(--bakery-text-muted)] transition-colors hover:text-amber-700 sm:px-4 sm:text-sm"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="rounded-full bg-amber-600 px-6 py-2.5 text-sm font-black text-white shadow-lg shadow-amber-600/20 transition-all hover:bg-amber-700 active:scale-95"
+                className="rounded-full bg-amber-600 px-4 py-2 text-xs font-black text-white shadow-lg shadow-amber-600/20 transition-all hover:bg-amber-700 active:scale-95 sm:px-6 sm:py-2.5 sm:text-sm"
               >
                 Sign Up
               </Link>

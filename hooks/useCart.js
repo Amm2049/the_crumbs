@@ -4,6 +4,7 @@ import useSWR from 'swr'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/context/ToastContext'
 
+/** API Fetcher for SWR */
 const fetcher = async (url) => {
   const response = await fetch(url)
   if (!response.ok) return []
@@ -11,6 +12,7 @@ const fetcher = async (url) => {
   return Array.isArray(payload) ? payload : []
 }
 
+/** Main Cart Hook - Manages all basket operations */
 export function useCart() {
   const { data: session, status } = useSession()
   const { addToast } = useToast()
@@ -20,6 +22,7 @@ export function useCart() {
     { revalidateOnFocus: false }
   )
 
+  /** Adds an item to the basket or increases quantity */
   const addToCart = async (productId, quantity = 1) => {
     if (!session) return
 
@@ -70,6 +73,7 @@ export function useCart() {
     }
   }
 
+  /** Updates the quantity of a specific item */
   const updateQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) {
       return removeItem(itemId)
@@ -100,6 +104,7 @@ export function useCart() {
     }
   }
 
+  /** Removes an item completely from the basket */
   const removeItem = async (itemId) => {
     try {
       await mutate(

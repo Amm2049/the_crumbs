@@ -21,17 +21,21 @@ export async function GET(request) {
     };
 
     // Date Filtering Logic
-    if (year) {
-        const y = parseInt(year);
+    if (year || month) {
+        const y = year ? parseInt(year) : new Date().getFullYear();
         let startDate, endDate;
 
         if (month && day) {
-            startDate = new Date(y, parseInt(month) - 1, parseInt(day));
-            endDate = new Date(y, parseInt(month) - 1, parseInt(day) + 1);
+            const m = parseInt(month) - 1;
+            const d = parseInt(day);
+            startDate = new Date(y, m, d);
+            endDate = new Date(y, m, d + 1);
         } else if (month) {
-            startDate = new Date(y, parseInt(month) - 1, 1);
-            endDate = new Date(y, parseInt(month), 1);
+            const m = parseInt(month) - 1;
+            startDate = new Date(y, m, 1);
+            endDate = new Date(y, m + 1, 1);
         } else {
+            // Year only
             startDate = new Date(y, 0, 1);
             endDate = new Date(y + 1, 0, 1);
         }

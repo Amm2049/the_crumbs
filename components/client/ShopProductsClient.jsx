@@ -9,6 +9,10 @@ import Pagination from '@/components/shared/Pagination'
 import { ProductCardSkeleton } from '@/components/shared/Skeletons'
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 
+/**
+ * Helper to fetch and parse JSON data from the internal API
+ */
+
 async function fetchJson(path) {
   const res = await fetch(path, {
     method: 'GET',
@@ -32,7 +36,8 @@ async function fetchJson(path) {
 function ShopProductsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
+  // State management for data, UI filters, and loading status
   const [categories, setCategories] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || '')
@@ -40,8 +45,13 @@ function ShopProductsContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // Pagination configuration
   const currentPage = Number(searchParams.get('page')) || 1
   const itemsPerPage = 15
+
+  /**
+   * Initial data fetch: Load all categories and products from the API
+   */
 
   useEffect(() => {
     let cancelled = false
@@ -74,17 +84,25 @@ function ShopProductsContent() {
     }
   }, [])
 
+  /**
+   * Client-side filtering: Filters the full product list based on 
+   * search query and active category
+   */
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase()
 
+    // Is a category selected?
     return allProducts.filter((p) => {
       if (activeCategory) {
         const slug = p?.category?.slug
+        // Does product match category?
+
         if (slug !== activeCategory) return false
       }
-
+      //Is there a search query?
       if (query) {
         const name = String(p?.name ?? '').toLowerCase()
+        //Does product name include it?
         if (!name.includes(query)) return false
       }
 
@@ -92,12 +110,21 @@ function ShopProductsContent() {
     })
   }, [allProducts, activeCategory, search])
 
+  // Pagination calculations based on filtered results
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
+
+  /**
+   * Slices the filtered products list to show only the current page
+   */
   const paginatedProducts = useMemo(() => {
     return filteredProducts.slice(startIndex, startIndex + itemsPerPage)
   }, [filteredProducts, startIndex])
 
+  /**
+   * Synchronizes component state with the URL query parameters
+   * This allows filters to persist on page refresh and shareable links
+   */
   const updateFilters = (newParams) => {
     const params = new URLSearchParams(searchParams.toString())
     Object.entries(newParams).forEach(([key, value]) => {
@@ -120,6 +147,7 @@ function ShopProductsContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Check if any active filters are applied to show/hide the "Clear" button
   const hasFilters = Boolean(activeCategory || search)
 
   return (
@@ -149,7 +177,7 @@ function ShopProductsContent() {
                   setSearch('')
                   updateFilters({ q: '' })
                 }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-amber-400 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-amber-400 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-600"
               >
                 <X size={16} />
               </button>
@@ -182,7 +210,7 @@ function ShopProductsContent() {
       />
 
       {isLoading ? (
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -190,7 +218,7 @@ function ShopProductsContent() {
       ) : error ? (
         <div className="rounded-[2rem] border-2 border-dashed border-red-100 bg-red-50/50 p-16 text-center">
           <p className="text-lg font-bold text-red-700">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-4 text-sm font-bold text-red-600 underline underline-offset-4"
           >
@@ -201,7 +229,7 @@ function ShopProductsContent() {
         <div className="space-y-12">
           <ProductGrid products={paginatedProducts} />
 
-          <Pagination 
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
@@ -216,6 +244,10 @@ function ShopProductsContent() {
   )
 }
 
+/**
+ * Main wrapper component using React Suspense for handling 
+ * the useSearchParams hook during server rendering
+ */
 export default function ShopProductsClient() {
   return (
     <Suspense fallback={

@@ -2,7 +2,7 @@
 // create a new product - admin only
 
 import db from '@/lib/db'
-import {handleGetAll,handlePost,ProductFormat} from '@/lib/api-helper'
+import { handleGetAll, handlePost, ProductFormat } from '@/lib/api-helper'
 
 export async function GET(request) {
     const { searchParams } = request.nextUrl
@@ -18,7 +18,8 @@ export async function GET(request) {
         resolvedCategoryId = found?.id
     }
 
-    return handleGetAll(db.product, {where: {
+    return handleGetAll(db.product, {
+        where: {
             isAvailable: true,
             ...(resolvedCategoryId && { categoryId: resolvedCategoryId }),
             ...(search && {
@@ -29,21 +30,21 @@ export async function GET(request) {
             })
         },
         include: {
-                category: true,
+            category: true,
         },
         orderBy: {
             createdAt: 'desc'
         },
         ...(Number.isFinite(take) && take > 0 ? { take } : {}),
-            }
-        )   
+    }
+    )
 }
 
 export async function POST(request) {
     const rawData = await request.json();
     const data = ProductFormat(rawData);
-    
-    return handlePost(db.product,{data},
+
+    return handlePost(db.product, { data },
         ["name", "slug", "price", "categoryId"],
         {
             P2002: 'Product already exists',

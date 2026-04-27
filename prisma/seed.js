@@ -13,7 +13,16 @@ const db = new PrismaClient({
 })
 
 async function main() {
-  console.log('Starting refined database seed...')
+  console.log('🧹 Cleaning up database for a fresh seed...')
+  
+  // Clear tables in order of dependency to avoid foreign key errors
+  await db.cartItem.deleteMany()
+  await db.orderItem.deleteMany()
+  await db.order.deleteMany()
+  await db.product.deleteMany()
+  await db.category.deleteMany()
+
+  console.log('🌱 Database cleared. Starting refined database seed...')
 
   const adminPassword = await bcrypt.hash('Admin123!', 10)
 

@@ -17,8 +17,9 @@ export function useCart() {
   const { data: session, status } = useSession()
   const { addToast } = useToast()
   const { data: cartItems = [], mutate, isLoading } = useSWR(
-    session ? '/api/cart' : null, 
-    fetcher, 
+    session ? '/api/cart' : null,
+    fetcher,
+    // prevents unnecessary background refreshes every time the user switches tabs
     { revalidateOnFocus: false }
   )
 
@@ -42,11 +43,11 @@ export function useCart() {
 
           const updatedItem = await response.json()
           addToast('Added to your basket! 🍯', 'success')
-          
+
+          // Cache Merging (add only updated one product)
           const existing = current.find(item => item.productId === productId)
-          
           if (existing) {
-            return current.map(item => 
+            return current.map(item =>
               item.productId === productId ? { ...item, ...updatedItem } : item
             )
           }
@@ -54,17 +55,19 @@ export function useCart() {
         },
         {
           optimisticData: (current = []) => {
+            // Step A: Check if the product is already in our local cart
             const existing = current.find(item => item.productId === productId)
             if (existing) {
-              return current.map(item => 
+              // Step B: If it exists, just show the increased number (e.g., 1 -> 2)
+              return current.map(item =>
                 item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item
               )
             }
-            // Note: In a real app, we might need a placeholder ID or more product info for the UI
+            // Step C: If it's new, add a "ghost" item so the UI shows it immediately.
             return [...current, { productId, quantity, id: 'temp-id', product: { id: productId } }]
           },
           rollbackOnError: true,
-          revalidate: true, // Revalidate to get the full product info from server
+          revalidate: true, // Revalidate to get the full product info from server (all products updated to cache)
         }
       )
     } catch (err) {
@@ -93,7 +96,7 @@ export function useCart() {
           return current.map(item => item.id === itemId ? { ...item, ...updated } : item)
         },
         {
-          optimisticData: (current = []) => 
+          optimisticData: (current = []) =>
             current.map(item => item.id === itemId ? { ...item, quantity: newQuantity } : item),
           rollbackOnError: true,
           revalidate: false,

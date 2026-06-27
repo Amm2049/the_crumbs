@@ -94,15 +94,16 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
         onClick={() => setOpen((v) => !v)}
         className={`
           inline-flex items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-xs font-bold
+          min-w-[130px]
           transition-all active:scale-95
           disabled:cursor-not-allowed disabled:opacity-60
           ${cfg.bg} ${cfg.border} ${cfg.text}
           ${open ? 'ring-2 ring-amber-100' : ''}
         `}
       >
-        {isUpdating ? <Loader2 size={12} className="animate-spin" /> : <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />}
-        <span>{cfg.label}</span>
-        <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        {isUpdating ? <Loader2 size={12} className="animate-spin" /> : <span className={`h-2 w-2 shrink-0 rounded-full ${cfg.dot}`} />}
+        <span className="flex-1 text-left">{cfg.label}</span>
+        <ChevronDown size={12} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
@@ -352,16 +353,16 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
 
       <div className="rounded-3xl border border-amber-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-900/5">
         <div className={`overflow-x-auto rounded-3xl ${normalizedOrders.length > 0 && normalizedOrders.length < 5 ? 'min-h-[420px]' : ''}`}>
-          <table className="min-w-full text-left text-sm">
+          <table className="w-full min-w-[820px] table-fixed text-left text-sm">
             <thead className="bg-amber-50/40 dark:bg-zinc-800/50 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--bakery-text-muted)]">
               <tr>
-                <th className="px-6 py-4">Order ID</th>
-                <th className="px-6 py-4">Customer</th>
-                {!compact && <th className="px-6 py-4">Date</th>}
-                <th className="px-6 py-4 text-center">Items</th>
-                <th className="px-6 py-4">Total</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-center">Action</th>
+                <th className="px-6 py-4 w-[110px]">Order ID</th>
+                <th className="px-6 py-4 w-[210px]">Customer</th>
+                {!compact && <th className="px-6 py-4 w-[110px]">Date</th>}
+                <th className="px-6 py-4 text-center w-[70px]">Items</th>
+                <th className="px-6 py-4 w-[100px]">Total</th>
+                <th className="px-6 py-4 text-center w-[120px]">Status</th>
+                <th className="px-6 py-4 text-center w-[150px]">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-amber-50 dark:divide-zinc-800">

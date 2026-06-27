@@ -28,8 +28,8 @@ export default async function AdminProductsPage({ searchParams }) {
       apiGet('/api/categories', { cache: 'no-store' }),
     ])
 
-    products   = Array.isArray(productsRes?.data) ? productsRes.data : []
-    total      = productsRes?.total ?? 0
+    products = Array.isArray(productsRes?.data) ? productsRes.data : []
+    total = productsRes?.total ?? 0
     totalPages = productsRes?.totalPages ?? 1
     categories = Array.isArray(categoriesRes) ? categoriesRes : []
   } catch {

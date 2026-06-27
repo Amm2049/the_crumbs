@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, UtensilsCrossed } from 'lucide-react'
 import CartItemRow from '@/components/client/CartItemRow'
 import { CartSkeleton } from '@/components/shared/Skeletons'
 import { useCart } from '@/hooks/useCart'
@@ -82,8 +82,9 @@ export default function CartPage() {
               <p className="mt-2 text-[var(--bakery-text-muted)] max-w-xs">Add some artisanal treats to get started on your order.</p>
               <Link
                 href="/products"
-                className="mt-8 inline-flex rounded-full bg-amber-500 px-10 py-4 text-sm font-bold text-white shadow-xl shadow-amber-200 transition-all hover:bg-amber-600 hover:scale-105 active:scale-95"
+                className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 px-10 py-4 text-sm font-black tracking-wide text-white shadow-xl shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97]"
               >
+                <UtensilsCrossed size={18} />
                 Browse Our Menu
               </Link>
             </div>
@@ -131,15 +132,20 @@ export default function CartPage() {
               type="button"
               onClick={handlePlaceOrder}
               disabled={isPlacingOrder || cartItems.length === 0}
-              className="mt-8 hidden lg:flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 py-5 text-base font-black text-white shadow-xl shadow-amber-200 transition-all hover:bg-amber-600 hover:scale-[1.02] active:scale-[0.98] disabled:bg-amber-100 disabled:text-amber-300 disabled:shadow-none disabled:cursor-not-allowed disabled:scale-100"
+              className="btn-shimmer mt-8 hidden lg:flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_100%] py-5 text-base font-black tracking-wide text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97] disabled:animation-none disabled:bg-none disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none disabled:cursor-not-allowed disabled:scale-100 [&:disabled]:animation-[none] disabled:[animation:none]"
             >
               {isPlacingOrder ? (
                 <>
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Processing...
+                  <span className="h-4 w-4 animate-spin rounded-full border-[2.5px] border-white/30 border-t-white" />
+                  <span className="tracking-widest text-sm">Processing…</span>
                 </>
               ) : (
-                'Place Your Order'
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  Place Your Order
+                </>
               )}
             </button>
             
@@ -169,15 +175,20 @@ export default function CartPage() {
                 type="button"
                 onClick={handlePlaceOrder}
                 disabled={isPlacingOrder}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 py-4 text-lg font-black text-white shadow-xl shadow-amber-200 transition-all active:scale-95 disabled:bg-amber-100 disabled:text-amber-300"
+                className="btn-shimmer flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 py-4 text-base font-black tracking-wide text-white transition-all duration-300 hover:brightness-110 active:scale-95 disabled:[animation:none] disabled:bg-none disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none"
               >
                 {isPlacingOrder ? (
                   <>
-                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Processing...
+                    <span className="h-4 w-4 animate-spin rounded-full border-[2.5px] border-white/30 border-t-white" />
+                    <span className="tracking-widest text-sm">Processing…</span>
                   </>
                 ) : (
-                  'Place Order'
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    Place Your Order
+                  </>
                 )}
               </button>
             </div>

@@ -67,9 +67,23 @@ export async function GET(request) {
     }
 }
 
-export async function POST() {
+export async function POST(request) {
     const session = await auth();
     const userId = session.user.id;
+
+    let address = '';
+    let notes = '';
+    try {
+        const body = await request.json();
+        address = body.address?.trim() ?? '';
+        notes = body.notes?.trim() ?? '';
+    } catch {
+        // body may be empty — will be caught by address validation below
+    }
+
+    if (!address) {
+        return response({ error: 'Delivery address is required' }, 400);
+    }
 
     try {
         const order = await db.$transaction(async (tx) => {
@@ -111,6 +125,8 @@ export async function POST() {
                 data: {
                     userId,
                     total,
+                    address,
+                    notes: notes || null,
                     items: { create: orderItemsData },
                 },
             });

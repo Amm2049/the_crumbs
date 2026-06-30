@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { X } from 'lucide-react'
+import { X, MapPin, MessageSquare } from 'lucide-react'
 import { useState } from 'react'
 
 const statusClasses = {
@@ -58,7 +58,7 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
             onClick={onClose}
         >
-            {/* Panel — stop click from bubbling to backdrop */}
+            {/* Panel ΓÇö stop click from bubbling to backdrop */}
             <div
                 className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
@@ -100,7 +100,7 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                                 <li key={item.id} className="flex items-center justify-between rounded-xl bg-amber-50 dark:bg-zinc-800/50 px-4 py-3">
                                     <div>
                                         <p className="text-sm font-bold text-[var(--bakery-text)]">{item.product?.name ?? 'Product'}</p>
-                                        <p className="text-xs text-[var(--bakery-text-muted)]">x{item.quantity} · ${Number(item.price).toFixed(2)} each</p>
+                                        <p className="text-xs text-[var(--bakery-text-muted)]">x{item.quantity} ┬╖ ${Number(item.price).toFixed(2)} each</p>
                                     </div>
                                     <p className="text-sm font-black text-amber-700 dark:text-amber-400">
                                         ${(item.quantity * Number(item.price)).toFixed(2)}
@@ -116,7 +116,29 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                         <span className="text-xl font-black text-[var(--bakery-text)]">${Number(order.total).toFixed(2)}</span>
                     </div>
 
-                    {/* Cancel button — only for PENDING orders */}
+                    {/* Delivery Address */}
+                    {order.address && (
+                        <div className="rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-3 space-y-1">
+                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
+                                <MapPin size={11} />
+                                <span>Delivery Address</span>
+                            </div>
+                            <p className="text-sm font-semibold text-[var(--bakery-text)]">{order.address}</p>
+                        </div>
+                    )}
+
+                    {/* Special Instructions */}
+                    {order.notes && (
+                        <div className="rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-3 space-y-1">
+                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
+                                <MessageSquare size={11} />
+                                <span>Special Instructions</span>
+                            </div>
+                            <p className="text-sm italic text-[var(--bakery-text-muted)]">{order.notes}</p>
+                        </div>
+                    )}
+
+                    {/* Cancel button ΓÇö only for PENDING orders */}
                     {order.status === 'PENDING' && (
                         <div className="pt-2">
                             {cancelError && (

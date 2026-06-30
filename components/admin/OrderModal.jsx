@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Calendar, User, Mail, Hash, ShoppingBag, MessageSquare, Loader2, Check, ChevronDown } from 'lucide-react'
+import { X, Calendar, User, Mail, Hash, ShoppingBag, MessageSquare, MapPin, Loader2, Check, ChevronDown } from 'lucide-react'
 
 // Reuse the status config from the table for consistency
 const STATUS_CONFIG = {
@@ -106,12 +106,25 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Delivery Address */}
+          {order.address && (
+            <div className="space-y-3 rounded-2xl border border-amber-100 dark:border-zinc-700 bg-amber-50/10 dark:bg-zinc-800/30 p-4">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-500">
+                <MapPin size={12} />
+                <span>Delivery Address</span>
+              </div>
+              <p className="text-sm font-semibold text-[var(--bakery-text)] leading-relaxed">
+                {order.address}
+              </p>
+            </div>
+          )}
+
+          {/* Special Instructions / Notes */}
           {order.notes && (
             <div className="space-y-3 rounded-2xl border border-amber-100 dark:border-zinc-700 bg-amber-50/10 dark:bg-zinc-800/30 p-4">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-500">
                 <MessageSquare size={12} />
-                <span>Customer Notes</span>
+                <span>Special Instructions</span>
               </div>
               <p className="text-sm italic text-[var(--bakery-text)] leading-relaxed">
                 "{order.notes}"

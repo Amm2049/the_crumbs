@@ -14,6 +14,9 @@ export default function CartPage() {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [placeOrderError, setPlaceOrderError] = useState('')
+  const [address, setAddress] = useState('')
+  const [notes, setNotes] = useState('')
+  const [addressError, setAddressError] = useState('')
 
   const total = cartItems.reduce((sum, item) => sum + Number(item.quantity ?? 0) * Number(item.product?.price ?? 0), 0)
   const totalItems = cartItems.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0)
@@ -21,13 +24,21 @@ export default function CartPage() {
   const handlePlaceOrder = async () => {
     if (isPlacingOrder || isSuccess) return
     setPlaceOrderError('')
+    setAddressError('')
+
+    // Client-side address validation
+    if (!address.trim()) {
+      setAddressError('Please enter a delivery address before placing your order.')
+      return
+    }
+
     setIsPlacingOrder(true)
 
     try {
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ address: address.trim(), notes: notes.trim() }),
       })
 
       if (!response.ok) {
@@ -112,6 +123,55 @@ export default function CartPage() {
                 <span className="text-[var(--bakery-text)]">{totalItems} units</span>
               </div>
               
+              {/* Delivery Address + Notes */}
+              <div className="mt-6 space-y-4">
+                {/* Address — required */}
+                <div>
+                  <label
+                    htmlFor="delivery-address"
+                    className="mb-1.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Delivery Address <span className="text-amber-500">*</span>
+                  </label>
+                  <input
+                    id="delivery-address"
+                    type="text"
+                    value={address}
+                    onChange={(e) => { setAddress(e.target.value); setAddressError('') }}
+                    placeholder="E.g. 123 Sukhumvit Rd, Bangkok 10110"
+                    className="w-full rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-3 text-sm text-[var(--bakery-text)] placeholder:text-[var(--bakery-text-muted)]/50 outline-none transition-all focus:border-amber-400 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/30"
+                  />
+                  {addressError && (
+                    <p className="mt-1.5 text-[11px] font-bold text-red-500">{addressError}</p>
+                  )}
+                </div>
+
+                {/* Notes — optional */}
+                <div>
+                  <label
+                    htmlFor="order-notes"
+                    className="mb-1.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3-3-3z" />
+                    </svg>
+                    Special Instructions <span className="text-[var(--bakery-text-muted)]/40 font-bold normal-case tracking-normal">(optional)</span>
+                  </label>
+                  <textarea
+                    id="order-notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="E.g. Leave at door, ring bell, no onions..."
+                    rows={2}
+                    className="w-full resize-none rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-3 text-sm text-[var(--bakery-text)] placeholder:text-[var(--bakery-text-muted)]/50 outline-none transition-all focus:border-amber-400 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/30"
+                  />
+                </div>
+              </div>
+
               <div className="pt-5 border-t border-amber-50 dark:border-zinc-800">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-[var(--bakery-text)]">Total Amount</span>

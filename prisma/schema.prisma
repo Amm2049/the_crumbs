@@ -93,13 +93,16 @@ model Product {
 // ─────────────────────────────────────────────────────────────────────────────
 // ORDER
 // Created when a customer places an order. Total is a price snapshot.
+// address: delivery address — required at checkout (validated in API, stored as String?).
+// notes:   optional special instructions from the customer (e.g. "leave at door").
 // ─────────────────────────────────────────────────────────────────────────────
 
 model Order {
   id        String      @id @default(cuid())
   status    OrderStatus @default(PENDING)
   total     Float       // Total snapshotted at time of order — does not change
-  notes     String?     // Optional customer delivery/pickup instructions
+  address   String?     // Delivery address — required at checkout (enforced by API)
+  notes     String?     // Optional special instructions (e.g. "ring the bell")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

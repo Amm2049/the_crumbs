@@ -1,5 +1,5 @@
 import db from "@/lib/db";
-import { response, handleApiError } from "@/lib/utils";
+import { response, handleApiError } from "@/lib/api-helper";
 import { auth } from "@/lib/auth";
 
 export async function GET() {

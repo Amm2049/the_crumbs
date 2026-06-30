@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { Star, Clock3, ShoppingBag } from "lucide-react";
 import { Skeleton } from "@/components/shared/Skeletons";
 
 export default function HeroSection() {
   const { status } = useSession();
+
   const isAuthenticated = status === "authenticated";
 
   return (
@@ -65,30 +65,25 @@ export default function HeroSection() {
 
           {/* CTA buttons */}
           <div className="mt-8 flex flex-wrap justify-center md:justify-start gap-3">
-            <Link href="/products">
-              <Button
-                id="hero-shop-btn"
-                size="lg"
-                className="bg-amber-600 text-white hover:bg-amber-700 active:scale-95 rounded-full h-12 px-8 shadow-md shadow-amber-500/30 transition-all hover:shadow-lg"
-              >
-                <ShoppingBag size={18} className="mr-2" />
-                Explore Shop
-              </Button>
+            <Link
+              id="hero-shop-btn"
+              href="/products"
+              className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 px-8 py-3.5 text-sm font-black tracking-wide text-white shadow-xl shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97]"
+            >
+              <ShoppingBag size={18} />
+              Explore Shop
             </Link>
 
             {status === "loading" ? (
-              <Skeleton className="h-12 w-36 rounded-full" />
+              <Skeleton className="h-12 w-36 rounded-2xl" />
             ) : (
               !isAuthenticated && (
-                <Link href="/register">
-                  <Button
-                    id="hero-register-btn"
-                    size="lg"
-                    variant="outline"
-                    className="border-2 border-amber-200 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-sm hover:bg-amber-50 dark:hover:bg-zinc-800 active:scale-95 rounded-full h-12 px-8 transition-all text-[var(--bakery-text)]"
-                  >
-                    Join the Club
-                  </Button>
+                <Link
+                  id="hero-register-btn"
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-2xl border-2 border-amber-200 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-sm px-8 py-3.5 text-sm font-black tracking-wide text-[var(--bakery-text)] transition-all duration-300 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:scale-[1.03] active:scale-[0.97]"
+                >
+                  Join the Club
                 </Link>
               )
             )}

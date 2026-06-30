@@ -12,14 +12,42 @@ export async function GET(request, { params }) {
             items: { include: { product: { select: { name: true, images: true } } } },
         }
     })
-    
+
     if (check.error) return check.error
     return response(check.data)
 }
 
 export async function PATCH(request, { params }) {
+
+    // authorization
+    const session = await auth()
+    if (!session) return response({ error: "Unauthorized" }, 401)
+
+    // get order informations
     const { id } = await params
     const { status } = await request.json()
+
+    const isAdmin = session.user.role === 'ADMIN'
+
+    // Customers can only cancel their own PENDING orders
+    if (!isAdmin) {
+        const order = await db.order.findUnique({ where: { id } })
+        if (!order || order?.userId !== session.user.id)
+            return response({ error: "Not Found" }, 404)
+        if (status !== 'CANCELLED')
+            return response({ error: 'Customers may only cancel orders' }, 403)
+        if (order.status !== 'PENDING')
+            return response({ error: 'Only pending orders can be cancelled' }, 400)
+
+        // restore stock for each item
+        const items = await db.orderItem.findMany({ where: { orderId: id } })
+        await db.$transaction(
+            items.map(item => db.product.update({
+                where: { id: item.productId },
+                data: { stock: { increment: item.quantity } }
+            }))
+        )
+    }
 
     return handleUpdate(id, db.order, { data: { status } })
 }

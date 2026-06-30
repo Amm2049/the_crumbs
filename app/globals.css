@@ -285,6 +285,36 @@ body::-webkit-scrollbar,
   .animate-soft-rotate {
     animation: soft-rotate 30s linear infinite;
   }
+
+  @keyframes shimmer-sweep {
+    0%   { transform: translateX(-120%) skewX(-20deg); }
+    100% { transform: translateX(220%) skewX(-20deg); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5), 0 8px 32px rgba(217, 119, 6, 0.35); }
+    50%       { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0), 0 12px 40px rgba(217, 119, 6, 0.55); }
+  }
+
+  .btn-shimmer {
+    position: relative;
+    overflow: hidden;
+    animation: pulse-glow 2.4s ease-in-out infinite;
+  }
+
+  .btn-shimmer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 70%
+    );
+    animation: shimmer-sweep 2s ease-in-out infinite;
+    pointer-events: none;
+  }
 }
 
 @layer components {
@@ -301,6 +331,6 @@ body::-webkit-scrollbar,
   }
   
   .bakery-btn-primary {
-    @apply w-full bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500 text-white font-bold text-lg py-4 rounded-[2rem] shadow-md shadow-amber-500/30 transform transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-70 disabled:hover:translate-y-0;
+    @apply w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 py-4 text-sm font-black tracking-wide text-white shadow-xl shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97] disabled:opacity-60 disabled:grayscale-[0.3] disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100;
   }
 }

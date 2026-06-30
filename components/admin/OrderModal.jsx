@@ -107,17 +107,15 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
           </div>
 
           {/* Delivery Address */}
-          {order.address && (
-            <div className="space-y-3 rounded-2xl border border-amber-100 dark:border-zinc-700 bg-amber-50/10 dark:bg-zinc-800/30 p-4">
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-500">
-                <MapPin size={12} />
-                <span>Delivery Address</span>
-              </div>
-              <p className="text-sm font-semibold text-[var(--bakery-text)] leading-relaxed">
-                {order.address}
-              </p>
+          <div className="space-y-3 rounded-2xl border border-amber-100 dark:border-zinc-700 bg-amber-50/10 dark:bg-zinc-800/30 p-4">
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-500">
+              <MapPin size={12} />
+              <span>Delivery Address</span>
             </div>
-          )}
+            <p className="text-sm font-semibold text-[var(--bakery-text)] leading-relaxed">
+              {order.address || 'No address provided (historical order)'}
+            </p>
+          </div>
 
           {/* Special Instructions / Notes */}
           {order.notes && (

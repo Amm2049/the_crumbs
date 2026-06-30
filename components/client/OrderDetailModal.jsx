@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { X, MapPin, MessageSquare } from 'lucide-react'
 import { useState } from 'react'
@@ -117,15 +117,13 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                     </div>
 
                     {/* Delivery Address */}
-                    {order.address && (
-                        <div className="rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-3 space-y-1">
-                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
-                                <MapPin size={11} />
-                                <span>Delivery Address</span>
-                            </div>
-                            <p className="text-sm font-semibold text-[var(--bakery-text)]">{order.address}</p>
+                    <div className="rounded-xl border border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-3 space-y-1">
+                        <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
+                            <MapPin size={11} />
+                            <span>Delivery Address</span>
                         </div>
-                    )}
+                        <p className="text-sm font-semibold text-[var(--bakery-text)]">{order.address || 'No address provided (historical order)'}</p>
+                    </div>
 
                     {/* Special Instructions */}
                     {order.notes && (

@@ -97,7 +97,7 @@ prisma/
 - Belongs to `Category` (onDelete: Restrict)
 
 **Order**
-- `id`, `status` (PENDING | PROCESSING | READY | DELIVERED | CANCELLED), `total` (Float, snapshotted), `notes?`, timestamps
+- `id`, `status` (PENDING | PROCESSING | READY | DELIVERED | CANCELLED), `total` (Float, snapshotted), `address?` (delivery address — required at checkout via API), `notes?` (optional special instructions), timestamps
 - Belongs to `User`
 - Has many `OrderItem`
 
@@ -209,6 +209,7 @@ const statusClasses = {
 | **Order detail modal** (`OrderDetailModal.jsx`) | `components/client/OrderDetailModal.jsx` |
 | **Server-driven pagination on orders page** | `components/client/OrdersClient.jsx` |
 | **Compact order cards** (pills preview, two-column layout) | `components/client/OrdersClient.jsx` |
+| **#4 Checkout delivery address + special instructions** | `app/(client)/cart/page.jsx`, `app/api/orders/route.js`, `components/admin/OrderModal.jsx`, `components/client/OrderDetailModal.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -223,6 +224,12 @@ const statusClasses = {
 - On cancel success: re-fetches current page and closes modal automatically
 - Props: `order`, `onClose`, `onCancelled`
 
+### Checkout Address + Notes — Key Details
+- `Order.address String?` — delivery address, stored as a single text field. Required at checkout: API returns `400` if missing, UI shows inline error before firing the request.
+- `Order.notes String?` — optional special instructions (e.g. "ring bell", "leave at door").
+- Both fields shown in the **admin `OrderModal`** (📍 Delivery Address + 💬 Special Instructions blocks) and the **customer `OrderDetailModal`**.
+- Migration baseline `0_init` + migration `20260630102115_add_address_and_notes_to_order` applied to DB.
+
 ---
 
 ## 📋 Features Pending (see FEATURES.md)
@@ -230,7 +237,7 @@ const statusClasses = {
 | # | Feature | Priority |
 |---|---------|----------|
 | #3 | ~~Email notifications~~ — deferred to mobile app (push/LINE more suitable than in-app for web) | ⏸️ Deferred |
-| #4 | Checkout delivery address / notes field | 🔴 High |
+| #4 | ~~Checkout delivery address / notes field~~ ✅ Done | ✅ |
 | #5 | Product search bar on storefront | 🔴 High |
 | #6 | Product reviews & ratings | 🟡 Medium |
 | #7 | Wishlist / favorites | 🟡 Medium |
@@ -276,4 +283,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-06-27 — Deferred #3 (notifications) to mobile app version; in-app/email notifications are not practical for a web-only bakery without push/LINE support.
+> Last updated: 2026-06-30 — Completed #4 (checkout address): added `Order.address` + `Order.notes` with DB migration, required address validation on API + UI, display in both admin and customer order modals.

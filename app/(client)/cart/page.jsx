@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { ChevronLeft, UtensilsCrossed } from 'lucide-react'
+import { ChevronLeft, UtensilsCrossed, MapPin, MessageSquare, ShoppingBag, X } from 'lucide-react'
 import CartItemRow from '@/components/client/CartItemRow'
 import { CartSkeleton } from '@/components/shared/Skeletons'
 import { useCart } from '@/hooks/useCart'
@@ -17,21 +17,28 @@ export default function CartPage() {
   const [address, setAddress] = useState('')
   const [notes, setNotes] = useState('')
   const [addressError, setAddressError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const total = cartItems.reduce((sum, item) => sum + Number(item.quantity ?? 0) * Number(item.product?.price ?? 0), 0)
   const totalItems = cartItems.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0)
 
-  const handlePlaceOrder = async () => {
+  // Step 1: validate, then show confirmation modal
+  const handlePlaceOrder = () => {
     if (isPlacingOrder || isSuccess) return
     setPlaceOrderError('')
     setAddressError('')
 
-    // Client-side address validation
     if (!address.trim()) {
       setAddressError('Please enter a delivery address before placing your order.')
       return
     }
 
+    setShowConfirm(true)
+  }
+
+  // Step 2: user confirmed — actually place the order
+  const handleConfirmOrder = async () => {
+    setShowConfirm(false)
     setIsPlacingOrder(true)
 
     try {
@@ -52,14 +59,9 @@ export default function CartPage() {
         return
       }
 
-      // Order placed successfully
       setIsSuccess(true)
       setIsPlacingOrder(false)
-
-      // Refresh cart state to clear it
       await mutate()
-
-      // Redirect to orders
       router.push('/orders')
     } catch (err) {
       setPlaceOrderError(err?.message || 'Failed to place order')
@@ -250,6 +252,87 @@ export default function CartPage() {
                     Place Your Order
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirmation Modal ── */}
+      {showConfirm && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-amber-50 dark:border-zinc-800 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-amber-50 dark:border-zinc-800 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-50 dark:bg-zinc-800 text-amber-600 dark:text-amber-400">
+                  <ShoppingBag size={18} />
+                </div>
+                <h2 className="text-base font-black text-[var(--bakery-text)]">Confirm Your Order</h2>
+              </div>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="rounded-full p-1.5 text-zinc-400 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-600 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-xs text-[var(--bakery-text-muted)] font-semibold">Please review your order details before confirming.</p>
+
+              {/* Items + Total */}
+              <div className="rounded-2xl border border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/40 px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-bold text-[var(--bakery-text)]">
+                  <ShoppingBag size={14} className="text-amber-500" />
+                  {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                </div>
+                <span className="text-xl font-black text-amber-600 dark:text-amber-400">${total.toFixed(2)}</span>
+              </div>
+
+              {/* Address */}
+              <div className="rounded-2xl border border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/40 px-4 py-3 space-y-1">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
+                  <MapPin size={11} />
+                  Delivery Address
+                </div>
+                <p className="text-sm font-semibold text-[var(--bakery-text)]">{address.trim()}</p>
+              </div>
+
+              {/* Notes — only if filled */}
+              {notes.trim() && (
+                <div className="rounded-2xl border border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/40 px-4 py-3 space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
+                    <MessageSquare size={11} />
+                    Special Instructions
+                  </div>
+                  <p className="text-sm italic text-[var(--bakery-text-muted)]">{notes.trim()}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex gap-3 border-t border-amber-50 dark:border-zinc-800 px-6 py-4">
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-white dark:bg-zinc-800 py-3 text-sm font-black text-[var(--bakery-text)] transition-all hover:bg-amber-50 dark:hover:bg-zinc-700 active:scale-95"
+              >
+                Go Back
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmOrder}
+                className="flex-1 btn-shimmer rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_100%] py-3 text-sm font-black text-white transition-all duration-300 hover:brightness-110 active:scale-95"
+              >
+                Confirm Order
               </button>
             </div>
           </div>

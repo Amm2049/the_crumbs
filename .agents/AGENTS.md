@@ -14,3 +14,8 @@
 
 > ❌ Never do: `feature/google-oauth → feature/something-else` (chained features)
 > ✅ Always do: `develop → feature/something-new`
+
+## Direct commits to `develop` (acceptable exceptions)
+- **Minor bug fixes** (e.g. config typos, one-line repairs) → commit directly to `develop` is fine.
+- **Small UX tweaks** (e.g. adding a confirmation dialog to an existing feature) → `develop` is okay.
+- **New features or major changes** → always create a `feature/` branch first, no exceptions.

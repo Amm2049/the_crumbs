@@ -8,6 +8,8 @@ import ProductGrid from '@/components/client/ProductGrid'
 import Pagination from '@/components/shared/Pagination'
 import { ProductCardSkeleton } from '@/components/shared/Skeletons'
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+import { useDebouncedCallback } from 'use-debounce'
+
 
 /**
  * Helper to fetch and parse JSON data from the internal API
@@ -37,89 +39,91 @@ function ShopProductsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // State management for data, UI filters, and loading status
-  const [categories, setCategories] = useState([])
-  const [allProducts, setAllProducts] = useState([])
-  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || '')
-  const [search, setSearch] = useState(searchParams.get('q') || '')
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  // Pagination configuration
+  const urlSearch = searchParams.get('q') || ''
+  const activeCategory = searchParams.get('category') || ''
   const currentPage = Number(searchParams.get('page')) || 1
   const itemsPerPage = 15
 
-  /**
-   * Initial data fetch: Load all categories and products from the API
-   */
+  // Local state management
+  const [categories, setCategories] = useState([])
+  const [productsData, setProductsData] = useState({ data: [], total: 0, totalPages: 1 })
+  const [search, setSearch] = useState(urlSearch)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
+  // Sync input text with URL (handles browser back/forward buttons & clear actions)
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch)
+  if (urlSearch !== prevUrlSearch) {
+    setSearch(urlSearch)
+    setPrevUrlSearch(urlSearch)
+  }
+
+
+  // Initial Category Fetch
   useEffect(() => {
     let cancelled = false
 
-    async function load() {
+    async function loadCats() {
+      try {
+        const cats = await fetchJson('/api/categories')
+        if (cancelled) return
+        setCategories(Array.isArray(cats) ? cats : [])
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+        setCategories([])
+      }
+    }
+
+    loadCats()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Fetch products from backend whenever URL parameters change
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadProducts() {
       setIsLoading(true)
       setError('')
       try {
-        const [cats, products] = await Promise.all([
-          fetchJson('/api/categories'),
-          fetchJson('/api/products'),
-        ])
+        const queryParams = new URLSearchParams()
+        if (urlSearch) queryParams.set('search', urlSearch)
+        if (activeCategory) queryParams.set('category', activeCategory)
+        queryParams.set('page', currentPage.toString())
+        queryParams.set('limit', itemsPerPage.toString())
 
+        const res = await fetchJson(`/api/products?${queryParams.toString()}`)
         if (cancelled) return
-        setCategories(Array.isArray(cats) ? cats : [])
-        setAllProducts(Array.isArray(products) ? products : [])
+
+        if (res && Array.isArray(res.data)) {
+          setProductsData(res)
+        } else if (Array.isArray(res)) {
+          setProductsData({
+            data: res,
+            total: res.length,
+            totalPages: Math.ceil(res.length / itemsPerPage)
+          })
+        } else {
+          setProductsData({ data: [], total: 0, totalPages: 1 })
+        }
       } catch (e) {
         if (cancelled) return
-        setCategories([])
-        setAllProducts([])
+        setProductsData({ data: [], total: 0, totalPages: 1 })
         setError(e instanceof Error ? e.message : 'Failed to load products')
       } finally {
         if (!cancelled) setIsLoading(false)
       }
     }
 
-    load()
+    loadProducts()
     return () => {
       cancelled = true
     }
-  }, [])
-
-  /**
-   * Client-side filtering: Filters the full product list based on 
-   * search query and active category
-   */
-  const filteredProducts = useMemo(() => {
-    const query = search.trim().toLowerCase()
-
-    // Is a category selected?
-    return allProducts.filter((p) => {
-      if (activeCategory) {
-        const slug = p?.category?.slug
-        // Does product match category?
-
-        if (slug !== activeCategory) return false
-      }
-      //Is there a search query?
-      if (query) {
-        const name = String(p?.name ?? '').toLowerCase()
-        //Does product name include it?
-        if (!name.includes(query)) return false
-      }
-
-      return true
-    })
-  }, [allProducts, activeCategory, search])
-
-  // Pagination calculations based on filtered results
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-
-  /**
-   * Slices the filtered products list to show only the current page
-   */
-  const paginatedProducts = useMemo(() => {
-    return filteredProducts.slice(startIndex, startIndex + itemsPerPage)
-  }, [filteredProducts, startIndex])
+  }, [urlSearch, activeCategory, currentPage])
 
   /**
    * Synchronizes component state with the URL query parameters
@@ -141,6 +145,15 @@ function ShopProductsContent() {
     router.push(`/products?${params.toString()}`, { scroll: false })
   }
 
+  // Debounced URL updates when typing
+  const debouncedUpdateFilters = useDebouncedCallback((val) => {
+    updateFilters({ q: val })
+  }, 500)
+
+  const totalPages = productsData.totalPages
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const paginatedProducts = productsData.data
+
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return
     updateFilters({ page: newPage.toString() })
@@ -148,7 +161,7 @@ function ShopProductsContent() {
   }
 
   // Check if any active filters are applied to show/hide the "Clear" button
-  const hasFilters = Boolean(activeCategory || search)
+  const hasFilters = Boolean(activeCategory || urlSearch)
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -166,7 +179,7 @@ function ShopProductsContent() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value)
-                updateFilters({ q: e.target.value })
+                debouncedUpdateFilters(e.target.value)
               }}
               placeholder="Search treats..."
               className="w-full rounded-2xl border-2 border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-3 pl-11 pr-4 text-sm font-medium text-[var(--bakery-text)] outline-none transition-all focus:border-amber-400 focus:ring-4 focus:ring-amber-50 dark:focus:ring-amber-900/20"
@@ -175,6 +188,7 @@ function ShopProductsContent() {
               <button
                 onClick={() => {
                   setSearch('')
+                  debouncedUpdateFilters.cancel()
                   updateFilters({ q: '' })
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-amber-400 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-600"
@@ -189,7 +203,7 @@ function ShopProductsContent() {
               type="button"
               onClick={() => {
                 setSearch('')
-                setActiveCategory('')
+                debouncedUpdateFilters.cancel()
                 updateFilters({ q: '', category: '', page: '1' })
               }}
               className="flex items-center justify-center gap-2 rounded-2xl border-2 border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-3 text-sm font-bold text-[var(--bakery-text-muted)] transition-all hover:bg-amber-50 dark:hover:bg-zinc-800 active:scale-95"
@@ -204,7 +218,6 @@ function ShopProductsContent() {
         categories={categories}
         activeCategory={activeCategory}
         onChangeCategory={(slug) => {
-          setActiveCategory(slug)
           updateFilters({ category: slug })
         }}
       />
@@ -234,7 +247,7 @@ function ShopProductsContent() {
             totalPages={totalPages}
             onPageChange={handlePageChange}
             itemsPerPage={itemsPerPage}
-            totalItems={filteredProducts.length}
+            totalItems={productsData.total}
             startIndex={startIndex}
             label="treats"
           />

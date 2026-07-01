@@ -210,6 +210,7 @@ const statusClasses = {
 | **Server-driven pagination on orders page** | `components/client/OrdersClient.jsx` |
 | **Compact order cards** (pills preview, two-column layout) | `components/client/OrdersClient.jsx` |
 | **#4 Checkout delivery address + special instructions** | `app/(client)/cart/page.jsx`, `app/api/orders/route.js`, `components/admin/OrderModal.jsx`, `components/client/OrderDetailModal.jsx` |
+| **#0 Backend product search & pagination** | `app/api/products/route.js`, `components/client/ShopProductsClient.jsx`, `components/client/ProductGrid.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -283,4 +284,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-06-30 — Completed #4 (checkout address): added `Order.address` + `Order.notes` with DB migration, required address validation on API + UI, display in both admin and customer order modals.
+> Last updated: 2026-07-01 — Completed #0 (backend search): Transitioned storefront products page to database-driven search, category filtering, and pagination with input debouncing.

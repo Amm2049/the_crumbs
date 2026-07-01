@@ -2,7 +2,7 @@
 // create a new product - admin only
 
 import db from '@/lib/db'
-import { handleGetAll, handlePost, ProductFormat } from '@/lib/api-helper'
+import { handleGetAll, handlePost, ProductFormat, response, handleApiError } from '@/lib/api-helper'
 
 export async function GET(request) {
     const { searchParams } = request.nextUrl
@@ -12,23 +12,60 @@ export async function GET(request) {
     const takeParam = searchParams.get('take')
     const take = takeParam ? Number.parseInt(takeParam, 10) : undefined
 
+    const pageParam = searchParams.get('page')
+    const limitParam = searchParams.get('limit')
+
     let resolvedCategoryId = categoryId
     if (!resolvedCategoryId && category) {
         const found = await db.category.findUnique({ where: { slug: category } })
         resolvedCategoryId = found?.id
     }
 
-    return handleGetAll(db.product, {
-        where: {
-            isAvailable: true,
-            ...(resolvedCategoryId && { categoryId: resolvedCategoryId }),
-            ...(search && {
-                name: {
-                    contains: search,
-                    mode: 'insensitive',
-                }
+    // Common Query Filter
+    const where = {
+        isAvailable: true,
+        ...(resolvedCategoryId && { categoryId: resolvedCategoryId }),
+        ...(search && {
+            name: {
+                contains: search,
+                mode: 'insensitive'
+            }
+        })
+    }
+
+    // If pagination is requested (storefront shop)
+    if (pageParam || limitParam) {
+        const page = Math.max(1, parseInt(pageParam ?? '1', 10))
+        const limit = Math.min(100, Math.max(1, parseInt(limitParam ?? '15', 10)))
+        const skip = (page - 1) * limit
+
+        try {
+            const [products, total] = await Promise.all([
+                db.product.findMany({
+                    where,
+                    include: { category: true },
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: limit,
+                }),
+                db.product.count({ where })
+            ])
+
+            return response({
+                data: products,
+                total,
+                page,
+                totalPages: Math.ceil(total / limit)
             })
-        },
+        } catch (error) {
+            return handleApiError(error)
+        }
+    }
+
+
+
+    return handleGetAll(db.product, {
+        where,
         include: {
             category: true,
         },

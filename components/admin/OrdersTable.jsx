@@ -57,8 +57,10 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
   const ref = useRef(null)
   const cfg = STATUS_CONFIG[currentStatus] ?? { bg: 'bg-gray-50', border: 'border-gray-100', text: 'text-gray-700', dot: 'bg-gray-400', label: currentStatus }
 
+  const isTerminal = currentStatus === 'CANCELLED' || currentStatus === 'DELIVERED'
+
   useEffect(() => {
-    if (!open) return
+    if (!open || isTerminal) return
     
     // Check if we should open upwards
     if (ref.current) {
@@ -79,7 +81,7 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
       document.removeEventListener('mousedown', handler)
       window.removeEventListener('scroll', scrollHandler, true)
     }
-  }, [open, onOpenChange])
+  }, [open, onOpenChange, isTerminal])
 
   const handleSelect = (status) => {
     setOpen(false)
@@ -90,7 +92,7 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
     <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
-        disabled={isUpdating}
+        disabled={isUpdating || isTerminal}
         onClick={() => setOpen((v) => !v)}
         className={`
           inline-flex items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-xs font-bold
@@ -103,7 +105,7 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
       >
         {isUpdating ? <Loader2 size={12} className="animate-spin" /> : <span className={`h-2 w-2 shrink-0 rounded-full ${cfg.dot}`} />}
         <span className="flex-1 text-left">{cfg.label}</span>
-        <ChevronDown size={12} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        {!isTerminal && <ChevronDown size={12} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />}
       </button>
 
       {open && (

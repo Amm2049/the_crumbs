@@ -211,6 +211,7 @@ const statusClasses = {
 | **Compact order cards** (pills preview, two-column layout) | `components/client/OrdersClient.jsx` |
 | **#4 Checkout delivery address + special instructions** | `app/(client)/cart/page.jsx`, `app/api/orders/route.js`, `components/admin/OrderModal.jsx`, `components/client/OrderDetailModal.jsx` |
 | **#0 Backend product search & pagination** | `app/api/products/route.js`, `components/client/ShopProductsClient.jsx`, `components/client/ProductGrid.jsx` |
+| **#1 Admin analytics charts** | `app/api/admin/dashboard/analytics/route.js`, `components/admin/AnalyticsCharts.jsx`, `app/(admin)/admin/dashboard/page.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -231,13 +232,17 @@ const statusClasses = {
 - Both fields shown in the **admin `OrderModal`** (📍 Delivery Address + 💬 Special Instructions blocks) and the **customer `OrderDetailModal`**.
 - Migration baseline `0_init` + migration `20260630102115_add_address_and_notes_to_order` applied to DB.
 
+### Admin Analytics Charts — Key Details
+- High-performance API endpoint at `/api/admin/dashboard/analytics` running query-optimized native PostgreSQL database aggregations via `db.$queryRaw`.
+- Renders 4 interactive, responsive SVG charts inside the dashboard utilizing Recharts: **Daily Revenue Trend** (Area), **Orders Volume by Status** (Stacked Bar), **Revenue by Category** (Donut Pie), and **Top 5 Products** (Horizontal Bar).
+- Employs standard static imports in server component combined with client mount checks in React components to avoid SSR/hydration mismatches.
+
 ---
 
 ## 📋 Features Pending (Current Roadmap)
 
 | # | Feature | Status / Priority |
 |---|---------|-------------------|
-| #1 | Admin analytics charts | 🟡 In Progress |
 | #2 | Low stock alerts in admin | 🟡 Pending |
 | #3 | Real-time order status timeline for customers | 🟢 Pending |
 | #4 | Product recommendations | 🟢 Pending |
@@ -278,4 +283,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-03 — Updated pending roadmap to include PromptPay QR payment with slip upload.
+> Last updated: 2026-07-03 — Completed Feature #1 (Admin Analytics Charts).

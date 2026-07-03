@@ -223,7 +223,17 @@ export default function AnalyticsCharts() {
                   }}
                   formatter={(value) => [formatCurrency(value), 'Sales']}
                 />
-                <Legend iconSize={8} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+                <Legend
+                  iconSize={8}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: '10px' }}
+                  payload={revenueByCategory.map((entry, index) => ({
+                    value: entry.name,
+                    type: 'circle',
+                    id: entry.name,
+                    color: COLORS[index % COLORS.length]
+                  }))}
+                />
               </PieChart>
             </ResponsiveContainer>
           )}

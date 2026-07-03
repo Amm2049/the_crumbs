@@ -38,11 +38,11 @@ const COLORS = [
 ]
 
 const STATUS_COLORS = {
-  delivered: '#D97706', // Honey-amber (amber-600)
-  ready: '#F59E0B',     // Warm gold (amber-500)
-  processing: '#FBBF24', // Soft wheat (amber-400)
-  pending: '#FDE68A',    // Cream (amber-200)
-  cancelled: '#C2410C',  // Terracotta (orange-700)
+  delivered: '#10B981', // Emerald-500
+  ready: '#6366F1',     // Indigo-500
+  processing: '#3B82F6', // Blue-500
+  pending: '#F59E0B',    // Amber-500
+  cancelled: '#EF4444',  // Red-500
 }
 
 export default function AnalyticsCharts() {

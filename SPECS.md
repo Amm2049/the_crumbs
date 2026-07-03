@@ -233,23 +233,17 @@ const statusClasses = {
 
 ---
 
-## 📋 Features Pending (see FEATURES.md)
+## 📋 Features Pending (Current Roadmap)
 
-| # | Feature | Priority |
-|---|---------|----------|
-| #3 | ~~Email notifications~~ — deferred to mobile app (push/LINE more suitable than in-app for web) | ⏸️ Deferred |
-| #4 | ~~Checkout delivery address / notes field~~ ✅ Done | ✅ |
-| #5 | Product search bar on storefront | 🔴 High |
-| #6 | Product reviews & ratings | 🟡 Medium |
-| #7 | Wishlist / favorites | 🟡 Medium |
-| #8 | Discount / coupon codes | 🟡 Medium |
-| #9 | Admin analytics charts | 🟡 Medium |
-| #10 | Low stock alerts in admin | 🟡 Medium |
-| #11 | Real-time order status timeline for customer | 🟢 Nice |
-| #12 | Product recommendations | 🟢 Nice |
-| #13 | Sitewide announcement banner | 🟢 Nice |
-| #14 | Customer profile editing (name, avatar) | 🟢 Nice |
-| #15 | PWA support (manifest + service worker) | 🟢 Nice |
+| # | Feature | Status / Priority |
+|---|---------|-------------------|
+| #1 | Admin analytics charts | 🟡 In Progress |
+| #2 | Low stock alerts in admin | 🟡 Pending |
+| #3 | Real-time order status timeline for customers | 🟢 Pending |
+| #4 | Product recommendations | 🟢 Pending |
+| #5 | PromptPay / QR Code payment integration + Slip upload | 🔴 Pending |
+| #6 | Performance, code quality and maintenance review | 🟢 Pending |
+| #7 | Final overall quality check | 🟢 Pending |
 
 ---
 
@@ -284,4 +278,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-01 — Completed #0 (backend search): Transitioned storefront products page to database-driven search, category filtering, and pagination with input debouncing.
+> Last updated: 2026-07-03 — Updated pending roadmap to include PromptPay QR payment with slip upload.

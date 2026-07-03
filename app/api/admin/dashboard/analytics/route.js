@@ -116,10 +116,23 @@ export async function GET() {
       ready: Number(row.ready ?? 0),
     }));
 
-    const revenueByCategory = revenueByCategoryRaw.map(row => ({
+    // format RevenueByCategory -------
+    const allCategories = revenueByCategoryRaw.map(row => ({
       name: row.name,
       revenue: Number(row.revenue ?? 0)
     }));
+    // If more than 5 categories, group the lower ones as others
+    let revenueByCategory = allCategories;
+    if (allCategories.length > 5) {
+      const top4 = allCategories.slice(0, 4)
+      const others = allCategories.slice(4)
+      const othersTotal = others.reduce((sum, item) => sum + item.revenue, 0)
+
+      revenueByCategory = [
+        ...top4,
+        { name: 'Others', revenue: othersTotal }
+      ]
+    }
 
     const monthlyRevenue = monthlyRevenueRaw.map(row => ({
       month: formatMonth(row.month),

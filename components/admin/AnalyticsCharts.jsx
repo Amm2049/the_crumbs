@@ -38,7 +38,7 @@ const COLORS = [
 ]
 
 const STATUS_COLORS = {
-  delivered: '#10B981', // Emerald-500
+  delivered: '#26ff00ff', // Emerald-500
   ready: '#6366F1',     // Indigo-500
   processing: '#3B82F6', // Blue-500
   pending: '#F59E0B',    // Amber-500

@@ -133,6 +133,9 @@ export async function GET() {
         { name: 'Others', revenue: othersTotal }
       ]
     }
+    console.log(revenueByCategory);
+
+    // ---------------
 
     const monthlyRevenue = monthlyRevenueRaw.map(row => ({
       month: formatMonth(row.month),

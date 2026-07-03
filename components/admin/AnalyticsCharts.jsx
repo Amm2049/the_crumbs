@@ -76,6 +76,7 @@ export default function AnalyticsCharts() {
     topProducts = [],
   } = data || {}
 
+
   // Format currency helpers
   const formatCurrency = (val) => `$${Number(val).toFixed(2)}`
 

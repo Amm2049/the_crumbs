@@ -76,7 +76,6 @@ export default function AnalyticsCharts() {
     topProducts = [],
   } = data || {}
 
-
   // Format currency helpers
   const formatCurrency = (val) => `$${Number(val).toFixed(2)}`
 
@@ -227,6 +226,7 @@ export default function AnalyticsCharts() {
                   iconSize={8}
                   iconType="circle"
                   wrapperStyle={{ fontSize: '10px' }}
+                  itemSorter={() => 0}
                   payload={revenueByCategory.map((entry, index) => ({
                     value: entry.name,
                     type: 'circle',

@@ -5,6 +5,7 @@ import { LogOut, ChevronDown, User as UserIcon, Settings, Menu } from 'lucide-re
 import { useState } from 'react'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import StockAlertBell from '@/components/admin/StockAlertBell'
 import Image from 'next/image'
 import { useAdmin } from '@/context/AdminContext'
 
@@ -35,8 +36,12 @@ export default function AdminNavbar() {
         </div>
       </div>
 
+
+
       {/* Right: account info + sign-out */}
       <div className="relative flex items-center gap-3">
+        <StockAlertBell />
+
         {/* Account pill */}
         <button
           type="button"
@@ -126,7 +131,8 @@ export default function AdminNavbar() {
             onClick={() => setMenuOpen(false)}
           />
         )}
-        
+
+
         <div className="ml-1 border-l border-amber-100 dark:border-zinc-800 pl-3">
           <ThemeToggle />
         </div>

@@ -212,6 +212,7 @@ const statusClasses = {
 | **#4 Checkout delivery address + special instructions** | `app/(client)/cart/page.jsx`, `app/api/orders/route.js`, `components/admin/OrderModal.jsx`, `components/client/OrderDetailModal.jsx` |
 | **#0 Backend product search & pagination** | `app/api/products/route.js`, `components/client/ShopProductsClient.jsx`, `components/client/ProductGrid.jsx` |
 | **#1 Admin analytics charts** | `app/api/admin/dashboard/analytics/route.js`, `components/admin/AnalyticsCharts.jsx`, `app/(admin)/admin/dashboard/page.jsx` |
+| **#2 Low stock alerts in admin** | `app/api/admin/dashboard/low-stock/route.js`, `components/admin/StockAlertBell.jsx`, `components/admin/StatsCard.jsx`, `components/admin/ProductsTable.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -243,7 +244,6 @@ const statusClasses = {
 
 | # | Feature | Status / Priority |
 |---|---------|-------------------|
-| #2 | Low stock alerts in admin | 🟡 Pending |
 | #3 | Real-time order status timeline for customers | 🟢 Pending |
 | #4 | Product recommendations | 🟢 Pending |
 | #5 | PromptPay / QR Code payment integration + Slip upload | 🔴 Pending |
@@ -283,4 +283,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-03 — Completed Feature #1 (Admin Analytics Charts).
+> Last updated: 2026-07-04 — Completed Feature #2 (Low Stock Alerts in Admin).

@@ -3,6 +3,7 @@ import { DollarSign, Package, ShoppingBag, Users } from 'lucide-react'
 import OrdersTable from '@/components/admin/OrdersTable'
 import StatsCard from '@/components/admin/StatsCard'
 import AnalyticsCharts from '@/components/admin/AnalyticsCharts'
+import LowStockAlerts from '@/components/admin/LowStockAlerts'
 import { apiGet } from '@/lib/api-client'
 
 export const metadata = {
@@ -15,7 +16,11 @@ export default async function DashboardPage() {
   let totalCustomers = 0
   let totalRevenue = 0
   let recentOrders = []
+  let lowStockCount = 0
   let hasDataError = false
+
+  let lowStockProducts = []
+  let hasLowStockError = false
 
   try {
     const data = await apiGet('/api/admin/dashboard', {
@@ -27,8 +32,18 @@ export default async function DashboardPage() {
     totalCustomers = data.totalCustomers ?? 0
     totalRevenue = Number(data.totalRevenue ?? 0)
     recentOrders = Array.isArray(data.recentOrders) ? data.recentOrders : []
+    lowStockCount = data.lowStockCount ?? 0
   } catch {
     hasDataError = true
+  }
+
+  try {
+    const lowStockData = await apiGet('/api/admin/dashboard/low-stock', {
+      cache: 'no-store',
+    })
+    lowStockProducts = Array.isArray(lowStockData?.products) ? lowStockData.products : []
+  } catch {
+    hasLowStockError = true
   }
 
   return (
@@ -47,9 +62,19 @@ export default async function DashboardPage() {
       <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <StatsCard title="Total Orders" value={totalOrders} icon={ShoppingBag} />
         <StatsCard title="Gross Revenue" value={`$${totalRevenue.toFixed(2)}`} icon={DollarSign} />
-        <StatsCard title="Active Menu" value={totalProducts} icon={Package} />
+        <StatsCard title="Active Menu" value={totalProducts} icon={Package} alert={lowStockCount > 0} />
         <StatsCard title="Customers" value={totalCustomers} icon={Users} />
       </section>
+
+      {/* Low Stock Alerts */}
+      {!hasLowStockError && (
+        <section className="space-y-4">
+          <div className="px-1">
+            <h2 className="text-xl font-black text-[var(--bakery-text)]">Stock Alerts</h2>
+          </div>
+          {/* <LowStockAlerts products={lowStockProducts} /> */}
+        </section>
+      )}
 
       <section className="space-y-4">
         <div className="flex items-center justify-between px-1">

@@ -2,6 +2,7 @@
 
 import { X, MapPin, MessageSquare } from 'lucide-react'
 import { useState } from 'react'
+import OrderStatusTimeline from './OrderStatusTimeline'
 
 const statusClasses = {
     PENDING: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400',
@@ -11,9 +12,7 @@ const statusClasses = {
     CANCELLED: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
 }
 
-
 export default function OrderDetailModal({ order, onClose, onCancelled }) {
-
     const [isCancelling, setIsCancelling] = useState(false)
     const [cancelError, setCancelError] = useState('')
 
@@ -91,6 +90,9 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                             {order.status}
                         </span>
                     </div>
+
+                    {/* Order timeline - Realtime  */}
+                    <OrderStatusTimeline status={order.status} updatedAt={order.updatedAt} />
 
                     {/* Items */}
                     <div>

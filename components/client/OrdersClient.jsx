@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import Pagination from '@/components/shared/Pagination'
 import OrderDetailModal from '@/components/client/OrderDetailModal'
+import { useSession } from 'next-auth/react'
+import { usePusher } from '@/hooks/usePusher'
 
 async function fetchJson(path) {
   const res = await fetch(path, {
@@ -54,6 +56,50 @@ export default function OrdersClient() {
 
   const currentPage = Number(searchParams.get('page')) || 1
   const itemsPerPage = 5
+
+  // Pusher 
+  const { data: session } = useSession()
+  const { client, connectionState } = usePusher()
+
+  useEffect(() => {
+    if (!client || !session?.user?.id) return
+
+    const channelName = `private-user-${session.user.id}`
+    const channel = client.subscribe(channelName)
+
+    channel.bind('status-changed', (data) => {
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o.id === data.orderId
+            ? { ...o, status: data.status, updatedAt: data.updatedAt }
+            : o
+        )
+      )
+    })
+
+    // Fallback: If pusher goes offline, fetch status every 15s
+    let fallbackInterval = null
+    if (connectionState === 'failed' || connectionState === 'unavailable') {
+      console.info('Pusher offline, launching fallback polling.')
+      fallbackInterval = setInterval(async () => {
+        try {
+          const result = await fetchJson(`/api/orders?page=${currentPage}&limit=${itemsPerPage}`)
+          const list = Array.isArray(result?.data) ? result.data : []
+          setOrders(list)
+          setTotalPages(result?.totalPages ?? 1)
+          setTotalItems(result?.total ?? list.length)
+        } catch (error) {
+          console.error('Fallback polling error:', error)
+        }
+      }, 15000)
+    }
+
+    return () => {
+      channel.unbind('status-changed')
+      client.unsubscribe(channelName)
+      if (fallbackInterval) clearInterval(fallbackInterval)
+    }
+  }, [client, session?.user?.id, connectionState, currentPage])
 
   useEffect(() => {
     async function loadOrders() {
@@ -194,7 +240,7 @@ export default function OrdersClient() {
         ) : (
           <div className="rounded-2xl border-2 border-dashed border-amber-100 dark:border-zinc-800 bg-amber-50/30 dark:bg-zinc-900/30 py-12 text-center">
             <p className="text-sm font-medium text-[var(--bakery-text-muted)]">No orders found on this page.</p>
-            <button 
+            <button
               onClick={() => handlePageChange(1)}
               className="mt-2 text-xs font-bold uppercase tracking-widest text-amber-600 hover:text-amber-700 underline underline-offset-4"
             >
@@ -214,13 +260,16 @@ export default function OrdersClient() {
       />
 
       {/* Order Detail Modal */}
-      {selectedOrder && (
-        <OrderDetailModal
-          order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
-          onCancelled={handleCancelled}
-        />
-      )}
+      {selectedOrder && (() => {
+        const activeOrder = orders.find((o) => o.id === selectedOrder.id) || selectedOrder
+        return (
+          <OrderDetailModal
+            order={activeOrder}
+            onClose={() => setSelectedOrder(null)}
+            onCancelled={handleCancelled}
+          />
+        )
+      })()}
     </div>
   )
 }

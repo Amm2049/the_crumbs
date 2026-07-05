@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import db from '@/lib/db'
+import { broadcast } from "@/lib/pusher-broadcast";
 import { handleUpdate, OwnershipCheck, response } from '@/lib/api-helper'
 
 export async function GET(request, { params }) {
@@ -59,7 +60,40 @@ export async function PATCH(request, { params }) {
         )
     }
 
-    return handleUpdate(id, db.order, { data: { status } })
+    // 1. Perform the update first
+    const updateResponse = await handleUpdate(id, db.order, { data: { status } })
+
+    // 2. If the update was successful, fetch the order data and broadcast
+    if (updateResponse.status === 200) {
+        const updatedOrder = await db.order.findUnique({
+            where: { id },
+            include: {
+                user: { select: { name: true } },
+                items: { include: { product: true } }
+            }
+        })
+
+        if (updatedOrder) {
+            // Notify the customer tracking the order status
+            broadcast.orderStatusChanged(updatedOrder.userId, id, updatedOrder.status, updatedOrder.updatedAt.toISOString())
+
+            // If the order was cancelled, notify the admin dashboard & restore storefront stocks
+            if (updatedOrder.status === 'CANCELLED') {
+                const cName = updatedOrder.user?.name || 'Customer'
+                broadcast.orderCancelled(id, cName, updatedOrder.total)
+
+                if (updatedOrder.items) {
+                    for (const item of updatedOrder.items) {
+                        if (item.product) {
+                            broadcast.stockChanged(item.product.id, item.product.stock, item.product.isAvailable)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return updateResponse
 }
 
 

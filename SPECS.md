@@ -256,8 +256,8 @@ const statusClasses = {
 
 | # | Feature | Status / Priority |
 |---|---------|-------------------|
-| #4 | Product recommendations | 🟢 Pending |
-| #5 | PromptPay / QR Code payment integration + Slip upload | 🔴 Pending |
+| #4 | PromptPay / QR Code payment integration + Slip upload | 🔴 Pending |
+| #5 | Product recommendations | 🟢 Pending |
 | #6 | Performance, code quality and maintenance review | 🟢 Pending |
 | #7 | Final overall quality check | 🟢 Pending |
 
@@ -294,4 +294,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-06 — Feature #3 (Real-time order tracking & Admin notifications) fully completed.
+> Last updated: 2026-07-06 — Roadmap adjusted (PromptPay integration prioritized).

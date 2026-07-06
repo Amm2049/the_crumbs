@@ -43,9 +43,11 @@ export default function Navbar() {
   }, 0) ?? 0;
 
   // Close drawer when route changes
-  useEffect(() => {
-    setDrawerOpen(false);
-  }, [pathname]);
+  const [prevPathname, setPrevPathname] = useState(pathname)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname)
+    setDrawerOpen(false)
+  }
 
   // Prevent body scroll when drawer is open
   useEffect(() => {

@@ -28,16 +28,27 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
   const canUpload = Boolean(cloudName && uploadPreset)
 
-  useEffect(() => { setMounted(true) }, [])
+  const [prevCategory, setPrevCategory] = useState(null)
+  const [prevIsOpen, setPrevIsOpen] = useState(false)
 
-  useEffect(() => {
+  if (category !== prevCategory || isOpen !== prevIsOpen) {
+    setPrevCategory(category)
+    setPrevIsOpen(isOpen)
     if (isOpen) {
       setName(category?.name || '')
       setSlug(category?.slug || '')
       setDescription(category?.description || '')
       setImage(category?.image || '')
     }
-  }, [isOpen, category])
+  }
+
+  useEffect(() => {
+    let active = true
+    setTimeout(() => {
+      if (active) setMounted(true)
+    }, 0)
+    return () => { active = false }
+  }, [])
 
   if (!isOpen || !mounted) return null
 

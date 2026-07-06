@@ -9,6 +9,7 @@ import Pagination from '@/components/shared/Pagination'
 import { ProductCardSkeleton } from '@/components/shared/Skeletons'
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import { useDebouncedCallback } from 'use-debounce'
+import { usePusher } from '@/hooks/usePusher';
 
 
 /**
@@ -50,6 +51,30 @@ function ShopProductsContent() {
   const [search, setSearch] = useState(urlSearch)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const { client } = usePusher()
+
+  useEffect(() => {
+    if (!client) return
+
+    const channel = client.subscribe('products')
+    channel.bind('stock-changed', (data) => {
+      // Update stock in products list
+      setProductsData((prev) => ({
+        ...prev,
+        data: prev.data.map((p) =>
+          p.id === data.id
+            ? { ...p, stock: data.stock, isAvailable: data.isAvailable }
+            : p
+        )
+      }))
+    })
+
+    return () => {
+      channel.unbind('stock-changed')
+      client.unsubscribe('products')
+    }
+  }, [client])
 
   // Sync input text with URL (handles browser back/forward buttons & clear actions)
   const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch)

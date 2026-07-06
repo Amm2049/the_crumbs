@@ -28,8 +28,10 @@ function getPusherClient() {
 }
 
 export function usePusher() {
-    const [connectionState, setConnectionState] = useState('disconnected')
     const client = getPusherClient()
+    const [connectionState, setConnectionState] = useState(() => 
+        client ? client.connection.state : 'disconnected'
+    )
 
     useEffect(() => {
         if (!client) return
@@ -39,7 +41,6 @@ export function usePusher() {
         }
 
         client.connection.bind('state_change', handleStateChange)
-        setConnectionState(client.connection.state)
 
         return () => {
             if (client) {

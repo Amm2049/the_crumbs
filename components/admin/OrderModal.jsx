@@ -17,7 +17,11 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    let active = true
+    setTimeout(() => {
+      if (active) setMounted(true)
+    }, 0)
+    return () => { active = false }
   }, [])
 
   if (!isOpen || !mounted || !order) return null
@@ -125,7 +129,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
                 <span>Special Instructions</span>
               </div>
               <p className="text-sm italic text-[var(--bakery-text)] leading-relaxed">
-                "{order.notes}"
+                &ldquo;{order.notes}&rdquo;
               </p>
             </div>
           )}

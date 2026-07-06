@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useToast } from '@/context/ToastContext'
 import { ChevronLeft, ChevronRight, ChevronDown, Check, Loader2, Calendar, ShoppingBag, User, Hash } from 'lucide-react'
 import OrderModal from './OrderModal'
+import { usePusher } from '@/hooks/usePusher'
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -249,6 +250,50 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
   // Modal state
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [recentOrderIds, setRecentOrderIds] = useState([])
+
+  // Real-time listener for customer updates
+  const { client } = usePusher()
+
+  useEffect(() => {
+    if (!client) return
+    const channel = client.subscribe('private-admin')
+
+    const handleCancel = (data) => {
+      // 1. Update the table status in-place instantly
+      setLocalStatus((prev) => ({ ...prev, [data.id]: 'CANCELLED' }))
+
+      // 2. If the modal is currently open for this order, update the modal status
+      setSelectedOrder((prev) => {
+        if (prev && prev.id === data.id) {
+          return { ...prev, status: 'CANCELLED' }
+        }
+        return prev
+      })
+
+      // 3. Re-sync with server
+      router.refresh()
+    }
+
+    const handleNewOrder = (data) => {
+      if (data?.id) {
+        setRecentOrderIds((prev) => [...prev, data.id])
+        setTimeout(() => {
+          setRecentOrderIds((prev) => prev.filter((id) => id !== data.id))
+        }, 6000)
+      }
+      // Re-sync with server to pull the new order row
+      router.refresh()
+    }
+
+    channel.bind('order-cancelled', handleCancel)
+    channel.bind('new-order', handleNewOrder)
+
+    return () => {
+      channel.unbind('order-cancelled', handleCancel)
+      channel.unbind('new-order', handleNewOrder)
+    }
+  }, [client, router])
 
   // Current filter values from URL
   const currentMonth = searchParams.get('month') || ''
@@ -326,6 +371,19 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
 
   return (
     <div className="space-y-4">
+      <style>{`
+        @keyframes highlightFade {
+          0% {
+            background-color: rgba(245, 158, 11, 0.25);
+          }
+          100% {
+            background-color: transparent;
+          }
+        }
+        .animate-row-highlight {
+          animation: highlightFade 6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
       {!compact && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1">
           <div className="flex items-baseline gap-2">
@@ -378,11 +436,12 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                 normalizedOrders.map((order) => {
                   const currentStatus = localStatus[order.id] ?? order.status
                   const isUpdating = pendingOrderId === order.id
+                  const isNew = recentOrderIds.includes(order.id)
                   return (
                     <tr
                       key={order.id}
                       onClick={() => openOrderDetails({ ...order, status: currentStatus })}
-                      className={`group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30 ${openDropdownId === order.id ? 'relative z-50' : ''}`}
+                      className={`group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30 ${isNew ? 'animate-row-highlight' : ''} ${openDropdownId === order.id ? 'relative z-50' : ''}`}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">

@@ -179,7 +179,7 @@ export default function ProfileClient({ session: initialSession }) {
                <h3 className="text-xs font-black uppercase tracking-widest text-amber-800 dark:text-amber-500 opacity-80">Sweet Rewards</h3>
              </div>
              <p className="text-[13px] font-bold leading-relaxed text-[var(--bakery-text)]">
-               You have <span className="text-lg text-amber-700 dark:text-amber-400">450</span> Crumbs points! You're just 50 points away from a <span className="underline decoration-amber-200 dark:decoration-amber-900 underline-offset-4">free croissant</span>.
+               You have <span className="text-lg text-amber-700 dark:text-amber-400">450</span> Crumbs points! You&apos;re just 50 points away from a <span className="underline decoration-amber-200 dark:decoration-amber-900 underline-offset-4">free croissant</span>.
              </p>
           </div>
         </div>

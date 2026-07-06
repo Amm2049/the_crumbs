@@ -14,7 +14,11 @@ export default function LoginPage() {
 
   // Trigger entrance animation
   useEffect(() => {
-    setIsMounted(true)
+    let active = true
+    setTimeout(() => {
+      if (active) setIsMounted(true)
+    }, 0)
+    return () => { active = false }
   }, [])
 
   const {
@@ -45,7 +49,7 @@ export default function LoginPage() {
       } else {
         // Redirect to admin dashboard if the user is an admin
         // We use window.location because router.push doesn't always trigger a full session refresh
-        window.location.href = data.email === 'admin@thecrumbs.com' ? '/admin/dashboard' : '/'
+        window.location.assign(data.email === 'admin@thecrumbs.com' ? '/admin/dashboard' : '/')
       }
     } catch (error) {
       setAuthError('Something went wrong. Please try again later.')

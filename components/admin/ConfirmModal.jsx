@@ -13,7 +13,13 @@ export default function ConfirmModal({
 }) {
   // Track when we're mounted on the client so createPortal works safely in Next.js
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    let active = true
+    setTimeout(() => {
+      if (active) setMounted(true)
+    }, 0)
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return

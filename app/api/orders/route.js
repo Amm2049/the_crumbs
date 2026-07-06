@@ -139,6 +139,9 @@ export async function POST(request) {
             await tx.cartItem.deleteMany({ where: { userId } });
 
             return newOrder;
+        }, {
+            maxWait: 10000, // 10s max wait to acquire a connection
+            timeout: 20000  // 20s max execution time
         });
 
         // --- Broadcast Real-time Updates ---

@@ -13,17 +13,7 @@ export default function AddToCartButton({ productId, quantity = 1, disabled = fa
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
 
-  const isAdmin = session?.user?.role === 'ADMIN'
-  const isCustomer = session && !isAdmin
-
-  if (authStatus === 'loading') {
-    return (
-      <div className={`h-14 w-full animate-pulse rounded-xl bg-amber-100/80 ${className}`} />
-    )
-  }
-
-  if (!isCustomer && session) return null
-  // For guest users, we show the button which redirects to login
+  const { addToCart } = useCart()
 
   useEffect(() => {
     if (status !== 'success') return
@@ -35,7 +25,16 @@ export default function AddToCartButton({ productId, quantity = 1, disabled = fa
     return () => clearTimeout(timeoutId)
   }, [status])
 
-  const { addToCart } = useCart()
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const isCustomer = session && !isAdmin
+
+  if (authStatus === 'loading') {
+    return (
+      <div className={`h-14 w-full animate-pulse rounded-xl bg-amber-100/80 ${className}`} />
+    )
+  }
+
+  if (!isCustomer && session) return null
 
   const handleAddToCart = async () => {
     setError('')

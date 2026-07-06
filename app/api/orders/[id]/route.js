@@ -56,7 +56,11 @@ export async function PATCH(request, { params }) {
             items.map(item => db.product.update({
                 where: { id: item.productId },
                 data: { stock: { increment: item.quantity } }
-            }))
+            })),
+            {
+                maxWait: 10000, // 10s max wait to acquire connection
+                timeout: 15000  // 15s max execution time
+            }
         )
     }
 

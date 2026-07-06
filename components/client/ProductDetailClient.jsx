@@ -105,7 +105,7 @@ export default function ProductDetailClient({ product }) {
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500/80">Baker's Description</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500/80">Baker&apos;s Description</h3>
             <p className="text-base leading-relaxed text-[var(--bakery-text)] font-medium">
               {product.description || "Our artisanal creation, baked fresh daily using premium local ingredients and a secret family recipe passed down through generations."}
             </p>
@@ -162,8 +162,8 @@ export default function ProductDetailClient({ product }) {
                 <p className="text-[10px] font-bold text-[var(--bakery-text-muted)]">
                   {inStock 
                     ? (isFullyStockedInCart 
-                        ? 'All available stock is in your basket' 
-                        : `${remainingStock} more available`) 
+                      ? 'All available stock is in your basket' 
+                      : `${remainingStock} more available`) 
                     : 'Baking more soon!'}
                 </p>
               </div>
@@ -182,9 +182,9 @@ export default function ProductDetailClient({ product }) {
 
           {/* Baker's Note Box */}
           <div className="rounded-2xl bg-amber-50 dark:bg-zinc-800/50 p-5 border-2 border-white dark:border-zinc-800 shadow-sm">
-            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Baker's Note</p>
+            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Baker&apos;s Note</p>
             <p className="text-xs font-medium italic text-[var(--bakery-text)]">
-              "This treat is best enjoyed warm with a cup of our signature honey tea. Keep stored in a cool, dry place for up to 3 days."
+              &ldquo;This treat is best enjoyed warm with a cup of our signature honey tea. Keep stored in a cool, dry place for up to 3 days.&rdquo;
             </p>
           </div>
         </div>

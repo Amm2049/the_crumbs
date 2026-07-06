@@ -213,7 +213,7 @@ const statusClasses = {
 | **#0 Backend product search & pagination** | `app/api/products/route.js`, `components/client/ShopProductsClient.jsx`, `components/client/ProductGrid.jsx` |
 | **#1 Admin analytics charts** | `app/api/admin/dashboard/analytics/route.js`, `components/admin/AnalyticsCharts.jsx`, `app/(admin)/admin/dashboard/page.jsx` |
 | **#2 Low stock alerts in admin** | `app/api/admin/dashboard/low-stock/route.js`, `components/admin/StockAlertBell.jsx`, `components/admin/StatsCard.jsx`, `components/admin/ProductsTable.jsx` |
-| **#3 Real-time order tracking (Pusher)** | `lib/pusher.js`, `lib/pusher-constants.js`, `lib/pusher-broadcast.js`, `app/api/pusher/auth/route.js`, `hooks/usePusher.js`, `components/client/OrderStatusTimeline.jsx`, `components/client/OrderDetailModal.jsx`, `components/client/OrdersClient.jsx` |
+| **#3 Real-time order tracking & Admin notifications (Pusher)** | `lib/pusher.js`, `lib/pusher-constants.js`, `lib/pusher-broadcast.js`, `app/api/pusher/auth/route.js`, `hooks/usePusher.js`, `components/client/OrderStatusTimeline.jsx`, `components/client/OrderDetailModal.jsx`, `components/client/OrdersClient.jsx`, `components/admin/AdminNavbar.jsx`, `components/admin/OrdersTable.jsx`, `components/client/ProductGrid.jsx`, `components/client/ShopProductsClient.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -239,9 +239,14 @@ const statusClasses = {
 - Renders 4 interactive, responsive SVG charts inside the dashboard utilizing Recharts: **Daily Revenue Trend** (Area), **Orders Volume by Status** (Stacked Bar), **Revenue by Category** (Donut Pie), and **Top 5 Products** (Horizontal Bar).
 - Employs standard static imports in server component combined with client mount checks in React components to avoid SSR/hydration mismatches.
 
-### Real-time Order Tracking (Pusher) — Key Details
-- Integrates server-to-client websockets using **Pusher Channels** for instant status propagation.
+### Real-time Order Tracking & Admin Alerts (Pusher) — Key Details
+- Integrates server-to-client websockets using **Pusher Channels** for instant status propagation and notifications.
 - Subscribes to private user-specific channels (`private-user-{userId}`) to sync both the Orders list dashboard cards and the visual modal timelines in real-time.
+- Subscribes to the private admin channel (`private-admin`) in the admin dashboard:
+  - **New Order Alert:** plays a dual-tone audio chime, pops up an amber-colored toast alert, and refreshes the Admin Orders table (prepending the new order row with a golden fade highlight animation).
+  - **Order Cancellation Alert:** plays a chime, displays a soft-red warning toast, and updates the order status in the Orders table and open modal live without page refresh.
+  - **Low Stock warning:** displays an amber toast if any product's stock falls below 5 items upon checkout.
+- Subscribes to the public products channel (`products`) on the customer shop page to sync storefront stock counts and availability states instantly across all online visitors.
 - Employs secure Form-Data token authorization endpoint at `/api/pusher/auth` validating NextAuth session ownership before channel subscription.
 - Features resilient client hook connection monitoring with automatic 15-second background HTTP API polling fallback.
 
@@ -251,7 +256,6 @@ const statusClasses = {
 
 | # | Feature | Status / Priority |
 |---|---------|-------------------|
-| #3 | Real-time order status timeline for customers | 🟡 In Progress (Customer complete) |
 | #4 | Product recommendations | 🟢 Pending |
 | #5 | PromptPay / QR Code payment integration + Slip upload | 🔴 Pending |
 | #6 | Performance, code quality and maintenance review | 🟢 Pending |
@@ -290,4 +294,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-05 — Feature #3 (Real-time order tracking) in progress (Customer-side complete).
+> Last updated: 2026-07-06 — Feature #3 (Real-time order tracking & Admin notifications) fully completed.

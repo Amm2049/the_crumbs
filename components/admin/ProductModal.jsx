@@ -116,7 +116,13 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
 
   const nameValue = watch('name')
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    let active = true
+    setTimeout(() => {
+      if (active) setMounted(true)
+    }, 0)
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     if (isOpen) {

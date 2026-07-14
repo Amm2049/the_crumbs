@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Plus, CheckCircle } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 import { useRouter } from 'next/navigation'
+import { formatCurrency } from '@/lib/utils'
 
 export default function ProductCard({ product }) {
   const router = useRouter()
@@ -80,7 +81,7 @@ export default function ProductCard({ product }) {
             <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600 sm:text-[10px]">
               {product?.category?.name || 'Handcrafted'}
             </p>
-            <p className="text-sm font-black text-[var(--bakery-text)] sm:text-base">${price.toFixed(2)}</p>
+            <p className="text-sm font-black text-[var(--bakery-text)] sm:text-base">{formatCurrency(price)}</p>
           </div>
           <h3 className="text-sm font-bold text-[var(--bakery-text)] transition-colors group-hover:text-amber-800 dark:group-hover:text-amber-400 sm:text-base truncate">
             {product?.name}

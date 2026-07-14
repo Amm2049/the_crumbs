@@ -145,9 +145,9 @@ export async function POST(request) {
         });
 
         // --- Broadcast Real-time Updates ---
-        // 1. Broadcast new order to admins
-        const customerName = session.user.name || 'Customer'
-        broadcast.newOrder(order.id, customerName, order.total)
+        // 1. Broadcast new order to admins (No longer needed because already broadcasted when webhook succed)
+        // const customerName = session.user.name || 'Customer'
+        // broadcast.newOrder(order.id, customerName, order.total)
 
         // 2. Broadcast stock updates and low-stock alerts
         if (order.items) {

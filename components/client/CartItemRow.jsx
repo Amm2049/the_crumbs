@@ -2,6 +2,7 @@
 
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { formatCurrency } from '@/lib/utils'
 
 export default function CartItemRow({ item, onUpdate, onRemove }) {
   const { id, product, quantity } = item
@@ -50,7 +51,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
         <div className="flex flex-1 flex-col justify-between min-w-0 sm:flex-row sm:items-center sm:gap-4">
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-bold text-[var(--bakery-text)] sm:text-lg">{product?.name || 'Product'}</p>
-            <p className="mt-0.5 text-sm font-medium text-[var(--bakery-text-muted)]">${unitPrice.toFixed(2)} each</p>
+            <p className="mt-0.5 text-sm font-medium text-[var(--bakery-text-muted)]">{formatCurrency(unitPrice)} each</p>
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 sm:mt-0 sm:justify-end">
@@ -80,7 +81,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
               </div>
 
               <p className="min-w-[70px] text-right text-base font-black text-amber-700 dark:text-amber-500 sm:text-[var(--bakery-text)]">
-                ${lineTotal.toFixed(2)}
+                {formatCurrency(lineTotal)}
               </p>
             </div>
 

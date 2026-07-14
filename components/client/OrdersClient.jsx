@@ -7,6 +7,7 @@ import { ChevronLeft } from 'lucide-react'
 import Pagination from '@/components/shared/Pagination'
 import OrderDetailModal from '@/components/client/OrderDetailModal'
 import { useSession } from 'next-auth/react'
+import { formatCurrency } from '@/lib/utils'
 import { usePusher } from '@/hooks/usePusher'
 
 async function fetchJson(path) {
@@ -227,10 +228,19 @@ export default function OrdersClient() {
                   >
                     {order.status}
                   </span>
-                  <p className="text-lg font-black text-[var(--bakery-text)]">${Number(order.total ?? 0).toFixed(2)}</p>
+                  <p className="text-lg font-black text-[var(--bakery-text)]">{formatCurrency(order.total ?? 0)}</p>
                   <span className="text-xs font-bold uppercase tracking-widest text-amber-600 group-hover:underline underline-offset-4">
                     View Details →
                   </span>
+                  {order.status === 'PENDING' && (
+                    <Link
+                      href={`/checkout/${order.id}/pay`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-bold text-white hover:bg-amber-600 transition-colors"
+                    >
+                      Complete Payment
+                    </Link>
+                  )}
                 </div>
 
               </div>

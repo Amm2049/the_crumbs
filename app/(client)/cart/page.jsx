@@ -7,6 +7,7 @@ import { ChevronLeft, UtensilsCrossed, MapPin, MessageSquare, ShoppingBag, X } f
 import CartItemRow from '@/components/client/CartItemRow'
 import { CartSkeleton } from '@/components/shared/Skeletons'
 import { useCart } from '@/hooks/useCart'
+import { formatCurrency } from '@/lib/utils'
 
 export default function CartPage() {
   const router = useRouter()
@@ -48,13 +49,10 @@ export default function CartPage() {
         body: JSON.stringify({ address: address.trim(), notes: notes.trim() }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        let message = 'Failed to place order'
-        try {
-          const payload = await response.json()
-          if (payload?.error) message = payload.error
-        } catch { }
-        setPlaceOrderError(message)
+        setPlaceOrderError(data?.error || 'Failed to place order')
         setIsPlacingOrder(false)
         return
       }
@@ -62,7 +60,7 @@ export default function CartPage() {
       setIsSuccess(true)
       setIsPlacingOrder(false)
       await mutate()
-      router.push('/orders')
+      router.push(`/checkout/${data.id}/pay`)
     } catch (err) {
       setPlaceOrderError(err?.message || 'Failed to place order')
       setIsPlacingOrder(false)
@@ -125,7 +123,7 @@ export default function CartPage() {
                 <span>Total Items</span>
                 <span className="text-[var(--bakery-text)]">{totalItems} units</span>
               </div>
-              
+
               {/* Delivery Address + Notes */}
               <div className="mt-6 space-y-4">
                 {/* Address — required */}
@@ -178,7 +176,7 @@ export default function CartPage() {
               <div className="pt-5 border-t border-amber-50 dark:border-zinc-800">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-[var(--bakery-text)]">Total Amount</span>
-                  <span className="text-3xl font-black text-amber-600 dark:text-amber-500">${total.toFixed(2)}</span>
+                  <span className="text-3xl font-black text-amber-600 dark:text-amber-500">{formatCurrency(total)}</span>
                 </div>
               </div>
             </div>
@@ -210,7 +208,7 @@ export default function CartPage() {
                 </>
               )}
             </button>
-            
+
             <p className="mt-6 text-[10px] text-center text-[var(--bakery-text-muted)] font-semibold uppercase tracking-widest opacity-60">
               Secure Checkout
             </p>
@@ -226,7 +224,7 @@ export default function CartPage() {
               <div className="flex items-center justify-between mb-4 px-2">
                 <div>
                   <p className="text-[10px] font-bold text-[var(--bakery-text-muted)] uppercase tracking-wider">Total Amount</p>
-                  <p className="text-2xl font-black text-[var(--bakery-text)]">${total.toFixed(2)}</p>
+                  <p className="text-2xl font-black text-[var(--bakery-text)]">{formatCurrency(total)}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-[var(--bakery-text-muted)] uppercase tracking-wider">Items</p>
@@ -294,7 +292,7 @@ export default function CartPage() {
                   <ShoppingBag size={14} className="text-amber-500" />
                   {totalItems} {totalItems === 1 ? 'item' : 'items'}
                 </div>
-                <span className="text-xl font-black text-amber-600 dark:text-amber-400">${total.toFixed(2)}</span>
+                <span className="text-xl font-black text-amber-600 dark:text-amber-400">{formatCurrency(total)}</span>
               </div>
 
               {/* Address */}

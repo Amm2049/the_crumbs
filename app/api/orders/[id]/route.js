@@ -37,6 +37,11 @@ export async function PATCH(request, { params }) {
         return response({ error: "Cannot modify completed or cancelled orders" }, 400)
     }
 
+    // Prevent reverting a paid/processed order back to PENDING
+    if (order.status !== 'PENDING' && status === 'PENDING') {
+        return response({ error: "Cannot revert a processed order back to pending" }, 400)
+    }
+
     const isAdmin = session.user.role === 'ADMIN'
 
     // Customers can only cancel their own PENDING orders

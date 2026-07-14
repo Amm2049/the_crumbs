@@ -214,6 +214,7 @@ const statusClasses = {
 | **#1 Admin analytics charts** | `app/api/admin/dashboard/analytics/route.js`, `components/admin/AnalyticsCharts.jsx`, `app/(admin)/admin/dashboard/page.jsx` |
 | **#2 Low stock alerts in admin** | `app/api/admin/dashboard/low-stock/route.js`, `components/admin/StockAlertBell.jsx`, `components/admin/StatsCard.jsx`, `components/admin/ProductsTable.jsx` |
 | **#3 Real-time order tracking & Admin notifications (Pusher)** | `lib/pusher.js`, `lib/pusher-constants.js`, `lib/pusher-broadcast.js`, `app/api/pusher/auth/route.js`, `hooks/usePusher.js`, `components/client/OrderStatusTimeline.jsx`, `components/client/OrderDetailModal.jsx`, `components/client/OrdersClient.jsx`, `components/admin/AdminNavbar.jsx`, `components/admin/OrdersTable.jsx`, `components/client/ProductGrid.jsx`, `components/client/ShopProductsClient.jsx` |
+| **#4 Stripe Payments (Credit Cards & PromptPay)** | `app/api/payment/`, `components/client/payment/`, `app/(client)/checkout/` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -250,13 +251,23 @@ const statusClasses = {
 - Employs secure Form-Data token authorization endpoint at `/api/pusher/auth` validating NextAuth session ownership before channel subscription.
 - Features resilient client hook connection monitoring with automatic 15-second background HTTP API polling fallback.
 
+### Stripe Payments (Credit Cards & PromptPay) — Key Details
+- Integrates Stripe's **Payment Intents API** and **Stripe Elements** for processing secure payments without PCI compliance scope.
+- Dynamically displays both credit card inputs and PromptPay QR codes based on dashboard configuration.
+- Features secure and idempotent backend processing via **Stripe Webhooks** (`/api/payment/webhook`), reading raw request payloads for cryptographic signature verification.
+- Idempotently transitions successful order statuses from `PENDING` to `PROCESSING` within database transactions and broadcasts real-time updates via Pusher.
+- Features a seamless customer-facing secure checkout route `/checkout/[id]/pay` and success redirect landing page `/checkout/success`.
+- **Theme Adaptation:** Payment form dynamically updates its appearance configurations (fonts, border radius, backgrounds, text colors) matching the Honey & Cream theme in both light and dark modes.
+- **Itemized Checkout Sidebar:** Renders a list of purchased products, quantities, and line totals directly within the payment page summary block.
+- **Safety Reversion Guards:** Implements backend API verification and frontend dropdown options filtering to block administrative users from reverting any paid/processed order (`PROCESSING`, `READY`, etc.) back to `PENDING`, preventing duplicate billing and button re-appearance.
+- **Price Formatting Refactor:** Unifies storefront and admin dashboard price displays to format with the central `formatCurrency()` helper dynamically reading currency configuration codes (THB ฿).
+
 ---
 
 ## 📋 Features Pending (Current Roadmap)
 
 | # | Feature | Status / Priority |
 |---|---------|-------------------|
-| #4 | PromptPay / QR Code payment integration + Slip upload | 🔴 Pending |
 | #5 | Product recommendations | 🟢 Pending |
 | #6 | Performance, code quality and maintenance review | 🟢 Pending |
 | #7 | Final overall quality check | 🟢 Pending |
@@ -283,7 +294,7 @@ git checkout -b feature/your-feature-name
 
 ---
 
-## 🧑‍💻 Developer Notes
+## 📋 Developer Notes
 
 - The student prefers to **write code themselves** with step-by-step guidance rather than having everything auto-generated. Provide guidance in small, testable chunks.
 - Keep explanations **short and clear** — they are learning, not a beginner.
@@ -294,4 +305,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-06 — Roadmap adjusted (PromptPay integration prioritized).
+> Last updated: 2026-07-14 — Stripe Card and PromptPay payment integration completed with advanced UI polish and safety guards.

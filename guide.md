@@ -220,7 +220,9 @@ export async function POST(request) {
 
     try {
       // 1. Transaction to update order idempotently
-      const updatedOrder = await db.$transaction(async (tx) => {
+      //    Returns { order, wasUpdated } so we only broadcast when a real change happened.
+      //    This prevents duplicate Pusher notifications if Stripe retries the webhook.
+      const result = await db.$transaction(async (tx) => {
         const order = await tx.order.findUnique({
           where: { id: orderId }
         });
@@ -229,32 +231,35 @@ export async function POST(request) {
         
         // Idempotency: skip if already processed
         if (order.status !== 'PENDING') {
-          return order;
+          return { order, wasUpdated: false };
         }
 
         // Update status to PROCESSING (payment confirmed)
-        return await tx.order.update({
+        const updated = await tx.order.update({
           where: { id: orderId },
           data: { status: 'PROCESSING' },
           include: { user: { select: { name: true } } }
         });
+
+        return { order: updated, wasUpdated: true };
       });
 
-      // 2. Broadcast live status updates
-      if (updatedOrder && updatedOrder.status === 'PROCESSING') {
+      // 2. Broadcast live status updates ONLY if the status actually changed
+      if (result.wasUpdated) {
+        // Notify the customer's order page
         broadcast.orderStatusChanged(
-          updatedOrder.userId,
-          updatedOrder.id,
-          updatedOrder.status,
-          updatedOrder.updatedAt.toISOString()
+          result.order.userId,
+          result.order.id,
+          result.order.status,
+          result.order.updatedAt.toISOString()
         );
         
-        // Refresh admin dashboard table
-        const customerName = updatedOrder.user?.name || 'Customer';
-        broadcast.newOrder(updatedOrder.id, customerName, updatedOrder.total);
+        // Notify admin dashboard with new-order chime
+        const customerName = result.order.user?.name || 'Customer';
+        broadcast.newOrder(result.order.id, customerName, result.order.total);
       }
 
-      console.log(`[Stripe Webhook]: Successfully processed Order #${orderId}`);
+      console.log(`[Stripe Webhook]: Order #${orderId} — ${result.wasUpdated ? 'Updated to PROCESSING' : 'Already processed (skipped)'}`);
     } catch (err) {
       console.error('[Stripe Webhook Processing Error]:', err.message);
       return response({ error: 'Processing error' }, 500);

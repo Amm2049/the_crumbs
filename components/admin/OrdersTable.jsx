@@ -115,7 +115,11 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
           ${openUp ? 'bottom-full mb-2' : 'top-full mt-1.5'}
         `}>
           <div className="p-1.5 space-y-0.5">
-            {ALL_STATUSES.map((status) => {
+            {ALL_STATUSES.filter(status => {
+              // Cannot revert back to PENDING once the order has moved past it
+              if (currentStatus !== 'PENDING' && status === 'PENDING') return false
+              return true
+            }).map((status) => {
               const c = STATUS_CONFIG[status]
               const isSelected = status === currentStatus
               return (

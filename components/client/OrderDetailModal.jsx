@@ -3,6 +3,7 @@
 import { X, MapPin, MessageSquare } from 'lucide-react'
 import { useState } from 'react'
 import OrderStatusTimeline from './OrderStatusTimeline'
+import { formatCurrency } from '@/lib/utils'
 
 const statusClasses = {
     PENDING: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400',
@@ -102,10 +103,10 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                                 <li key={item.id} className="flex items-center justify-between rounded-xl bg-amber-50 dark:bg-zinc-800/50 px-4 py-3">
                                     <div>
                                         <p className="text-sm font-bold text-[var(--bakery-text)]">{item.product?.name ?? 'Product'}</p>
-                                        <p className="text-xs text-[var(--bakery-text-muted)]">x{item.quantity} ┬╖ ${Number(item.price).toFixed(2)} each</p>
+                                        <p className="text-xs text-[var(--bakery-text-muted)]">x{item.quantity} · {formatCurrency(Number(item.price))} each</p>
                                     </div>
                                     <p className="text-sm font-black text-amber-700 dark:text-amber-400">
-                                        ${(item.quantity * Number(item.price)).toFixed(2)}
+                                        {formatCurrency(item.quantity * Number(item.price))}
                                     </p>
                                 </li>
                             ))}
@@ -115,7 +116,7 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                     {/* Total */}
                     <div className="flex items-center justify-between border-t border-amber-100 dark:border-zinc-800 pt-4">
                         <span className="text-sm font-bold text-[var(--bakery-text-muted)]">Total</span>
-                        <span className="text-xl font-black text-[var(--bakery-text)]">${Number(order.total).toFixed(2)}</span>
+                        <span className="text-xl font-black text-[var(--bakery-text)]">{formatCurrency(Number(order.total))}</span>
                     </div>
 
                     {/* Delivery Address */}

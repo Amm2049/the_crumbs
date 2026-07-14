@@ -103,6 +103,7 @@ model Order {
   total     Float       // Total snapshotted at time of order — does not change
   address   String?     // Delivery address — required at checkout (enforced by API)
   notes     String?     // Optional special instructions (e.g. "ring the bell")
+  stripePaymentIntentId String?    @unique
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

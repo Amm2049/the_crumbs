@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronLeft, Star, Clock, ShieldCheck, Leaf, ShoppingCart, Minus, Plus, ShoppingBag, ShoppingBasket } from 'lucide-react'
 import AddToCartButton from '@/components/client/AddToCartButton'
 import { useCart } from '@/hooks/useCart'
+import { formatCurrency } from '@/lib/utils'
 
 export default function ProductDetailClient({ product }) {
   const { cartItems, isAuthenticated, isLoading } = useCart()
@@ -91,7 +92,7 @@ export default function ProductDetailClient({ product }) {
 
             <div className="flex flex-wrap items-end gap-3 pt-1">
               <div className="flex items-end gap-2">
-                <p className="text-3xl font-black text-amber-600 dark:text-amber-500">${price.toFixed(2)}</p>
+                <p className="text-3xl font-black text-amber-600 dark:text-amber-500">{formatCurrency(price)}</p>
                 <p className="mb-1 text-[11px] font-bold text-[var(--bakery-text-muted)]">per treat</p>
               </div>
 

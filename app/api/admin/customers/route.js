@@ -10,7 +10,15 @@ export async function GET() {
 
   return handleGetAll(db.user, {
     where: { role: "CUSTOMER" },
-    include: { _count: { select: { orders: true } } },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+      createdAt: true,
+      _count: { select: { orders: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 }

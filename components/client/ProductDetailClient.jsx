@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, Star, Clock, ShieldCheck, Leaf, ShoppingCart, Minus, Plus, ShoppingBag, ShoppingBasket } from 'lucide-react'
 import AddToCartButton from '@/components/client/AddToCartButton'
+import ProductCard from '@/components/client/ProductCard'
+import { ProductCardSkeleton } from '@/components/shared/Skeletons'
 import { useCart } from '@/hooks/useCart'
 import { formatCurrency } from '@/lib/utils'
 
@@ -12,6 +14,27 @@ export default function ProductDetailClient({ product }) {
   const images = Array.isArray(product.images) ? product.images.filter(Boolean) : []
   const [activeImage, setActiveImage] = useState(images[0] || '')
   const [quantity, setQuantity] = useState(1)
+  const [recommendations, setRecommendations] = useState([])
+  const [loadingRecs, setLoadingRecs] = useState(true)
+
+  useEffect(() => {
+    async function fetchRecommendations() {
+      try {
+        const res = await fetch(`/api/products/recommendations?type=related&productId=${product.id}&limit=4`)
+        if (res.ok) {
+          const data = await res.json()
+          setRecommendations(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch recommendations:', err)
+      } finally {
+        setLoadingRecs(false)
+      }
+    }
+    if (product?.id) {
+      fetchRecommendations()
+    }
+  }, [product?.id])
 
   const inStock = product.isAvailable && Number(product.stock ?? 0) > 0
   const price = Number(product.price ?? 0)
@@ -190,6 +213,34 @@ export default function ProductDetailClient({ product }) {
           </div>
         </div>
       </div>
+
+      {/* Related Products Section */}
+      {!loadingRecs && recommendations.length > 0 && (
+        <div className="mt-16 border-t border-amber-100/50 dark:border-zinc-800/50 pt-12">
+          <div className="mb-8 space-y-1">
+            <h2 className="text-2xl font-extrabold text-[var(--bakery-text)]">You May Also Like</h2>
+            <p className="text-sm text-[var(--bakery-text-muted)]">Delicious additions that complement this treat</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+            {recommendations.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
+        </div>
+      )}
+      {loadingRecs && (
+        <div className="mt-16 border-t border-amber-100/50 dark:border-zinc-800/50 pt-12">
+          <div className="mb-8 space-y-1">
+            <h2 className="text-2xl font-extrabold text-[var(--bakery-text)]">You May Also Like</h2>
+            <p className="text-sm text-[var(--bakery-text-muted)]">Delicious additions that complement this treat</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

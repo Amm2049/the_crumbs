@@ -215,6 +215,7 @@ const statusClasses = {
 | **#2 Low stock alerts in admin** | `app/api/admin/dashboard/low-stock/route.js`, `components/admin/StockAlertBell.jsx`, `components/admin/StatsCard.jsx`, `components/admin/ProductsTable.jsx` |
 | **#3 Real-time order tracking & Admin notifications (Pusher)** | `lib/pusher.js`, `lib/pusher-constants.js`, `lib/pusher-broadcast.js`, `app/api/pusher/auth/route.js`, `hooks/usePusher.js`, `components/client/OrderStatusTimeline.jsx`, `components/client/OrderDetailModal.jsx`, `components/client/OrdersClient.jsx`, `components/admin/AdminNavbar.jsx`, `components/admin/OrdersTable.jsx`, `components/client/ProductGrid.jsx`, `components/client/ShopProductsClient.jsx` |
 | **#4 Stripe Payments (Credit Cards & PromptPay)** | `app/api/payment/`, `components/client/payment/`, `app/(client)/checkout/` |
+| **#5 Product recommendations** | `app/api/products/recommendations/`, `components/client/RecommendedProducts.jsx`, `app/(client)/page.jsx`, `components/client/ProductDetailClient.jsx`, `app/(client)/cart/page.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -262,13 +263,20 @@ const statusClasses = {
 - **Safety Reversion Guards:** Implements backend API verification and frontend dropdown options filtering to block administrative users from reverting any paid/processed order (`PROCESSING`, `READY`, etc.) back to `PENDING`, preventing duplicate billing and button re-appearance.
 - **Price Formatting Refactor:** Unifies storefront and admin dashboard price displays to format with the central `formatCurrency()` helper dynamically reading currency configuration codes (THB ฿).
 
+### Product Recommendations — Key Details
+- **Intelligent Routing API**: Secure endpoint at `/api/products/recommendations` that processes dynamic category, cart, and user-personalized recommendations.
+- **Related Products (Product Page)**: Displays products from the same category, excluding the product currently viewed, with a top-seller fallback.
+- **Cross-selling (Cart Page)**: Recommends top-selling items dynamically, excluding any products already in the cart.
+- **Personalized Recommendations (Home Page)**: Inspects the user session to query their most ordered category, then recommends items matching their taste. If guest, falls back to top-sellers.
+- **Stock Guard**: Strict query filter checks `isAvailable: true` and `stock: { gt: 0 }` to avoid suggesting out-of-stock items.
+- **Aesthetic Integration**: Reuses the existing storefront `ProductCard` component inside responsive layouts with loading skeletons support.
+
 ---
 
 ## 📋 Features Pending (Current Roadmap)
 
 | # | Feature | Status / Priority |
 |---|---------|-------------------|
-| #5 | Product recommendations | 🟢 Pending |
 | #6 | Performance, code quality and maintenance review | 🟢 Pending |
 | #7 | Final overall quality check | 🟢 Pending |
 
@@ -305,4 +313,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-14 — Stripe Card and PromptPay payment integration completed with advanced UI polish and safety guards.
+> Last updated: 2026-07-17 — Product recommendations feature completed with personalized matching, cart cross-selling, related products grid, and fallback safeguards.

@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth'
 import db from '@/lib/db'
 import { broadcast } from "@/lib/pusher-broadcast";
-import { handleUpdate, OwnershipCheck, response } from '@/lib/api-helper'
+import { handleApiError, handleUpdate, OwnershipCheck, response } from '@/lib/api-helper'
 
 export async function GET(request, { params }) {
     const session = await auth()
@@ -54,23 +54,37 @@ export async function PATCH(request, { params }) {
             return response({ error: 'Only pending orders can be cancelled' }, 400)
     }
 
-    // If transitioning to CANCELLED, restore stock (works for both admin and customer cancels)
+    let updateResponse
     if (status === 'CANCELLED') {
-        const items = await db.orderItem.findMany({ where: { orderId: id } })
-        await db.$transaction(
-            items.map(item => db.product.update({
-                where: { id: item.productId },
-                data: { stock: { increment: item.quantity } }
-            })),
-            {
+        try {
+            const items = await db.orderItem.findMany({ where: { orderId: id } })
+            
+            // Perform both stock restoration and status update in a single transaction
+            const updatedOrderObj = await db.$transaction(async (tx) => {
+                for (const item of items) {
+                    await tx.product.update({
+                        where: { id: item.productId },
+                        data: { stock: { increment: item.quantity } }
+                    })
+                }
+                
+                return await tx.order.update({
+                    where: { id },
+                    data: { status }
+                })
+            }, {
                 maxWait: 10000, // 10s max wait to acquire connection
                 timeout: 15000  // 15s max execution time
-            }
-        )
+            })
+            
+            updateResponse = response(updatedOrderObj)
+        } catch (error) {
+            updateResponse = handleApiError(error)
+        }
+    } else {
+        // 1. Perform the update first
+        updateResponse = await handleUpdate(id, db.order, { data: { status } })
     }
-
-    // 1. Perform the update first
-    const updateResponse = await handleUpdate(id, db.order, { data: { status } })
 
     // 2. If the update was successful, fetch the order data and broadcast
     if (updateResponse.status === 200) {

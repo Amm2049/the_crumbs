@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronLeft, UtensilsCrossed, MapPin, MessageSquare, ShoppingBag, X } from 'lucide-react'
 import CartItemRow from '@/components/client/CartItemRow'
-import { CartSkeleton } from '@/components/shared/Skeletons'
+import ProductCard from '@/components/client/ProductCard'
+import { CartSkeleton, ProductCardSkeleton } from '@/components/shared/Skeletons'
 import { useCart } from '@/hooks/useCart'
 import { formatCurrency } from '@/lib/utils'
 
@@ -19,6 +20,31 @@ export default function CartPage() {
   const [notes, setNotes] = useState('')
   const [addressError, setAddressError] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
+  const [recommendations, setRecommendations] = useState([])
+  const [loadingRecs, setLoadingRecs] = useState(true)
+
+  useEffect(() => {
+    async function fetchRecommendations() {
+      if (cartItems.length === 0) {
+        setRecommendations([])
+        setLoadingRecs(false)
+        return
+      }
+      try {
+        const productIds = cartItems.map(item => item.productId).join(',')
+        const res = await fetch(`/api/products/recommendations?type=cart&cartItems=${productIds}&limit=4`)
+        if (res.ok) {
+          const data = await res.json()
+          setRecommendations(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch recommendations:', err)
+      } finally {
+        setLoadingRecs(false)
+      }
+    }
+    fetchRecommendations()
+  }, [cartItems])
 
   const total = cartItems.reduce((sum, item) => sum + Number(item.quantity ?? 0) * Number(item.product?.price ?? 0), 0)
   const totalItems = cartItems.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0)
@@ -334,6 +360,32 @@ export default function CartPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Complete Your Order Section */}
+      {cartItems.length > 0 && (
+        <div className="mt-16 border-t border-amber-100/50 dark:border-zinc-800/50 pt-12">
+          <div className="mb-8 space-y-1">
+            <h2 className="text-2xl font-extrabold text-[var(--bakery-text)]">Complete Your Order</h2>
+            <p className="text-sm text-[var(--bakery-text-muted)]">Customers also loved adding these delicious treats</p>
+          </div>
+          
+          {loadingRecs ? (
+            <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            recommendations.length > 0 && (
+              <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+                {recommendations.map((item) => (
+                  <ProductCard key={item.id} product={item} />
+                ))}
+              </div>
+            )
+          )}
         </div>
       )}
     </div>

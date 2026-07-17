@@ -40,7 +40,7 @@ export default function SuccessPage() {
                 </div>
                 <h1 className="text-2xl font-black text-[var(--bakery-text)] mb-3">Order Paid Successfully!</h1>
                 <p className="text-sm text-[var(--bakery-text-muted)] mb-8 leading-relaxed">
-                    Thank you for your order {orderId ? `(#${orderId.slice(0, 8).toUpperCase()})` : ''}! We've received your payment, and our bakers are preparing your items.
+                    Thank you for your order {orderId ? `(#${orderId.slice(0, 8).toUpperCase()})` : ''}! We&apos;ve received your payment, and our bakers are preparing your items.
                 </p>
 
                 <div className="rounded-2xl bg-amber-50/40 dark:bg-zinc-850/40 p-4 mb-6">

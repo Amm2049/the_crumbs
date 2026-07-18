@@ -5,6 +5,9 @@ import { broadcast } from "@/lib/pusher-broadcast"
 
 export async function GET(request) {
     const session = await auth();
+    if (!session) {
+        return response({ error: "Unauthorized" }, 401);
+    }
     const isAdmin = session.user.role === 'ADMIN';
     const { searchParams } = request.nextUrl;
     const requestedStatus = searchParams.get('status');
@@ -52,7 +55,7 @@ export async function GET(request) {
             db.order.findMany({
                 where,
                 include: {
-                    user: { select: { name: true, email: true } },
+                    user: { select: { name: true, email: true, image: true } },
                     items: { include: { product: { select: { name: true, images: true, category: { select: { name: true } } } } } },
                 },
                 orderBy: { createdAt: 'desc' },
@@ -103,6 +106,11 @@ export async function POST(request) {
             const orderItemsData = [];
 
             for (const item of cartItems) {
+                // Validate quantity is positive (#14)
+                if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+                    throw new Error(`STOCK_ERROR:${item.product.name}`);
+                }
+
                 if (!item.product.isAvailable || item.quantity > item.product.stock) {
                     throw new Error(`STOCK_ERROR:${item.product.name}`);
                 }
@@ -114,11 +122,21 @@ export async function POST(request) {
                     price: item.product.price,
                 });
 
-                // stock will be deducted after order is created
-                await tx.product.update({
-                    where: { id: item.productId },
+                // Atomic stock deduction with concurrency guard (#13)
+                // The WHERE clause ensures stock >= quantity at the DB level,
+                // preventing concurrent purchases from driving stock negative.
+                const updated = await tx.product.updateMany({
+                    where: {
+                        id: item.productId,
+                        stock: { gte: item.quantity }
+                    },
                     data: { stock: { decrement: item.quantity } },
                 });
+
+                // If no rows were updated, another transaction grabbed the stock first
+                if (updated.count === 0) {
+                    throw new Error(`STOCK_ERROR:${item.product.name}`);
+                }
             }
 
             // Create the order

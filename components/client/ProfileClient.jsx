@@ -228,9 +228,16 @@ export default function ProfileClient({ session: initialSession }) {
                   );
                 })}
               </div>
-              <div className="mt-4 flex items-center gap-2 text-[#B09080]">
-                <RefreshCw size={12} className="animate-spin-slow" />
-                <span className="text-[9px] font-black uppercase tracking-[0.2em]">Scroll sideways to explore all {PRESET_SEEDS.length} characters</span>
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-[#B09080]">
+                  <RefreshCw size={12} className="animate-spin-slow" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em]">Scroll sideways to explore all {PRESET_SEEDS.length} characters</span>
+                </div>
+                {formData.image !== (session?.user?.image || initialSession?.user?.image) && (
+                  <p className="text-[10px] font-bold text-amber-600 animate-pulse">
+                    Don't forget to save changes!
+                  </p>
+                )}
               </div>
             </div>
           )}

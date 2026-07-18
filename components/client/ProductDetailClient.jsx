@@ -158,6 +158,10 @@ export default function ProductDetailClient({ product }) {
                 <label className="text-[10px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)] opacity-60">Quantity</label>
                 {isLoading ? (
                   <div className="h-10 w-24 animate-pulse rounded-xl bg-amber-100/80" />
+                ) : isFullyStockedInCart ? (
+                  <div className="flex items-center rounded-xl border-2 border-amber-500/20 bg-amber-500/10 px-3 py-1.5 w-fit">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-500">Maximum stock in cart</span>
+                  </div>
                 ) : (
                   <div className="flex items-center rounded-xl border-2 border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-0.5 w-fit">
                     <button
@@ -167,7 +171,7 @@ export default function ProductDetailClient({ product }) {
                     >
                       <Minus size={14} />
                     </button>
-                    <span className="min-w-8 text-center text-sm font-black text-[var(--bakery-text)]">{isFullyStockedInCart ? 0 : quantity}</span>
+                    <span className="min-w-8 text-center text-sm font-black text-[var(--bakery-text)]">{quantity}</span>
                     <button
                       onClick={() => setQuantity(Math.min(remainingStock, quantity + 1))}
                       disabled={isFullyStockedInCart || quantity >= remainingStock}

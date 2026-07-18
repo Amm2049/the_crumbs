@@ -5,9 +5,11 @@ import { useForm } from 'react-hook-form'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [authError, setAuthError] = useState('')
   const [isMounted, setIsMounted] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
@@ -18,8 +20,14 @@ export default function LoginPage() {
     setTimeout(() => {
       if (active) setIsMounted(true)
     }, 0)
+
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setAuthError('Authentication failed. Please try again.')
+    }
+
     return () => { active = false }
-  }, [])
+  }, [searchParams])
 
   const {
     register,
@@ -29,8 +37,13 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true)
-    await signIn('google', { callbackUrl: '/' })
-    // Note: page redirects after this, setIsGoogleLoading(false) not needed
+    try {
+      await signIn('google', { callbackUrl: '/' })
+    } catch (error) {
+      setAuthError('Google sign in failed. Please try again.')
+    } finally {
+      setIsGoogleLoading(false)
+    }
   }
 
   const onSubmit = async (data) => {

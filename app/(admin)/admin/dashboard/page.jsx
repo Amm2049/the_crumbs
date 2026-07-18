@@ -3,8 +3,7 @@ import { DollarSign, Package, ShoppingBag, Users } from 'lucide-react'
 import OrdersTable from '@/components/admin/OrdersTable'
 import StatsCard from '@/components/admin/StatsCard'
 import AnalyticsCharts from '@/components/admin/AnalyticsCharts'
-import LowStockAlerts from '@/components/admin/LowStockAlerts'
-import { apiGet } from '@/lib/api-client'
+import db from '@/lib/db'
 
 export const metadata = {
   title: 'Dashboard | The Crumbs Admin',
@@ -19,31 +18,33 @@ export default async function DashboardPage() {
   let lowStockCount = 0
   let hasDataError = false
 
-  let lowStockProducts = []
-  let hasLowStockError = false
-
   try {
-    const data = await apiGet('/api/admin/dashboard', {
-      cache: 'no-store',
-    })
+    const [ordersCount, productsCount, customersCount, revenueResult, recentOrdersResult, lowStockCountVal] =
+      await Promise.all([
+        db.order.count(),
+        db.product.count(),
+        db.user.count({ where: { role: "CUSTOMER" } }),
+        db.order.aggregate({ _sum: { total: true } }),
+        db.order.findMany({
+          take: 8,
+          orderBy: { createdAt: "desc" },
+          include: {
+            user: { select: { name: true, email: true, image: true } },
+            items: { include: { product: { select: { name: true, images: true, category: { select: { name: true } } } } } },
+          },
+        }),
+        db.product.count({ where: { stock: { lte: 5 } } })
+      ]);
 
-    totalOrders = data.totalOrders ?? 0
-    totalProducts = data.totalProducts ?? 0
-    totalCustomers = data.totalCustomers ?? 0
-    totalRevenue = Number(data.totalRevenue ?? 0)
-    recentOrders = Array.isArray(data.recentOrders) ? data.recentOrders : []
-    lowStockCount = data.lowStockCount ?? 0
-  } catch {
+    totalOrders = ordersCount
+    totalProducts = productsCount
+    totalCustomers = customersCount
+    totalRevenue = Number(revenueResult?._sum?.total ?? 0)
+    recentOrders = Array.isArray(recentOrdersResult) ? recentOrdersResult : []
+    lowStockCount = lowStockCountVal
+  } catch (error) {
+    console.error('[Dashboard SSR Error]:', error)
     hasDataError = true
-  }
-
-  try {
-    const lowStockData = await apiGet('/api/admin/dashboard/low-stock', {
-      cache: 'no-store',
-    })
-    lowStockProducts = Array.isArray(lowStockData?.products) ? lowStockData.products : []
-  } catch {
-    hasLowStockError = true
   }
 
   return (
@@ -65,16 +66,6 @@ export default async function DashboardPage() {
         <StatsCard title="Active Menu" value={totalProducts} icon={Package} alert={lowStockCount > 0} />
         <StatsCard title="Customers" value={totalCustomers} icon={Users} />
       </section>
-
-      {/* Low Stock Alerts */}
-      {!hasLowStockError && (
-        <section className="space-y-4">
-          <div className="px-1">
-            <h2 className="text-xl font-black text-[var(--bakery-text)]">Stock Alerts</h2>
-          </div>
-          {/* <LowStockAlerts products={lowStockProducts} /> */}
-        </section>
-      )}
 
       <section className="space-y-4">
         <div className="flex items-center justify-between px-1">

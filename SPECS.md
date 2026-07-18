@@ -275,10 +275,7 @@ const statusClasses = {
 
 ## 📋 Features Pending (Current Roadmap)
 
-| # | Feature | Status / Priority |
-|---|---------|-------------------|
-| #6 | Performance, code quality and maintenance review | 🟢 Pending |
-| #7 | Final overall quality check | 🟢 Pending |
+* None. All features are completed or discarded.
 
 ---
 
@@ -313,4 +310,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-17 — Product recommendations feature completed with personalized matching, cart cross-selling, related products grid, and fallback safeguards.
+> Last updated: 2026-07-18 — Remaining review and quality check features discarded.

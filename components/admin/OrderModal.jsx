@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Calendar, User, Mail, Hash, ShoppingBag, MessageSquare, MapPin, Loader2, Check, ChevronDown } from 'lucide-react'
+import UserAvatar from '@/components/shared/UserAvatar'
 
 // Reuse the status config from the table for consistency
 const STATUS_CONFIG = {
@@ -66,9 +67,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--bakery-text-muted)]">Customer</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-zinc-700 text-[10px] font-black text-amber-700 dark:text-amber-400 shadow-sm ring-1 ring-amber-50 dark:ring-zinc-600">
-                    {order.user?.name?.charAt(0) || <User size={12} />}
-                  </div>
+                  <UserAvatar src={order.user?.image} name={order.user?.name} sizeClass="h-8 w-8 text-[10px]" />
                   <div>
                     <p className="text-sm font-black text-[var(--bakery-text)]">{order.user?.name || 'Guest'}</p>
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--bakery-text-muted)]">

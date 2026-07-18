@@ -3,6 +3,7 @@
 
 import db from '@/lib/db'
 import { handleGetAll, handlePost, ProductFormat, response, handleApiError } from '@/lib/api-helper'
+import { auth } from '@/lib/auth'
 
 export async function GET(request) {
     const { searchParams } = request.nextUrl
@@ -78,6 +79,11 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+    const session = await auth()
+    if (!session || session.user.role !== 'ADMIN') {
+        return response({ error: 'Forbidden - Admin only' }, 403)
+    }
+
     const rawData = await request.json();
     const data = ProductFormat(rawData);
 

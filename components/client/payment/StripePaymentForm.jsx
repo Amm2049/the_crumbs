@@ -10,6 +10,7 @@ export default function StripePaymentForm({ orderId }) {
 
     const [errorMessage, setErrorMessage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isFormReady, setIsFormReady] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -36,7 +37,10 @@ export default function StripePaymentForm({ orderId }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="rounded-2xl border border-amber-50 dark:border-zinc-800 bg-amber-50/10 dark:bg-zinc-850/40 p-4">
-                <PaymentElement />
+                {!isFormReady && <div className="h-40 w-full animate-pulse rounded-xl bg-amber-100/50" />}
+                <div className={isFormReady ? 'block' : 'hidden'}>
+                    <PaymentElement onReady={() => setIsFormReady(true)} />
+                </div>
             </div>
 
             {errorMessage && (

@@ -5,15 +5,27 @@ export const metadata = {
   title: 'Customers | The Crumbs Admin',
 }
 
-export default async function AdminCustomersPage() {
+const LIMIT = 10
+
+export default async function AdminCustomersPage({ searchParams }) {
+  const resolved = await searchParams
+  const page = Math.max(1, parseInt(resolved?.page ?? '1', 10))
+
   let customers = []
+  let total = 0
+  let totalPages = 1
   let hasDataError = false
 
   try {
-    customers = await apiGet('/api/admin/customers', {
+    const customersRes = await apiGet('/api/admin/customers', {
+      searchParams: { page: String(page), limit: String(LIMIT) },
       cache: 'no-store',
     })
-  } catch {
+    customers = Array.isArray(customersRes?.data) ? customersRes.data : []
+    total = customersRes?.total ?? 0
+    totalPages = customersRes?.totalPages ?? 1
+  } catch (error) {
+    console.error('[AdminCustomersPage Error]:', error)
     hasDataError = true
   }
 
@@ -30,7 +42,12 @@ export default async function AdminCustomersPage() {
         </p>
       )}
 
-      <CustomersTable customers={customers} />
+      <CustomersTable
+        customers={customers}
+        page={page}
+        totalPages={totalPages}
+        total={total}
+      />
     </div>
   )
 }

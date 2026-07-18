@@ -5,9 +5,11 @@ import { useForm } from 'react-hook-form'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useToast } from '@/context/ToastContext'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { addToast } = useToast()
   const [authError, setAuthError] = useState('')
   const [isMounted, setIsMounted] = useState(false)
 
@@ -29,11 +31,15 @@ export default function RegisterPage() {
     setAuthError('')
     
     try {
+      const name = data.name.trim()
+      const email = data.email.trim()
+      const password = data.password.trim()
+
       // 1. Register the user
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: data.name, email: data.email, password: data.password }),
+        body: JSON.stringify({ name, email, password }),
       })
 
       if (!res.ok) {
@@ -44,13 +50,14 @@ export default function RegisterPage() {
 
       // 2. Auto-login on success
       const loginResult = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
+        email,
+        password,
         redirect: false,
       })
 
       if (loginResult?.error) {
-        setAuthError('Account created, but auto-login failed. Please sign in.')
+        addToast('Account created successfully! Please sign in.', 'success')
+        router.push('/login')
       } else {
         router.push('/')
         router.refresh()

@@ -9,6 +9,7 @@ export default function SuccessPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId');
+    const redirectStatus = searchParams.get('redirect_status');
 
     const [countdown, setCountdown] = useState(5);
 
@@ -38,9 +39,13 @@ export default function SuccessPage() {
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 dark:bg-green-950/30 text-green-500 animate-bounce">
                     <CheckCircle size={40} />
                 </div>
-                <h1 className="text-2xl font-black text-[var(--bakery-text)] mb-3">Order Paid Successfully!</h1>
+                <h1 className="text-2xl font-black text-[var(--bakery-text)] mb-3">
+                    {redirectStatus && redirectStatus !== 'succeeded' ? 'Payment Status Unconfirmed' : 'Order Paid Successfully!'}
+                </h1>
                 <p className="text-sm text-[var(--bakery-text-muted)] mb-8 leading-relaxed">
-                    Thank you for your order {orderId ? `(#${orderId.slice(0, 8).toUpperCase()})` : ''}! We&apos;ve received your payment, and our bakers are preparing your items.
+                    {redirectStatus && redirectStatus !== 'succeeded' 
+                        ? `Thank you for your order ${orderId ? `(#${orderId.slice(0, 8).toUpperCase()})` : ''}! Your payment status is currently '${redirectStatus}'. Please check your order history later.`
+                        : `Thank you for your order ${orderId ? `(#${orderId.slice(0, 8).toUpperCase()})` : ''}! We've received your payment, and our bakers are preparing your items.`}
                 </p>
 
                 <div className="rounded-2xl bg-amber-50/40 dark:bg-zinc-850/40 p-4 mb-6">

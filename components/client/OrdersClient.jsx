@@ -80,11 +80,13 @@ export default function OrdersClient() {
 
     // Fallback: If pusher goes offline, fetch status every 15s
     let fallbackInterval = null
+    let isStale = false
     if (connectionState === 'failed' || connectionState === 'unavailable') {
       console.info('Pusher offline, launching fallback polling.')
       fallbackInterval = setInterval(async () => {
         try {
           const result = await fetchJson(`/api/orders?page=${currentPage}&limit=${itemsPerPage}`)
+          if (isStale) return
           const list = Array.isArray(result?.data) ? result.data : []
           setOrders(list)
           setTotalPages(result?.totalPages ?? 1)
@@ -96,6 +98,7 @@ export default function OrdersClient() {
     }
 
     return () => {
+      isStale = true
       channel.unbind('status-changed')
       client.unsubscribe(channelName)
       if (fallbackInterval) clearInterval(fallbackInterval)
@@ -103,22 +106,28 @@ export default function OrdersClient() {
   }, [client, session?.user?.id, connectionState, currentPage])
 
   useEffect(() => {
+    let isStale = false
     async function loadOrders() {
       setIsLoading(true)
       setError('')
       try {
         const result = await fetchJson(`/api/orders?page=${currentPage}&limit=${itemsPerPage}`)
+        if (isStale) return
         const list = Array.isArray(result?.data) ? result.data : []
         setOrders(list)
         setTotalPages(result?.totalPages ?? 1)
         setTotalItems(result?.total ?? list.length)
       } catch (err) {
+        if (isStale) return
         setError(err instanceof Error ? err.message : 'Failed to load orders')
       } finally {
-        setIsLoading(false)
+        if (!isStale) setIsLoading(false)
       }
     }
     loadOrders()
+    return () => {
+      isStale = true
+    }
   }, [currentPage])
 
   // Called by the modal after a successful cancellation — re-fetches the current page

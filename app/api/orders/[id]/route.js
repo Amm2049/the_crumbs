@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
 
     const check = await OwnershipCheck(id, db.order, session, {
         include: {
-            user: { select: { name: true, email: true } },
+            user: { select: { name: true, email: true, image: true } },
             items: { include: { product: { select: { name: true, images: true } } } },
         }
     })
@@ -57,12 +57,38 @@ export async function PATCH(request, { params }) {
     let updateResponse
     if (status === 'CANCELLED') {
         try {
+            // #15: If this order has a Stripe PaymentIntent, verify it hasn't already succeeded
+            // This closes the race window between payment confirmation and webhook arrival
+            if (order.stripePaymentIntentId) {
+                const Stripe = (await import('stripe')).default
+                const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+                try {
+                    const pi = await stripe.paymentIntents.retrieve(order.stripePaymentIntentId)
+                    if (pi.status === 'succeeded') {
+                        return response({
+                            error: 'This order has already been paid. Cancellation is no longer possible. Please contact support for a refund.'
+                        }, 400)
+                    }
+                    // Attempt to cancel the Stripe PaymentIntent if it's still cancellable
+                    if (['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing'].includes(pi.status)) {
+                        await stripe.paymentIntents.cancel(order.stripePaymentIntentId)
+                    }
+                } catch (stripeErr) {
+                    console.error('[Cancel Order] Stripe PI check failed:', stripeErr.message)
+                    // If we can't verify the PI status, err on the side of caution
+                    return response({
+                        error: 'Unable to verify payment status. Please try again or contact support.'
+                    }, 500)
+                }
+            }
+
             const items = await db.orderItem.findMany({ where: { orderId: id } })
             
             // Perform both stock restoration and status update in a single transaction
             const updatedOrderObj = await db.$transaction(async (tx) => {
                 for (const item of items) {
-                    await tx.product.update({
+                    // #20: Use updateMany so deleted products don't crash the transaction
+                    await tx.product.updateMany({
                         where: { id: item.productId },
                         data: { stock: { increment: item.quantity } }
                     })

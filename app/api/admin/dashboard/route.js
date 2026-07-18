@@ -19,7 +19,7 @@ export async function GET() {
           take: 8,
           orderBy: { createdAt: "desc" },
           include: {
-            user: { select: { name: true, email: true } },
+            user: { select: { name: true, email: true, image: true } },
             items: { include: { product: { select: { name: true, images: true, category: { select: { name: true } } } } } },
           },
         }),

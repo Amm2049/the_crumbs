@@ -6,6 +6,7 @@ import { useToast } from '@/context/ToastContext'
 import { ChevronLeft, ChevronRight, ChevronDown, Check, Loader2, Calendar, ShoppingBag, User, Hash } from 'lucide-react'
 import OrderModal from './OrderModal'
 import { usePusher } from '@/hooks/usePusher'
+import UserAvatar from '@/components/shared/UserAvatar'
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -341,6 +342,12 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
   const normalizedOrders = useMemo(() => (Array.isArray(orders) ? orders : []), [orders])
 
   const handleStatusChange = async (orderId, newStatus) => {
+    if (newStatus === 'CANCELLED') {
+      if (!window.confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+        return;
+      }
+    }
+    
     const prevStatus = localStatus[orderId] ?? normalizedOrders.find(o => o.id === orderId)?.status
     setPendingOrderId(orderId)
     setLocalStatus((prev) => ({ ...prev, [orderId]: newStatus }))
@@ -457,9 +464,7 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-50 dark:bg-zinc-800 text-[10px] font-black text-amber-700 dark:text-amber-400">
-                            {order.user?.name?.charAt(0) || <User size={12} />}
-                          </div>
+                          <UserAvatar src={order.user?.image} name={order.user?.name} sizeClass="h-8 w-8 text-[10px]" />
                           <div>
                             <p className="font-black text-[var(--bakery-text)]">{order.user?.name || 'Guest'}</p>
                             <p className="text-[10px] font-bold text-[var(--bakery-text-muted)] lowercase">{order.user?.email}</p>

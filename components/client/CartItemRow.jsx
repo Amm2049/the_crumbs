@@ -11,11 +11,18 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
   const maxStock = Number(product?.stock ?? 0)
   const imageUrl = Array.isArray(product?.images) && product.images.length > 0 ? product.images[0] : ''
   const [isRemoving, setIsRemoving] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const handleUpdate = async (newQuantity) => {
     if (newQuantity < 1) return
     if (maxStock > 0 && newQuantity > maxStock) return
-    await onUpdate(id, newQuantity)
+    if (isUpdating) return
+    setIsUpdating(true)
+    try {
+      await onUpdate(id, newQuantity)
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const handleRemove = async () => {
@@ -61,7 +68,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
                   type="button"
                   onClick={() => handleUpdate(quantity - 1)}
                   className="px-2.5 py-1.5 text-[var(--bakery-text-muted)] transition-colors hover:bg-amber-100 dark:hover:bg-zinc-700 disabled:opacity-30"
-                  disabled={quantity <= 1}
+                  disabled={quantity <= 1 || isUpdating}
                   aria-label="Decrease quantity"
                 >
                   <Minus size={14} />
@@ -73,7 +80,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
                   type="button"
                   onClick={() => handleUpdate(quantity + 1)}
                   className="px-2.5 py-1.5 text-[var(--bakery-text-muted)] transition-colors hover:bg-amber-100 dark:hover:bg-zinc-700 disabled:opacity-30"
-                  disabled={maxStock > 0 && quantity >= maxStock}
+                  disabled={(maxStock > 0 && quantity >= maxStock) || isUpdating}
                   aria-label="Increase quantity"
                 >
                   <Plus size={14} />

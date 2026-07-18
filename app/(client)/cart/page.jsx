@@ -9,9 +9,11 @@ import ProductCard from '@/components/client/ProductCard'
 import { CartSkeleton, ProductCardSkeleton } from '@/components/shared/Skeletons'
 import { useCart } from '@/hooks/useCart'
 import { formatCurrency } from '@/lib/utils'
+import { useToast } from '@/context/ToastContext'
 
 export default function CartPage() {
   const router = useRouter()
+  const { addToast } = useToast()
   const { cartItems, isLoading, removeItem, updateQuantity, mutate } = useCart()
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -58,6 +60,16 @@ export default function CartPage() {
     if (!address.trim()) {
       setAddressError('Please enter a delivery address before placing your order.')
       return
+    }
+
+    const invalidItems = cartItems.filter(item => {
+      const stock = Number(item.product?.stock ?? 0);
+      return !item.product?.isAvailable || stock < item.quantity;
+    });
+
+    if (invalidItems.length > 0) {
+      addToast('Some items in your cart are out of stock or unavailable.', 'error');
+      return;
     }
 
     setShowConfirm(true)
@@ -386,6 +398,19 @@ export default function CartPage() {
               </div>
             )
           )}
+        </div>
+      )}
+
+      {/* Full-screen Loading Overlay during checkout creation */}
+      {isPlacingOrder && (
+        <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-white/70 dark:bg-zinc-950/70 backdrop-blur-sm animate-fade-in">
+          <div className="flex flex-col items-center gap-4 rounded-3xl bg-white dark:bg-zinc-900 p-8 shadow-2xl border border-amber-50 dark:border-zinc-800 text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-amber-500/20 border-t-amber-500" />
+            <div>
+              <p className="text-lg font-black text-[var(--bakery-text)]">Securing Your Treats...</p>
+              <p className="text-xs text-[var(--bakery-text-muted)] font-semibold mt-1">Please wait while we prepare your checkout.</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

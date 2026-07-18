@@ -247,7 +247,7 @@ function ShopProductsContent() {
         }}
       />
 
-      {isLoading ? (
+      {isLoading && productsData.data.length === 0 ? (
         <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
@@ -264,18 +264,37 @@ function ShopProductsContent() {
           </button>
         </div>
       ) : (
-        <div className="space-y-12">
-          <ProductGrid products={paginatedProducts} />
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            itemsPerPage={itemsPerPage}
-            totalItems={productsData.total}
-            startIndex={startIndex}
-            label="treats"
-          />
+        <div className={`space-y-12 transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+          {paginatedProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <h2 className="text-2xl font-bold text-[var(--bakery-text)] mb-2">No treats match your search</h2>
+              <p className="text-[var(--bakery-text-muted)] mb-6">Try adjusting your filters or search terms.</p>
+              <button
+                onClick={() => {
+                  setSearch('')
+                  debouncedUpdateFilters.cancel()
+                  updateFilters({ q: '', category: '', page: '1' })
+                }}
+                className="rounded-2xl border-2 border-amber-100 bg-white px-6 py-3 text-sm font-bold text-[var(--bakery-text-muted)] transition-all hover:bg-amber-50"
+              >
+                Reset Search
+              </button>
+            </div>
+          ) : (
+            <>
+              <ProductGrid products={paginatedProducts} />
+    
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                itemsPerPage={itemsPerPage}
+                totalItems={productsData.total}
+                startIndex={startIndex}
+                label="treats"
+              />
+            </>
+          )}
         </div>
       )}
     </div>

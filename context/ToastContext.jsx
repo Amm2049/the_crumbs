@@ -27,10 +27,16 @@ export function ToastProvider({ children }) {
       {children}
       
       {/* Toast Container */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+      <div 
+        role="region" 
+        aria-live="polite" 
+        aria-label="Notifications"
+        className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}
+            role="status"
             className={`
               pointer-events-auto flex items-center gap-3 min-w-[300px] max-w-md p-4 rounded-2xl shadow-2xl border backdrop-blur-md
               animate-fade-up transition-all duration-300
@@ -39,7 +45,7 @@ export function ToastProvider({ children }) {
                 'bg-amber-50/90 dark:bg-zinc-900/90 border-amber-200 dark:border-zinc-800 text-amber-900 dark:text-amber-100'}
             `}
           >
-            <div className="shrink-0">
+            <div className="shrink-0" aria-hidden="true">
               {toast.type === 'error' && <AlertCircle size={20} className="text-red-500" />}
               {toast.type === 'success' && <CheckCircle size={20} className="text-emerald-500" />}
               {toast.type === 'info' && <Info size={20} className="text-amber-600" />}
@@ -50,7 +56,9 @@ export function ToastProvider({ children }) {
             </p>
 
             <button
+              type="button"
               onClick={() => removeToast(toast.id)}
+              aria-label="Close notification"
               className="shrink-0 rounded-full p-1 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
               <X size={16} className="opacity-50" />

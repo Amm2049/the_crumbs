@@ -25,13 +25,27 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen || !mounted || !order) return null
 
   const cfg = STATUS_CONFIG[order.status] ?? { bg: 'bg-gray-50', border: 'border-gray-100', text: 'text-gray-700', dot: 'bg-gray-400', label: order.status }
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-order-modal-title"
+    >
+      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       
       <div className="relative w-full max-w-2xl animate-fade-up overflow-hidden rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-amber-50 dark:border-zinc-800">
         {/* Header */}
@@ -41,7 +55,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
               <ShoppingBag size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-black text-[var(--bakery-text)]">Order Details</h2>
+              <h2 id="admin-order-modal-title" className="text-lg font-black text-[var(--bakery-text)]">Order Details</h2>
               <div className="flex items-center gap-2">
                 <Hash size={12} className="text-amber-500 opacity-50" />
                 <span className="font-mono text-[10px] font-black uppercase text-[var(--bakery-text-muted)]">
@@ -53,6 +67,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
           <button 
             type="button" 
             onClick={onClose} 
+            aria-label="Close order details modal"
             className="rounded-full p-2 text-[#B09080] dark:text-[#8A6D5E] transition-colors hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400"
           >
             <X size={20} />

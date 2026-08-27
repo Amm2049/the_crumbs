@@ -1,7 +1,7 @@
 'use client'
 
 import { X, MapPin, MessageSquare } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import OrderStatusTimeline from './OrderStatusTimeline'
 import { formatCurrency } from '@/lib/utils'
 
@@ -16,6 +16,14 @@ const statusClasses = {
 export default function OrderDetailModal({ order, onClose, onCancelled }) {
     const [isCancelling, setIsCancelling] = useState(false)
     const [cancelError, setCancelError] = useState('')
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose()
+        }
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [onClose])
 
     const handleCancel = async () => {
         setCancelError('')
@@ -57,8 +65,11 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
             onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="order-modal-title"
         >
-            {/* Panel ΓÇö stop click from bubbling to backdrop */}
+            {/* Panel — stop click from bubbling to backdrop */}
             <div
                 className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
@@ -66,7 +77,7 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-amber-100 dark:border-zinc-800 px-6 py-4">
                     <div>
-                        <h2 className="text-lg font-black text-[var(--bakery-text)]">
+                        <h2 id="order-modal-title" className="text-lg font-black text-[var(--bakery-text)]">
                             Order #{order.id.slice(0, 8).toUpperCase()}
                         </h2>
                         <p className="text-xs text-[var(--bakery-text-muted)]">
@@ -74,7 +85,9 @@ export default function OrderDetailModal({ order, onClose, onCancelled }) {
                         </p>
                     </div>
                     <button
+                        type="button"
                         onClick={onClose}
+                        aria-label="Close order details"
                         className="rounded-full p-2 text-zinc-400 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-600 transition-colors"
                     >
                         <X size={18} />

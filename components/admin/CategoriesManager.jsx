@@ -50,6 +50,15 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen || !mounted) return null
 
   const handleSubmit = (e) => {
@@ -58,9 +67,14 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="category-modal-title"
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
 
       {/* Panel */}
       <form
@@ -68,12 +82,13 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
         className="relative w-full max-w-lg animate-fade-up overflow-hidden rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-amber-50 dark:border-zinc-800 px-6 py-4">
-          <h2 className="text-lg font-black text-[var(--bakery-text)]">
+          <h2 id="category-modal-title" className="text-lg font-black text-[var(--bakery-text)]">
             {category ? 'Edit Category' : 'New Category'}
           </h2>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close category modal"
             className="rounded-full p-1 text-[#B09080] dark:text-[#8A6D5E] hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400"
           >
             <X size={20} />
@@ -365,14 +380,18 @@ export default function CategoriesManager({ initialCategories = [] }) {
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() => openEdit(cat)}
+                            aria-label={`Edit category ${cat.name}`}
                             className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[var(--bakery-text)] shadow-sm transition-all hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400"
                             title="Edit"
                           >
                             <Pencil size={14} />
                           </button>
                           <button
+                            type="button"
                             onClick={() => setConfirmDelete({ open: true, id: cat.id, name: cat.name })}
+                            aria-label={`Delete category ${cat.name}`}
                             className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-50 dark:border-red-900/30 bg-white dark:bg-zinc-900 text-red-400 shadow-sm transition-all hover:border-red-200 hover:text-red-600"
                             title="Delete"
                           >

@@ -171,19 +171,40 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
     }
   }
 
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
+  if (!isOpen || !mounted) return null
+
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="product-modal-title"
+    >
+      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="relative w-full max-w-2xl animate-fade-up overflow-hidden rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-amber-50 dark:border-zinc-800"
       >
         <div className="flex items-center justify-between border-b border-amber-50 dark:border-zinc-800 px-6 py-4">
-          <h2 className="text-lg font-black text-[var(--bakery-text)]">
+          <h2 id="product-modal-title" className="text-lg font-black text-[var(--bakery-text)]">
             {mode === 'create' ? 'Add New Product' : 'Edit Product'}
           </h2>
-          <button type="button" onClick={onClose} className="rounded-full p-1 text-[#B09080] dark:text-[#8A6D5E] hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close product modal"
+            className="rounded-full p-1 text-[#B09080] dark:text-[#8A6D5E] hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400"
+          >
             <X size={20} />
           </button>
         </div>

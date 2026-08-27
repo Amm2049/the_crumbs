@@ -451,8 +451,17 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                   return (
                     <tr
                       key={order.id}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`View order ${order.id.slice(0, 8).toUpperCase()} details`}
                       onClick={() => openOrderDetails({ ...order, status: currentStatus })}
-                      className={`group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30 ${isNew ? 'animate-row-highlight' : ''} ${openDropdownId === order.id ? 'relative z-50' : ''}`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          openOrderDetails({ ...order, status: currentStatus })
+                        }
+                      }}
+                      className={`group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30 focus:outline-none focus:ring-2 focus:ring-amber-400 ${isNew ? 'animate-row-highlight' : ''} ${openDropdownId === order.id ? 'relative z-50' : ''}`}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">

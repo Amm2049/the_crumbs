@@ -101,12 +101,15 @@ export default function Navbar() {
                   <div className="flex items-center gap-1">
                     <Link
                       href="/cart"
-                      aria-label="View Cart"
+                      aria-label={`View Cart, ${cartCount} item${cartCount === 1 ? '' : 's'}`}
                       className="relative rounded-full p-2.5 text-[var(--bakery-text-muted)] transition-all hover:bg-amber-100/50 hover:text-amber-700 dark:hover:bg-zinc-800"
                     >
                       <ShoppingCart size={20} />
                       {cartCount > 0 && (
-                        <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 animate-bounce items-center justify-center rounded-full bg-amber-600 px-1 text-[10px] font-black text-white ring-2 ring-white dark:ring-zinc-900">
+                        <span
+                          aria-live="polite"
+                          className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 animate-bounce items-center justify-center rounded-full bg-amber-600 px-1 text-[10px] font-black text-white ring-2 ring-white dark:ring-zinc-900"
+                        >
                           {cartCount}
                         </span>
                       )}
@@ -188,6 +191,8 @@ export default function Navbar() {
             <button
               id="mobile-menu-toggle"
               type="button"
+              aria-expanded={drawerOpen}
+              aria-controls="mobile-drawer"
               aria-label={drawerOpen ? "Close menu" : "Open menu"}
               onClick={() => setDrawerOpen((v) => !v)}
               className="flex items-center justify-center rounded-full p-2 text-[var(--bakery-text-muted)] transition-all hover:bg-amber-100/60 hover:text-amber-700 dark:hover:bg-zinc-800 md:hidden"

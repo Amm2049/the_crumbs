@@ -24,7 +24,7 @@ const CroissantIcon = ({ size = 24, className = "" }) => (
 
 export default function Decorations() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden select-none z-0">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden select-none z-0" aria-hidden="true">
       {/* Soft Blobs */}
       <div className="absolute top-[5%] -left-20 h-96 w-96 rounded-full bg-amber-100/30 dark:bg-amber-900/10 blur-3xl" />
       <div className="absolute top-[35%] -right-20 h-96 w-96 rounded-full bg-orange-100/20 dark:bg-orange-900/10 blur-3xl" />

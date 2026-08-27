@@ -192,14 +192,18 @@ export default function ProductsTable({ products = [], categories = [], page = 1
                         <td className="px-6 py-4">
                           <div className="flex justify-center gap-2">
                             <button
+                              type="button"
                               onClick={() => openEdit(p)}
+                              aria-label={`Edit ${p.name}`}
                               className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[var(--bakery-text)] shadow-sm transition-all hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400"
                               title="Edit"
                             >
                               <Pencil size={14} />
                             </button>
                             <button
+                              type="button"
                               onClick={() => setConfirmDelete({ open: true, id: p.id, name: p.name })}
+                              aria-label={`Delete ${p.name}`}
                               className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-50 dark:border-red-900/30 bg-white dark:bg-zinc-900 text-red-400 shadow-sm transition-all hover:border-red-200 hover:text-red-600"
                               title="Delete"
                             >

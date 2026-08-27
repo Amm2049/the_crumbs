@@ -196,7 +196,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                 <input
                   {...register('name', { required: 'Name is required' })}
                   onBlur={() => { if (mode === 'create' && nameValue) setValue('slug', toSlug(nameValue)) }}
-                  className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                  className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                 />
                 {errors.name && <p className="text-[10px] font-bold text-red-500">{errors.name.message}</p>}
               </label>
@@ -205,7 +205,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                 <span className="text-xs font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Slug</span>
                 <input
                   {...register('slug', { required: 'Slug is required', validate: slugPattern })}
-                  className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                  className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                 />
               </label>
 
@@ -215,7 +215,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                   <input
                     type="number" step="0.01"
                     {...register('price', { required: true, min: 0.01 })}
-                    className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                    className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                   />
                 </label>
                 <label className="block space-y-1">
@@ -223,7 +223,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                   <input
                     type="number"
                     {...register('stock', { required: true, min: 0 })}
-                    className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                    className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                   />
                 </label>
               </div>

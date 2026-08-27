@@ -153,7 +153,7 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
                   if (!category) setSlug(toSlug(e.target.value))
                 }}
                 required
-                className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-4 py-2.5 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-2.5 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
               />
             </label>
 
@@ -164,7 +164,7 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
                 onChange={(e) => setSlug(e.target.value)}
                 required
                 pattern="[a-z0-9-]+"
-                className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-4 py-2.5 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-2.5 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
               />
             </label>
           </div>
@@ -175,7 +175,7 @@ function CategoryModal({ isOpen, onClose, category, isSaving, onSave }) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-4 py-2.5 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+              className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-4 py-2.5 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
             />
           </label>
         </div>

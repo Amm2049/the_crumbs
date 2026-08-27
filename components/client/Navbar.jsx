@@ -9,6 +9,7 @@ import { LogOut, ShoppingBag, ShoppingCart, User, Menu, X, Home, Store, LayoutDa
 import { Skeleton } from "@/components/shared/Skeletons";
 import useSWR from "swr";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import UserAvatar from "@/components/shared/UserAvatar";
 
 const fetcher = async (url) => {
   const response = await fetch(url);
@@ -143,22 +144,7 @@ export default function Navbar() {
                       "sm:gap-2.5 sm:border sm:border-amber-100 sm:dark:border-zinc-700 sm:bg-white sm:dark:bg-zinc-900 sm:px-1.5 sm:py-1.5 sm:pr-4 sm:hover:bg-amber-50 sm:dark:hover:bg-zinc-800 sm:ring-0 sm:hover:ring-0",
                     ].join(" ")}
                   >
-                    <div className="h-8 w-8 overflow-hidden rounded-full border-2 border-amber-50 dark:border-zinc-800 bg-amber-50 dark:bg-zinc-800">
-                      {session.user.image ? (
-                        <Image
-                          src={session.user.image}
-                          alt={session.user.name || "User"}
-                          width={32}
-                          height={32}
-                          unoptimized
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-amber-600 dark:text-amber-400">
-                          <User size={16} />
-                        </div>
-                      )}
-                    </div>
+                    <UserAvatar src={session.user.image} name={session.user.name} sizeClass="h-8 w-8 text-xs" />
                     <span className="hidden text-xs font-black sm:inline">
                       {session.user.name?.split(" ")[0]}
                     </span>
@@ -282,22 +268,7 @@ export default function Navbar() {
 
               {/* User info */}
               <div className="flex items-center gap-3 rounded-xl bg-amber-50/60 dark:bg-zinc-900 px-3 py-3 mb-1">
-                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-amber-100 dark:border-zinc-700 bg-amber-50 dark:bg-zinc-800">
-                  {session.user.image ? (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || "User"}
-                      width={40}
-                      height={40}
-                      unoptimized
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-amber-300">
-                      <User size={18} />
-                    </div>
-                  )}
-                </div>
+                <UserAvatar src={session.user.image} name={session.user.name} sizeClass="h-10 w-10 text-xs" />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-black text-[var(--bakery-text)]">
                     {session.user.name || "User"}

@@ -9,6 +9,7 @@ import StockAlertBell from '@/components/admin/StockAlertBell'
 import Image from 'next/image'
 import { useAdmin } from '@/context/AdminContext'
 import { usePusher } from '@/hooks/usePusher'
+import UserAvatar from '@/components/shared/UserAvatar'
 
 function playChime() {
   try {
@@ -108,21 +109,7 @@ export default function AdminNavbar() {
             onClick={() => setMenuOpen((v) => !v)}
             className="flex items-center gap-2 rounded-full border border-amber-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-1.5 pr-3 py-1.5 text-sm font-semibold text-[var(--bakery-text)] shadow-sm transition-all hover:bg-amber-50 dark:hover:bg-zinc-800 hover:shadow-md"
           >
-            {/* Avatar */}
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-amber-500 text-[11px] font-black text-white">
-              {user?.image ? (
-                <Image
-                  src={user.image}
-                  alt={user.name || 'Admin'}
-                  width={32}
-                  height={32}
-                  unoptimized
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                initials
-              )}
-            </div>
+            <UserAvatar src={user?.image} name={user?.name} sizeClass="h-8 w-8 text-xs" />
             <span className="hidden sm:block max-w-[140px] truncate">{user?.name ?? 'Admin'}</span>
             <ChevronDown size={14} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -133,20 +120,7 @@ export default function AdminNavbar() {
               {/* Account info */}
               <div className="mb-2 rounded-xl bg-amber-50/70 dark:bg-zinc-800/50 p-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-amber-500 text-sm font-black text-white">
-                    {user?.image ? (
-                      <Image
-                        src={user.image}
-                        alt={user.name || 'Admin'}
-                        width={40}
-                        height={40}
-                        unoptimized
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      initials
-                    )}
-                  </div>
+                  <UserAvatar src={user?.image} name={user?.name} sizeClass="h-10 w-10 text-xs" />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold text-[var(--bakery-text)]">{user?.name ?? 'Admin User'}</p>
                     <p className="truncate text-xs text-[var(--bakery-text-muted)] font-medium">{user?.email ?? ''}</p>

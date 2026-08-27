@@ -34,9 +34,9 @@ export function ToastProvider({ children }) {
             className={`
               pointer-events-auto flex items-center gap-3 min-w-[300px] max-w-md p-4 rounded-2xl shadow-2xl border backdrop-blur-md
               animate-fade-up transition-all duration-300
-              ${toast.type === 'error' ? 'bg-red-50/90 border-red-200 text-red-800' : 
-                toast.type === 'success' ? 'bg-emerald-50/90 border-emerald-200 text-emerald-800' : 
-                'bg-amber-50/90 border-amber-200 text-amber-900'}
+              ${toast.type === 'error' ? 'bg-red-50/90 dark:bg-red-950/90 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-200' : 
+                toast.type === 'success' ? 'bg-emerald-50/90 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-200' : 
+                'bg-amber-50/90 dark:bg-zinc-900/90 border-amber-200 dark:border-zinc-800 text-amber-900 dark:text-amber-100'}
             `}
           >
             <div className="shrink-0">
@@ -51,7 +51,7 @@ export function ToastProvider({ children }) {
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="shrink-0 rounded-full p-1 hover:bg-black/5 transition-colors"
+              className="shrink-0 rounded-full p-1 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
               <X size={16} className="opacity-50" />
             </button>

@@ -275,7 +275,7 @@ function ShopProductsContent() {
                   debouncedUpdateFilters.cancel()
                   updateFilters({ q: '', category: '', page: '1' })
                 }}
-                className="rounded-2xl border-2 border-amber-100 bg-white px-6 py-3 text-sm font-bold text-[var(--bakery-text-muted)] transition-all hover:bg-amber-50"
+                className="rounded-2xl border-2 border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-3 text-sm font-bold text-[var(--bakery-text-muted)] transition-all hover:bg-amber-50 dark:hover:bg-zinc-800"
               >
                 Reset Search
               </button>

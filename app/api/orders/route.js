@@ -1,19 +1,12 @@
 import db from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { handleApiError, response } from "@/lib/api-helper";
+import { handleApiError, parsePagination, response, withAuth } from "@/lib/api-helper";
 import { broadcast } from "@/lib/pusher-broadcast"
 
-export async function GET(request) {
-    const session = await auth();
-    if (!session) {
-        return response({ error: "Unauthorized" }, 401);
-    }
+export const GET = withAuth(async (request, _context, session) => {
     const isAdmin = session.user.role === 'ADMIN';
     const { searchParams } = request.nextUrl;
     const requestedStatus = searchParams.get('status');
-    const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '10', 10)));
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parsePagination(searchParams, 10);
 
     const year = searchParams.get('year');
     const month = searchParams.get('month'); // 1-12
@@ -69,13 +62,9 @@ export async function GET(request) {
     } catch (error) {
         return handleApiError(error);
     }
-}
+})
 
-export async function POST(request) {
-    const session = await auth();
-    if (!session) {
-        return response({ error: "Unauthorized" }, 401);
-    }
+export const POST = withAuth(async (request, _context, session) => {
     const userId = session.user.id;
 
     let address = '';
@@ -196,5 +185,5 @@ export async function POST(request) {
         }
         return handleApiError(error);
     }
-}
+})
 

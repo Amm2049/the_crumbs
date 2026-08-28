@@ -1,17 +1,9 @@
 import db from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { handleGetAll, response } from "@/lib/api-helper";
+import { handleApiError, parsePagination, response, withAdmin } from "@/lib/api-helper";
 
-export async function GET(request) {
-  const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
-    return response({ error: "Forbidden - Admin only" }, 403);
-  }
-
+export const GET = withAdmin(async (request) => {
   const { searchParams } = request.nextUrl;
-  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '10', 10)));
-  const skip = (page - 1) * limit;
+  const { page, limit, skip } = parsePagination(searchParams, 10);
 
   try {
     const [customers, total] = await Promise.all([
@@ -42,5 +34,5 @@ export async function GET(request) {
   } catch (error) {
     return handleApiError(error);
   }
-}
+})
 

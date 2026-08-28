@@ -2,8 +2,7 @@
 // create a new product - admin only
 
 import db from '@/lib/db'
-import { handleGetAll, handlePost, ProductFormat, response, handleApiError } from '@/lib/api-helper'
-import { auth } from '@/lib/auth'
+import { handleGetAll, handlePost, ProductFormat, response, handleApiError, parsePagination, withAdmin } from '@/lib/api-helper'
 
 export async function GET(request) {
     const { searchParams } = request.nextUrl
@@ -36,9 +35,7 @@ export async function GET(request) {
 
     // If pagination is requested (storefront shop)
     if (pageParam || limitParam) {
-        const page = Math.max(1, parseInt(pageParam ?? '1', 10))
-        const limit = Math.min(100, Math.max(1, parseInt(limitParam ?? '15', 10)))
-        const skip = (page - 1) * limit
+        const { page, limit, skip } = parsePagination(searchParams, 15)
 
         try {
             const [products, total] = await Promise.all([
@@ -63,8 +60,6 @@ export async function GET(request) {
         }
     }
 
-
-
     return handleGetAll(db.product, {
         where,
         include: {
@@ -74,16 +69,10 @@ export async function GET(request) {
             createdAt: 'desc'
         },
         ...(Number.isFinite(take) && take > 0 ? { take } : {}),
-    }
-    )
+    })
 }
 
-export async function POST(request) {
-    const session = await auth()
-    if (!session || session.user.role !== 'ADMIN') {
-        return response({ error: 'Forbidden - Admin only' }, 403)
-    }
-
+export const POST = withAdmin(async (request) => {
     const rawData = await request.json();
     const data = ProductFormat(rawData);
 
@@ -93,4 +82,4 @@ export async function POST(request) {
             P2002: 'Product already exists',
         }
     )
-}
+})

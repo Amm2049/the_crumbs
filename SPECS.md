@@ -219,6 +219,7 @@ const statusClasses = {
 | **#6 Final Launch Review — Phase 1: QA & Security Fixes** | `app/(client)/cart/page.jsx`, `app/api/orders/route.js`, `app/api/cart/[id]/route.js` |
 | **#7 Final Launch Review — Phase 2: Honey & Cream Theme & WCAG AA** | `context/ToastContext.jsx`, `components/client/ShopProductsClient.jsx`, `components/shared/UserAvatar.jsx`, `components/client/Navbar.jsx`, `components/admin/AdminNavbar.jsx`, `components/client/OrderDetailModal.jsx`, `components/admin/ProductModal.jsx`, `components/admin/OrderModal.jsx`, `components/admin/CategoriesManager.jsx` |
 | **#8 Final Launch Review — Phase 3: Security Hardening & Error Masking** | `proxy.js`, `lib/utils.js`, `lib/api-helper.js`, `app/api/orders/route.js` |
+| **#9 API Helper Refactoring & Prisma Indexing** | `lib/api-helper.js`, `prisma/schema.prisma`, `app/api/products/route.js`, `app/api/orders/route.js`, `app/api/admin/customers/route.js` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -256,15 +257,9 @@ const statusClasses = {
 - Features resilient client hook connection monitoring with automatic 15-second background HTTP API polling fallback.
 
 ### Stripe Payments (Credit Cards & PromptPay) — Key Details
-- Integrates Stripe's **Payment Intents API** and **Stripe Elements** for processing secure payments without PCI compliance scope.
-- Dynamically displays both credit card inputs and PromptPay QR codes based on dashboard configuration.
-- Features secure and idempotent backend processing via **Stripe Webhooks** (`/api/payment/webhook`), reading raw request payloads for cryptographic signature verification.
-- Idempotently transitions successful order statuses from `PENDING` to `PROCESSING` within database transactions and broadcasts real-time updates via Pusher.
-- Features a seamless customer-facing secure checkout route `/checkout/[id]/pay` and success redirect landing page `/checkout/success`.
-- **Theme Adaptation:** Payment form dynamically updates its appearance configurations (fonts, border radius, backgrounds, text colors) matching the Honey & Cream theme in both light and dark modes.
-- **Itemized Checkout Sidebar:** Renders a list of purchased products, quantities, and line totals directly within the payment page summary block.
-- **Safety Reversion Guards:** Implements backend API verification and frontend dropdown options filtering to block administrative users from reverting any paid/processed order (`PROCESSING`, `READY`, etc.) back to `PENDING`, preventing duplicate billing and button re-appearance.
-- **Price Formatting Refactor:** Unifies storefront and admin dashboard price displays to format with the central `formatCurrency()` helper dynamically reading currency configuration codes (THB ฿).
+- Full Stripe integration supporting Credit Cards and PromptPay QR codes.
+- Server-side Payment Intent generation at `/api/payment/create-intent` calculating amount from DB order totals.
+- Webhook handling at `/api/payment/webhook` with raw body signature verification and idempotency locks.
 
 ### Product Recommendations — Key Details
 - **Intelligent Routing API**: Secure endpoint at `/api/products/recommendations` that processes dynamic category, cart, and user-personalized recommendations.
@@ -278,6 +273,7 @@ const statusClasses = {
 - **Phase 1 (QA & Security Fixes)**: Resolved cart item modification guards during pending checkout loading states, enforced server-side cart line item total recalculation, and guarded against stale stock checkout collisions.
 - **Phase 2 (Honey & Cream Theme & WCAG 2.1 AA)**: Added dark mode overrides (`dark:bg-zinc-900`, `dark:border-zinc-800`) to toast notifications and search reset controls. Unified profile avatars across storefront and admin navbars using `<UserAvatar />` for automatic Google OAuth picture error fallbacks. Upgraded all modals (`OrderDetailModal`, `ProductModal`, `OrderModal`, `CategoriesManager`) with WCAG `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, and `Escape` key dismissal listeners. Configured `ToastContext` with `aria-live="polite"` live region announcements.
 - **Phase 3 (Security Hardening & Error Masking)**: Configured Next.js 16 Edge proxy route protection (`proxy.js`) for `/admin/*`, `/cart`, `/orders/*`, `/profile`, and `/api/*` endpoints. Masked raw 500 server error stack traces in `lib/utils.js` (`console.error('[API Error]:', error)` returning generic 500 JSON). Added explicit session auth checks to `POST /api/orders` and `OwnershipCheck` in `lib/api-helper.js` returning clean 401 Unauthorized responses.
+- **API Helper Refactoring & Prisma Database Indexes**: Created `parsePagination`, `withAuth`, and `withAdmin` utilities in `lib/api-helper.js`. Added foreign key & filter indexes in `prisma/schema.prisma` (`Product.@@index([categoryId, isAvailable])`, `Order.@@index([userId, status, createdAt])`, `OrderItem.@@index([orderId, productId])`, `CartItem.@@index([userId])`) and enabled `onDelete: Cascade` on `CartItem.product`.
 
 ---
 

@@ -216,6 +216,9 @@ const statusClasses = {
 | **#3 Real-time order tracking & Admin notifications (Pusher)** | `lib/pusher.js`, `lib/pusher-constants.js`, `lib/pusher-broadcast.js`, `app/api/pusher/auth/route.js`, `hooks/usePusher.js`, `components/client/OrderStatusTimeline.jsx`, `components/client/OrderDetailModal.jsx`, `components/client/OrdersClient.jsx`, `components/admin/AdminNavbar.jsx`, `components/admin/OrdersTable.jsx`, `components/client/ProductGrid.jsx`, `components/client/ShopProductsClient.jsx` |
 | **#4 Stripe Payments (Credit Cards & PromptPay)** | `app/api/payment/`, `components/client/payment/`, `app/(client)/checkout/` |
 | **#5 Product recommendations** | `app/api/products/recommendations/`, `components/client/RecommendedProducts.jsx`, `app/(client)/page.jsx`, `components/client/ProductDetailClient.jsx`, `app/(client)/cart/page.jsx` |
+| **#6 Final Launch Review — Phase 1: QA & Security Fixes** | `app/(client)/cart/page.jsx`, `app/api/orders/route.js`, `app/api/cart/[id]/route.js` |
+| **#7 Final Launch Review — Phase 2: Honey & Cream Theme & WCAG AA** | `context/ToastContext.jsx`, `components/client/ShopProductsClient.jsx`, `components/shared/UserAvatar.jsx`, `components/client/Navbar.jsx`, `components/admin/AdminNavbar.jsx`, `components/client/OrderDetailModal.jsx`, `components/admin/ProductModal.jsx`, `components/admin/OrderModal.jsx`, `components/admin/CategoriesManager.jsx` |
+| **#8 Final Launch Review — Phase 3: Security Hardening & Error Masking** | `proxy.js`, `lib/utils.js`, `lib/api-helper.js`, `app/api/orders/route.js` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -271,6 +274,11 @@ const statusClasses = {
 - **Stock Guard**: Strict query filter checks `isAvailable: true` and `stock: { gt: 0 }` to avoid suggesting out-of-stock items.
 - **Aesthetic Integration**: Reuses the existing storefront `ProductCard` component inside responsive layouts with loading skeletons support.
 
+### Final Product Launch Review & Hardening — Key Details
+- **Phase 1 (QA & Security Fixes)**: Resolved cart item modification guards during pending checkout loading states, enforced server-side cart line item total recalculation, and guarded against stale stock checkout collisions.
+- **Phase 2 (Honey & Cream Theme & WCAG 2.1 AA)**: Added dark mode overrides (`dark:bg-zinc-900`, `dark:border-zinc-800`) to toast notifications and search reset controls. Unified profile avatars across storefront and admin navbars using `<UserAvatar />` for automatic Google OAuth picture error fallbacks. Upgraded all modals (`OrderDetailModal`, `ProductModal`, `OrderModal`, `CategoriesManager`) with WCAG `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, and `Escape` key dismissal listeners. Configured `ToastContext` with `aria-live="polite"` live region announcements.
+- **Phase 3 (Security Hardening & Error Masking)**: Configured Next.js 16 Edge proxy route protection (`proxy.js`) for `/admin/*`, `/cart`, `/orders/*`, `/profile`, and `/api/*` endpoints. Masked raw 500 server error stack traces in `lib/utils.js` (`console.error('[API Error]:', error)` returning generic 500 JSON). Added explicit session auth checks to `POST /api/orders` and `OwnershipCheck` in `lib/api-helper.js` returning clean 401 Unauthorized responses.
+
 ---
 
 ## 📋 Features Pending (Current Roadmap)
@@ -310,4 +318,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-07-18 — Remaining review and quality check features discarded.
+> Last updated: 2026-08-28 — Final Product Launch Review (Phases 1-3) completed.

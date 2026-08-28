@@ -24,13 +24,23 @@ export async function PATCH(request, { params }) {
     const session = await auth()
     if (!session) return response({ error: "Unauthorized" }, 401)
 
-    // get order informations
+    // get order information
     const { id } = await params
     const { status } = await request.json()
 
-    // Fetch order first to check status
+    // Fetch order
     const order = await db.order.findUnique({ where: { id } })
     if (!order) return response({ error: "Not Found" }, 404)
+
+    const isAdmin = session.user.role === 'ADMIN'
+
+    // Ownership check FIRST — non-owners must not learn anything about the order
+    if (!isAdmin) {
+        if (order.userId !== session.user.id)
+            return response({ error: "Not Found" }, 404)
+        if (status !== 'CANCELLED')
+            return response({ error: 'Customers may only cancel orders' }, 403)
+    }
 
     // Terminal order check: CANCELLED and DELIVERED orders cannot be modified
     if (order.status === 'CANCELLED' || order.status === 'DELIVERED') {
@@ -42,16 +52,9 @@ export async function PATCH(request, { params }) {
         return response({ error: "Cannot revert a processed order back to pending" }, 400)
     }
 
-    const isAdmin = session.user.role === 'ADMIN'
-
-    // Customers can only cancel their own PENDING orders
-    if (!isAdmin) {
-        if (order.userId !== session.user.id)
-            return response({ error: "Not Found" }, 404)
-        if (status !== 'CANCELLED')
-            return response({ error: 'Customers may only cancel orders' }, 403)
-        if (order.status !== 'PENDING')
-            return response({ error: 'Only pending orders can be cancelled' }, 400)
+    // Customers can only cancel PENDING orders
+    if (!isAdmin && order.status !== 'PENDING') {
+        return response({ error: 'Only pending orders can be cancelled' }, 400)
     }
 
     let updateResponse

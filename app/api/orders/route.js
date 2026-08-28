@@ -73,6 +73,9 @@ export async function GET(request) {
 
 export async function POST(request) {
     const session = await auth();
+    if (!session) {
+        return response({ error: "Unauthorized" }, 401);
+    }
     const userId = session.user.id;
 
     let address = '';

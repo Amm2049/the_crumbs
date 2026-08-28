@@ -1,23 +1,38 @@
 import db from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { handleApiError, response } from "@/lib/api-helper";
+import { handleApiError, parsePagination, response, withAdmin } from "@/lib/api-helper";
 
-export async function GET() {
-  const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
-    return response({ error: "Forbidden - Admin only" }, 403);
-  }
+export const GET = withAdmin(async (request) => {
+  const { searchParams } = request.nextUrl;
+  const { page, limit, skip } = parsePagination(searchParams, 10);
 
   try {
-    const customers = await db.user.findMany({
-      where: { role: "CUSTOMER" },
-      include: { _count: { select: { orders: true } } },
-      orderBy: { createdAt: "desc" },
-    });
+    const [customers, total] = await Promise.all([
+      db.user.findMany({
+        where: { role: "CUSTOMER" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          role: true,
+          createdAt: true,
+          _count: { select: { orders: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      db.user.count({ where: { role: "CUSTOMER" } })
+    ]);
 
-    return response(customers);
+    return response({
+      data: customers,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     return handleApiError(error);
   }
-}
+})
 

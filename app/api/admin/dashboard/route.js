@@ -1,5 +1,5 @@
 import db from "@/lib/db";
-import { response, handleApiError } from "@/lib/utils";
+import { response, handleApiError } from "@/lib/api-helper";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   try {
-    const [ordersCount, productsCount, customersCount, revenueResult, recentOrders] =
+    const [ordersCount, productsCount, customersCount, revenueResult, recentOrders, lowStockCount] =
       await Promise.all([
         db.order.count(),
         db.product.count(),
@@ -19,10 +19,11 @@ export async function GET() {
           take: 8,
           orderBy: { createdAt: "desc" },
           include: {
-            user: { select: { name: true, email: true } },
+            user: { select: { name: true, email: true, image: true } },
             items: { include: { product: { select: { name: true, images: true, category: { select: { name: true } } } } } },
           },
         }),
+        db.product.count({ where: { stock: { lte: 5 } } })
       ]);
 
     return response({
@@ -31,6 +32,7 @@ export async function GET() {
       totalCustomers: customersCount,
       totalRevenue: Number(revenueResult?._sum?.total ?? 0),
       recentOrders,
+      lowStockCount
     });
   } catch (error) {
     return handleApiError(error);

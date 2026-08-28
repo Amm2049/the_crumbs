@@ -62,11 +62,6 @@ export default auth((req) => {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Orders - Only Admin can update status
-    if (path.startsWith('/api/orders/') && req.method === 'PATCH' && !isAdmin) {
-      return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 })
-    }
-
     // Admin APIs
     if (path.startsWith('/api/admin') && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 })

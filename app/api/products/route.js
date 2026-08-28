@@ -2,7 +2,7 @@
 // create a new product - admin only
 
 import db from '@/lib/db'
-import { handleGetAll, handlePost, ProductFormat } from '@/lib/api-helper'
+import { handleGetAll, handlePost, ProductFormat, response, handleApiError, parsePagination, withAdmin } from '@/lib/api-helper'
 
 export async function GET(request) {
     const { searchParams } = request.nextUrl
@@ -12,23 +12,56 @@ export async function GET(request) {
     const takeParam = searchParams.get('take')
     const take = takeParam ? Number.parseInt(takeParam, 10) : undefined
 
+    const pageParam = searchParams.get('page')
+    const limitParam = searchParams.get('limit')
+
     let resolvedCategoryId = categoryId
     if (!resolvedCategoryId && category) {
         const found = await db.category.findUnique({ where: { slug: category } })
         resolvedCategoryId = found?.id
     }
 
-    return handleGetAll(db.product, {
-        where: {
-            isAvailable: true,
-            ...(resolvedCategoryId && { categoryId: resolvedCategoryId }),
-            ...(search && {
-                name: {
-                    contains: search,
-                    mode: 'insensitive',
-                }
+    // Common Query Filter
+    const where = {
+        isAvailable: true,
+        ...(resolvedCategoryId && { categoryId: resolvedCategoryId }),
+        ...(search && {
+            name: {
+                contains: search,
+                mode: 'insensitive'
+            }
+        })
+    }
+
+    // If pagination is requested (storefront shop)
+    if (pageParam || limitParam) {
+        const { page, limit, skip } = parsePagination(searchParams, 15)
+
+        try {
+            const [products, total] = await Promise.all([
+                db.product.findMany({
+                    where,
+                    include: { category: true },
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: limit,
+                }),
+                db.product.count({ where })
+            ])
+
+            return response({
+                data: products,
+                total,
+                page,
+                totalPages: Math.ceil(total / limit)
             })
-        },
+        } catch (error) {
+            return handleApiError(error)
+        }
+    }
+
+    return handleGetAll(db.product, {
+        where,
         include: {
             category: true,
         },
@@ -36,11 +69,10 @@ export async function GET(request) {
             createdAt: 'desc'
         },
         ...(Number.isFinite(take) && take > 0 ? { take } : {}),
-    }
-    )
+    })
 }
 
-export async function POST(request) {
+export const POST = withAdmin(async (request) => {
     const rawData = await request.json();
     const data = ProductFormat(rawData);
 
@@ -50,4 +82,4 @@ export async function POST(request) {
             P2002: 'Product already exists',
         }
     )
-}
+})

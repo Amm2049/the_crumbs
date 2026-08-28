@@ -2,6 +2,7 @@
 
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { formatCurrency } from '@/lib/utils'
 
 export default function CartItemRow({ item, onUpdate, onRemove }) {
   const { id, product, quantity } = item
@@ -10,11 +11,18 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
   const maxStock = Number(product?.stock ?? 0)
   const imageUrl = Array.isArray(product?.images) && product.images.length > 0 ? product.images[0] : ''
   const [isRemoving, setIsRemoving] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const handleUpdate = async (newQuantity) => {
     if (newQuantity < 1) return
     if (maxStock > 0 && newQuantity > maxStock) return
-    await onUpdate(id, newQuantity)
+    if (isUpdating) return
+    setIsUpdating(true)
+    try {
+      await onUpdate(id, newQuantity)
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const handleRemove = async () => {
@@ -50,7 +58,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
         <div className="flex flex-1 flex-col justify-between min-w-0 sm:flex-row sm:items-center sm:gap-4">
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-bold text-[var(--bakery-text)] sm:text-lg">{product?.name || 'Product'}</p>
-            <p className="mt-0.5 text-sm font-medium text-[var(--bakery-text-muted)]">${unitPrice.toFixed(2)} each</p>
+            <p className="mt-0.5 text-sm font-medium text-[var(--bakery-text-muted)]">{formatCurrency(unitPrice)} each</p>
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 sm:mt-0 sm:justify-end">
@@ -60,7 +68,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
                   type="button"
                   onClick={() => handleUpdate(quantity - 1)}
                   className="px-2.5 py-1.5 text-[var(--bakery-text-muted)] transition-colors hover:bg-amber-100 dark:hover:bg-zinc-700 disabled:opacity-30"
-                  disabled={quantity <= 1}
+                  disabled={quantity <= 1 || isUpdating}
                   aria-label="Decrease quantity"
                 >
                   <Minus size={14} />
@@ -72,7 +80,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
                   type="button"
                   onClick={() => handleUpdate(quantity + 1)}
                   className="px-2.5 py-1.5 text-[var(--bakery-text-muted)] transition-colors hover:bg-amber-100 dark:hover:bg-zinc-700 disabled:opacity-30"
-                  disabled={maxStock > 0 && quantity >= maxStock}
+                  disabled={(maxStock > 0 && quantity >= maxStock) || isUpdating}
                   aria-label="Increase quantity"
                 >
                   <Plus size={14} />
@@ -80,7 +88,7 @@ export default function CartItemRow({ item, onUpdate, onRemove }) {
               </div>
 
               <p className="min-w-[70px] text-right text-base font-black text-amber-700 dark:text-amber-500 sm:text-[var(--bakery-text)]">
-                ${lineTotal.toFixed(2)}
+                {formatCurrency(lineTotal)}
               </p>
             </div>
 

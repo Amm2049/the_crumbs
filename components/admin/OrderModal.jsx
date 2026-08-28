@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Calendar, User, Mail, Hash, ShoppingBag, MessageSquare, Loader2, Check, ChevronDown } from 'lucide-react'
+import { X, Calendar, User, Mail, Hash, ShoppingBag, MessageSquare, MapPin, Loader2, Check, ChevronDown } from 'lucide-react'
+import UserAvatar from '@/components/shared/UserAvatar'
 
 // Reuse the status config from the table for consistency
 const STATUS_CONFIG = {
@@ -17,16 +18,34 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    let active = true
+    setTimeout(() => {
+      if (active) setMounted(true)
+    }, 0)
+    return () => { active = false }
   }, [])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
 
   if (!isOpen || !mounted || !order) return null
 
   const cfg = STATUS_CONFIG[order.status] ?? { bg: 'bg-gray-50', border: 'border-gray-100', text: 'text-gray-700', dot: 'bg-gray-400', label: order.status }
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-order-modal-title"
+    >
+      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       
       <div className="relative w-full max-w-2xl animate-fade-up overflow-hidden rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-amber-50 dark:border-zinc-800">
         {/* Header */}
@@ -36,7 +55,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
               <ShoppingBag size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-black text-[var(--bakery-text)]">Order Details</h2>
+              <h2 id="admin-order-modal-title" className="text-lg font-black text-[var(--bakery-text)]">Order Details</h2>
               <div className="flex items-center gap-2">
                 <Hash size={12} className="text-amber-500 opacity-50" />
                 <span className="font-mono text-[10px] font-black uppercase text-[var(--bakery-text-muted)]">
@@ -48,6 +67,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
           <button 
             type="button" 
             onClick={onClose} 
+            aria-label="Close order details modal"
             className="rounded-full p-2 text-[#B09080] dark:text-[#8A6D5E] transition-colors hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400"
           >
             <X size={20} />
@@ -62,9 +82,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--bakery-text-muted)]">Customer</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-zinc-700 text-[10px] font-black text-amber-700 dark:text-amber-400 shadow-sm ring-1 ring-amber-50 dark:ring-zinc-600">
-                    {order.user?.name?.charAt(0) || <User size={12} />}
-                  </div>
+                  <UserAvatar src={order.user?.image} name={order.user?.name} sizeClass="h-8 w-8 text-[10px]" />
                   <div>
                     <p className="text-sm font-black text-[var(--bakery-text)]">{order.user?.name || 'Guest'}</p>
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--bakery-text-muted)]">
@@ -106,15 +124,26 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange, isU
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Delivery Address */}
+          <div className="space-y-3 rounded-2xl border border-amber-100 dark:border-zinc-700 bg-amber-50/10 dark:bg-zinc-800/30 p-4">
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-500">
+              <MapPin size={12} />
+              <span>Delivery Address</span>
+            </div>
+            <p className="text-sm font-semibold text-[var(--bakery-text)] leading-relaxed">
+              {order.address || 'No address provided (historical order)'}
+            </p>
+          </div>
+
+          {/* Special Instructions / Notes */}
           {order.notes && (
             <div className="space-y-3 rounded-2xl border border-amber-100 dark:border-zinc-700 bg-amber-50/10 dark:bg-zinc-800/30 p-4">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-500">
                 <MessageSquare size={12} />
-                <span>Customer Notes</span>
+                <span>Special Instructions</span>
               </div>
               <p className="text-sm italic text-[var(--bakery-text)] leading-relaxed">
-                "{order.notes}"
+                &ldquo;{order.notes}&rdquo;
               </p>
             </div>
           )}

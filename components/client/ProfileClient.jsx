@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { User, Mail, Save, Camera, Loader2, ShieldCheck, ShoppingBag, Sparkles, RefreshCw, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
 import Image from "next/image";
 
@@ -180,7 +179,7 @@ export default function ProfileClient({ session: initialSession }) {
                <h3 className="text-xs font-black uppercase tracking-widest text-amber-800 dark:text-amber-500 opacity-80">Sweet Rewards</h3>
              </div>
              <p className="text-[13px] font-bold leading-relaxed text-[var(--bakery-text)]">
-               You have <span className="text-lg text-amber-700 dark:text-amber-400">450</span> Crumbs points! You're just 50 points away from a <span className="underline decoration-amber-200 dark:decoration-amber-900 underline-offset-4">free croissant</span>.
+               You have <span className="text-lg text-amber-700 dark:text-amber-400">450</span> Crumbs points! You&apos;re just 50 points away from a <span className="underline decoration-amber-200 dark:decoration-amber-900 underline-offset-4">free croissant</span>.
              </p>
           </div>
         </div>
@@ -229,9 +228,16 @@ export default function ProfileClient({ session: initialSession }) {
                   );
                 })}
               </div>
-              <div className="mt-4 flex items-center gap-2 text-[#B09080]">
-                <RefreshCw size={12} className="animate-spin-slow" />
-                <span className="text-[9px] font-black uppercase tracking-[0.2em]">Scroll sideways to explore all {PRESET_SEEDS.length} characters</span>
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-[#B09080]">
+                  <RefreshCw size={12} className="animate-spin-slow" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em]">Scroll sideways to explore all {PRESET_SEEDS.length} characters</span>
+                </div>
+                {formData.image !== (session?.user?.image || initialSession?.user?.image) && (
+                  <p className="text-[10px] font-bold text-amber-600 animate-pulse">
+                    Don't forget to save changes!
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -315,23 +321,23 @@ export default function ProfileClient({ session: initialSession }) {
               </div>
 
               <div className="flex flex-col items-center gap-4 pt-6 sm:flex-row">
-                <Button
+                <button
                   type="submit"
                   disabled={loading || (formData.name === (session?.user?.name || initialSession?.user?.name || "") && formData.image === (session?.user?.image || initialSession?.user?.image || "") && !formData.newPassword)}
-                  className="h-14 w-full rounded-[1.25rem] bg-amber-600 text-base font-black shadow-lg shadow-amber-600/20 hover:bg-amber-700 active:scale-95 transition-all sm:w-auto sm:px-14 disabled:opacity-50 disabled:grayscale-[0.5]"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 h-14 w-full px-10 text-sm font-black tracking-wide text-white shadow-xl shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97] disabled:opacity-50 disabled:grayscale-[0.5] disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 sm:w-auto sm:px-14"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <Loader2 className="h-5 w-5 animate-spin" />
                       Baking Changes...
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-5 w-5" />
+                      <Save className="h-5 w-5" />
                       Save All Changes
                     </>
                   )}
-                </Button>
+                </button>
                  <p className="text-[10px] font-bold text-[var(--bakery-text-muted)] opacity-60 text-center sm:text-left">
                   Your changes will be saved to our bakery oven instantly.
                 </p>

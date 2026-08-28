@@ -6,8 +6,6 @@ import { useSession } from 'next-auth/react'
 import { ShoppingCart } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 
-import { Button } from '@/components/ui/button'
-
 export default function AddToCartButton({ productId, quantity = 1, disabled = false, className = "", isUpdate = false }) {
   const router = useRouter()
   const { data: session, status: authStatus } = useSession()
@@ -15,17 +13,7 @@ export default function AddToCartButton({ productId, quantity = 1, disabled = fa
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
 
-  const isAdmin = session?.user?.role === 'ADMIN'
-  const isCustomer = session && !isAdmin
-
-  if (authStatus === 'loading') {
-    return (
-      <div className={`h-14 w-full animate-pulse rounded-xl bg-amber-100/80 ${className}`} />
-    )
-  }
-
-  if (!isCustomer && session) return null
-  // For guest users, we show the button which redirects to login
+  const { addToCart } = useCart()
 
   useEffect(() => {
     if (status !== 'success') return
@@ -37,7 +25,16 @@ export default function AddToCartButton({ productId, quantity = 1, disabled = fa
     return () => clearTimeout(timeoutId)
   }, [status])
 
-  const { addToCart } = useCart()
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const isCustomer = session && !isAdmin
+
+  if (authStatus === 'loading') {
+    return (
+      <div className={`h-14 w-full animate-pulse rounded-xl bg-amber-100/80 ${className}`} />
+    )
+  }
+
+  if (!isCustomer && session) return null
 
   const handleAddToCart = async () => {
     setError('')
@@ -64,16 +61,15 @@ export default function AddToCartButton({ productId, quantity = 1, disabled = fa
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <Button
+      <button
         type="button"
         onClick={handleAddToCart}
         disabled={disabled || isLoading}
-        size="lg"
-        className={`w-full bg-amber-500 text-white hover:bg-amber-600 h-full ${className.includes('rounded') ? '' : 'rounded-xl'}`}
+        className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 py-3.5 text-sm font-black tracking-wide text-white shadow-xl shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97] disabled:opacity-60 disabled:grayscale-[0.3] disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 ${className}`}
       >
         <ShoppingCart size={18} />
         {isLoading ? 'Adding...' : status === 'success' ? 'Added to Cart' : (isUpdate ? 'Add More to Cart' : 'Add to Cart')}
-      </Button>
+      </button>
 
       {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
     </div>

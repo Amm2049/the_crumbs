@@ -14,9 +14,11 @@ export function AdminProvider({ children }) {
   const pathname = usePathname()
 
   // Close sidebar automatically when navigating on mobile
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname)
     setSidebarOpen(false)
-  }, [pathname])
+  }
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 

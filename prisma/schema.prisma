@@ -39,7 +39,7 @@ model User {
   name      String
   email     String     @unique
   image     String?
-  password  String     // Bcrypt hashed password
+  password  String?    // Bcrypt hashed password — null for OAuth (Google) users
   role      Role       @default(CUSTOMER)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -88,18 +88,25 @@ model Product {
 
   orderItems  OrderItem[]
   cartItems   CartItem[]
+
+  @@index([categoryId])
+  @@index([isAvailable])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ORDER
 // Created when a customer places an order. Total is a price snapshot.
+// address: delivery address — required at checkout (validated in API, stored as String?).
+// notes:   optional special instructions from the customer (e.g. "leave at door").
 // ─────────────────────────────────────────────────────────────────────────────
 
 model Order {
   id        String      @id @default(cuid())
   status    OrderStatus @default(PENDING)
   total     Float       // Total snapshotted at time of order — does not change
-  notes     String?     // Optional customer delivery/pickup instructions
+  address   String?     // Delivery address — required at checkout (enforced by API)
+  notes     String?     // Optional special instructions (e.g. "ring the bell")
+  stripePaymentIntentId String?    @unique
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
@@ -107,6 +114,10 @@ model Order {
   user      User        @relation(fields: [userId], references: [id])
 
   items     OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,6 +138,9 @@ model OrderItem {
 
   productId String
   product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -146,7 +160,8 @@ model CartItem {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+  @@index([userId])
 }

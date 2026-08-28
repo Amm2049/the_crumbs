@@ -116,7 +116,13 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
 
   const nameValue = watch('name')
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    let active = true
+    setTimeout(() => {
+      if (active) setMounted(true)
+    }, 0)
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
@@ -165,19 +171,40 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
     }
   }
 
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
+  if (!isOpen || !mounted) return null
+
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="product-modal-title"
+    >
+      <div className="absolute inset-0 bg-[#1A0E08]/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="relative w-full max-w-2xl animate-fade-up overflow-hidden rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-amber-50 dark:border-zinc-800"
       >
         <div className="flex items-center justify-between border-b border-amber-50 dark:border-zinc-800 px-6 py-4">
-          <h2 className="text-lg font-black text-[var(--bakery-text)]">
+          <h2 id="product-modal-title" className="text-lg font-black text-[var(--bakery-text)]">
             {mode === 'create' ? 'Add New Product' : 'Edit Product'}
           </h2>
-          <button type="button" onClick={onClose} className="rounded-full p-1 text-[#B09080] dark:text-[#8A6D5E] hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close product modal"
+            className="rounded-full p-1 text-[#B09080] dark:text-[#8A6D5E] hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400"
+          >
             <X size={20} />
           </button>
         </div>
@@ -190,7 +217,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                 <input
                   {...register('name', { required: 'Name is required' })}
                   onBlur={() => { if (mode === 'create' && nameValue) setValue('slug', toSlug(nameValue)) }}
-                  className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                  className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                 />
                 {errors.name && <p className="text-[10px] font-bold text-red-500">{errors.name.message}</p>}
               </label>
@@ -199,7 +226,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                 <span className="text-xs font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Slug</span>
                 <input
                   {...register('slug', { required: 'Slug is required', validate: slugPattern })}
-                  className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                  className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                 />
               </label>
 
@@ -209,7 +236,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                   <input
                     type="number" step="0.01"
                     {...register('price', { required: true, min: 0.01 })}
-                    className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                    className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                   />
                 </label>
                 <label className="block space-y-1">
@@ -217,7 +244,7 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                   <input
                     type="number"
                     {...register('stock', { required: true, min: 0 })}
-                    className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
+                    className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                   />
                 </label>
               </div>

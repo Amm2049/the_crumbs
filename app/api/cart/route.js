@@ -1,9 +1,12 @@
 import db from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { handleGetAll, handleUpsert } from "@/lib/api-helper";
+import { handleGetAll, handleUpsert, response } from "@/lib/api-helper";
 
 export async function GET() {
     const session = await auth();
+    if (!session) {
+        return response({ error: "Unauthorized" }, 401);
+    }
 
     return handleGetAll(db.cartItem, {
         where: { userId: session.user.id },
@@ -13,6 +16,9 @@ export async function GET() {
 
 export async function POST(request) {
     const session = await auth();
+    if (!session) {
+        return response({ error: "Unauthorized" }, 401);
+    }
 
     const { productId, quantity } = await request.json();
     const userId = session.user.id;

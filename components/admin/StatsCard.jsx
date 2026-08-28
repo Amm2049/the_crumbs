@@ -1,4 +1,4 @@
-export default function StatsCard({ title, value, icon: Icon, trend }) {
+export default function StatsCard({ title, value, icon: Icon, trend, alert }) {
   return (
     <article className="group relative overflow-hidden rounded-3xl border border-amber-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xl shadow-amber-900/5 transition-all hover:border-amber-200 dark:hover:border-zinc-700">
       <div className="flex items-center justify-between gap-3">
@@ -7,8 +7,14 @@ export default function StatsCard({ title, value, icon: Icon, trend }) {
           <p className="mt-1 text-3xl font-black text-[var(--bakery-text)]">{value}</p>
         </div>
         
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-zinc-800 text-amber-600 dark:text-amber-500 transition-colors group-hover:bg-amber-500 dark:group-hover:bg-amber-600 group-hover:text-white">
+        <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-zinc-800 text-amber-600 dark:text-amber-500 transition-colors group-hover:bg-amber-500 dark:group-hover:bg-amber-600 group-hover:text-white">
           {Icon && <Icon size={24} />}
+          {alert && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-black text-white">!</span>
+            </span>
+          )}
         </div>
       </div>
 

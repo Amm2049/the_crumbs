@@ -38,11 +38,10 @@ function PaginationBar({ page, totalPages }) {
           <button
             key={p}
             onClick={() => go(p)}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition-colors ${
-              p === page
+            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition-colors ${p === page
                 ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30'
                 : 'border border-amber-200 dark:border-zinc-700 text-[var(--bakery-text)] hover:bg-amber-50 dark:hover:bg-zinc-800'
-            }`}
+              }`}
           >
             {p}
           </button>
@@ -172,16 +171,20 @@ export default function ProductsTable({ products = [], categories = [], page = 1
                           <span className="font-black text-amber-700 dark:text-amber-400">${Number(p.price).toFixed(2)}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex h-7 min-w-[32px] items-center justify-center rounded-full px-2 text-[11px] font-black ring-1 ${
-                            p.stock > 0 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 ring-amber-100 dark:ring-amber-900/30' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 ring-red-100 dark:ring-red-900/30'
-                          }`}>
+                          <span className={`inline-flex h-7 min-w-[32px] items-center justify-center rounded-full px-2 text-[11px] font-black ring-1 ${p.stock === 0
+                              ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 ring-red-100 dark:ring-red-900/30'
+                              : p.stock <= 3
+                                ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 ring-orange-100 dark:ring-orange-900/30'
+                                : p.stock <= 5
+                                  ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 ring-yellow-100 dark:ring-yellow-900/30'
+                                  : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 ring-amber-100 dark:ring-amber-900/30'
+                            }`}>
                             {p.stock}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
-                            p.isAvailable ? 'border-green-100 dark:border-green-900/30 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800 text-gray-500'
-                          }`}>
+                          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${p.isAvailable ? 'border-green-100 dark:border-green-900/30 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800 text-gray-500'
+                            }`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${p.isAvailable ? 'bg-green-500' : 'bg-gray-400'}`} />
                             {p.isAvailable ? 'Live' : 'Hidden'}
                           </span>
@@ -189,14 +192,18 @@ export default function ProductsTable({ products = [], categories = [], page = 1
                         <td className="px-6 py-4">
                           <div className="flex justify-center gap-2">
                             <button
+                              type="button"
                               onClick={() => openEdit(p)}
+                              aria-label={`Edit ${p.name}`}
                               className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[var(--bakery-text)] shadow-sm transition-all hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400"
                               title="Edit"
                             >
                               <Pencil size={14} />
                             </button>
                             <button
+                              type="button"
                               onClick={() => setConfirmDelete({ open: true, id: p.id, name: p.name })}
+                              aria-label={`Delete ${p.name}`}
                               className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-50 dark:border-red-900/30 bg-white dark:bg-zinc-900 text-red-400 shadow-sm transition-all hover:border-red-200 hover:text-red-600"
                               title="Delete"
                             >

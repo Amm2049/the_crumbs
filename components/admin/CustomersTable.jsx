@@ -1,6 +1,8 @@
 'use client'
 
-import { Mail, Calendar, Hash, Image as ImageIcon } from 'lucide-react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { Mail, Calendar, Hash, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import UserAvatar from '@/components/shared/UserAvatar'
 
 function formatDate(value) {
   return new Intl.DateTimeFormat('en-US', {
@@ -10,13 +12,63 @@ function formatDate(value) {
   }).format(new Date(value))
 }
 
-export default function CustomersTable({ customers = [] }) {
+function PaginationBar({ page, totalPages }) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const go = (p) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', String(p))
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
+  if (totalPages <= 1) return null
+
+  return (
+    <div className="flex items-center justify-between border-t border-amber-100 dark:border-zinc-800 px-5 py-3">
+      <p className="text-xs font-semibold text-[var(--bakery-text-muted)]">
+        Page <span className="text-[var(--bakery-text)]">{page}</span> of <span className="text-[var(--bakery-text)]">{totalPages}</span>
+      </p>
+      <div className="flex gap-2">
+        <button
+          disabled={page <= 1}
+          onClick={() => go(page - 1)}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 dark:border-zinc-700 text-[var(--bakery-text)] transition-colors hover:bg-amber-50 dark:hover:bg-zinc-800 disabled:opacity-30"
+        >
+          <ChevronLeft size={14} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+          <button
+            key={p}
+            onClick={() => go(p)}
+            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition-colors ${p === page
+                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30'
+                : 'border border-amber-200 dark:border-zinc-700 text-[var(--bakery-text)] hover:bg-amber-50 dark:hover:bg-zinc-800'
+              }`}
+          >
+            {p}
+          </button>
+        ))}
+        <button
+          disabled={page >= totalPages}
+          onClick={() => go(page + 1)}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 dark:border-zinc-700 text-[var(--bakery-text)] transition-colors hover:bg-amber-50 dark:hover:bg-zinc-800 disabled:opacity-30"
+        >
+          <ChevronRight size={14} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default function CustomersTable({ customers = [], page = 1, totalPages = 1, total = 0 }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-baseline gap-2">
           <h2 className="text-xl font-black text-[var(--bakery-text)]">Registered Customers</h2>
-          <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">({customers.length} total)</span>
+          <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">({total} total)</span>
         </div>
       </div>
 
@@ -41,13 +93,7 @@ export default function CustomersTable({ customers = [] }) {
                   <tr key={user.id} className="group transition-colors hover:bg-amber-50/20 dark:hover:bg-zinc-800/30">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-amber-50 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-black text-xs ring-2 ring-white dark:ring-zinc-700 shadow-sm">
-                          {user.image ? (
-                            <img src={user.image} alt={user.name} className="h-full w-full object-cover" />
-                          ) : (
-                            user.name?.charAt(0).toUpperCase() || '?'
-                          )}
-                        </div>
+                        <UserAvatar src={user.image} name={user.name} sizeClass="h-10 w-10 text-xs" />
                         <div>
                           <p className="font-black text-[var(--bakery-text)]">{user.name || 'Anonymous'}</p>
                           <p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider">ID: {user.id.slice(-6).toUpperCase()}</p>
@@ -77,6 +123,7 @@ export default function CustomersTable({ customers = [] }) {
             </tbody>
           </table>
         </div>
+        <PaginationBar page={page} totalPages={totalPages} />
       </div>
     </div>
   )

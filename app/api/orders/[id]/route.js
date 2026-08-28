@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import db from '@/lib/db'
-import { handleUpdate, OwnershipCheck, response } from '@/lib/api-helper'
+import { broadcast } from "@/lib/pusher-broadcast";
+import { handleApiError, handleUpdate, OwnershipCheck, response } from '@/lib/api-helper'
 
 export async function GET(request, { params }) {
     const session = await auth()
@@ -8,20 +9,143 @@ export async function GET(request, { params }) {
 
     const check = await OwnershipCheck(id, db.order, session, {
         include: {
-            user: { select: { name: true, email: true } },
+            user: { select: { name: true, email: true, image: true } },
             items: { include: { product: { select: { name: true, images: true } } } },
         }
     })
-    
+
     if (check.error) return check.error
     return response(check.data)
 }
 
 export async function PATCH(request, { params }) {
+
+    // authorization
+    const session = await auth()
+    if (!session) return response({ error: "Unauthorized" }, 401)
+
+    // get order information
     const { id } = await params
     const { status } = await request.json()
 
-    return handleUpdate(id, db.order, { data: { status } })
+    // Fetch order
+    const order = await db.order.findUnique({ where: { id } })
+    if (!order) return response({ error: "Not Found" }, 404)
+
+    const isAdmin = session.user.role === 'ADMIN'
+
+    // Ownership check FIRST — non-owners must not learn anything about the order
+    if (!isAdmin) {
+        if (order.userId !== session.user.id)
+            return response({ error: "Not Found" }, 404)
+        if (status !== 'CANCELLED')
+            return response({ error: 'Customers may only cancel orders' }, 403)
+    }
+
+    // Terminal order check: CANCELLED and DELIVERED orders cannot be modified
+    if (order.status === 'CANCELLED' || order.status === 'DELIVERED') {
+        return response({ error: "Cannot modify completed or cancelled orders" }, 400)
+    }
+
+    // Prevent reverting a paid/processed order back to PENDING
+    if (order.status !== 'PENDING' && status === 'PENDING') {
+        return response({ error: "Cannot revert a processed order back to pending" }, 400)
+    }
+
+    // Customers can only cancel PENDING orders
+    if (!isAdmin && order.status !== 'PENDING') {
+        return response({ error: 'Only pending orders can be cancelled' }, 400)
+    }
+
+    let updateResponse
+    if (status === 'CANCELLED') {
+        try {
+            // #15: If this order has a Stripe PaymentIntent, verify it hasn't already succeeded
+            // This closes the race window between payment confirmation and webhook arrival
+            if (order.stripePaymentIntentId) {
+                const Stripe = (await import('stripe')).default
+                const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+                try {
+                    const pi = await stripe.paymentIntents.retrieve(order.stripePaymentIntentId)
+                    if (pi.status === 'succeeded') {
+                        return response({
+                            error: 'This order has already been paid. Cancellation is no longer possible. Please contact support for a refund.'
+                        }, 400)
+                    }
+                    // Attempt to cancel the Stripe PaymentIntent if it's still cancellable
+                    if (['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing'].includes(pi.status)) {
+                        await stripe.paymentIntents.cancel(order.stripePaymentIntentId)
+                    }
+                } catch (stripeErr) {
+                    console.error('[Cancel Order] Stripe PI check failed:', stripeErr.message)
+                    // If we can't verify the PI status, err on the side of caution
+                    return response({
+                        error: 'Unable to verify payment status. Please try again or contact support.'
+                    }, 500)
+                }
+            }
+
+            const items = await db.orderItem.findMany({ where: { orderId: id } })
+            
+            // Perform both stock restoration and status update in a single transaction
+            const updatedOrderObj = await db.$transaction(async (tx) => {
+                for (const item of items) {
+                    // #20: Use updateMany so deleted products don't crash the transaction
+                    await tx.product.updateMany({
+                        where: { id: item.productId },
+                        data: { stock: { increment: item.quantity } }
+                    })
+                }
+                
+                return await tx.order.update({
+                    where: { id },
+                    data: { status }
+                })
+            }, {
+                maxWait: 10000, // 10s max wait to acquire connection
+                timeout: 15000  // 15s max execution time
+            })
+            
+            updateResponse = response(updatedOrderObj)
+        } catch (error) {
+            updateResponse = handleApiError(error)
+        }
+    } else {
+        // 1. Perform the update first
+        updateResponse = await handleUpdate(id, db.order, { data: { status } })
+    }
+
+    // 2. If the update was successful, fetch the order data and broadcast
+    if (updateResponse.status === 200) {
+        const updatedOrder = await db.order.findUnique({
+            where: { id },
+            include: {
+                user: { select: { name: true } },
+                items: { include: { product: true } }
+            }
+        })
+
+        if (updatedOrder) {
+            // Notify the customer tracking the order status
+            broadcast.orderStatusChanged(updatedOrder.userId, id, updatedOrder.status, updatedOrder.updatedAt.toISOString())
+
+            // If the order was cancelled, notify the admin dashboard & restore storefront stocks
+            if (updatedOrder.status === 'CANCELLED') {
+                const cName = updatedOrder.user?.name || 'Customer'
+                broadcast.orderCancelled(id, cName, updatedOrder.total)
+
+                if (updatedOrder.items) {
+                    for (const item of updatedOrder.items) {
+                        if (item.product) {
+                            broadcast.stockChanged(item.product.id, item.product.stock, item.product.isAvailable)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return updateResponse
 }
 
 

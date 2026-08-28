@@ -3,6 +3,7 @@ import HeroSection from "@/components/client/HeroSection";
 import Features from "@/components/client/Features";
 import CategoryShowcase from "@/components/client/CategoryShowcase";
 import FeaturedProducts from "@/components/client/FeaturedProducts";
+import RecommendedProducts from "@/components/client/RecommendedProducts";
 import Decorations from "@/components/client/Decorations";
 import { CategoryShowcaseSkeleton, FeaturedProductsSkeleton } from "@/components/shared/Skeletons";
 
@@ -26,6 +27,10 @@ export default function HomePage() {
 
       <Suspense fallback={<FeaturedProductsSkeleton />}>
         <FeaturedProducts />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsSkeleton />}>
+        <RecommendedProducts />
       </Suspense>
     </div>
   );

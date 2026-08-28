@@ -1,16 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, Star, Clock, ShieldCheck, Leaf, ShoppingCart, Minus, Plus, ShoppingBag, ShoppingBasket } from 'lucide-react'
 import AddToCartButton from '@/components/client/AddToCartButton'
+import ProductCard from '@/components/client/ProductCard'
+import { ProductCardSkeleton } from '@/components/shared/Skeletons'
 import { useCart } from '@/hooks/useCart'
+import { formatCurrency } from '@/lib/utils'
 
 export default function ProductDetailClient({ product }) {
   const { cartItems, isAuthenticated, isLoading } = useCart()
   const images = Array.isArray(product.images) ? product.images.filter(Boolean) : []
   const [activeImage, setActiveImage] = useState(images[0] || '')
   const [quantity, setQuantity] = useState(1)
+  const [recommendations, setRecommendations] = useState([])
+  const [loadingRecs, setLoadingRecs] = useState(true)
+
+  useEffect(() => {
+    async function fetchRecommendations() {
+      try {
+        const res = await fetch(`/api/products/recommendations?type=related&productId=${product.id}&limit=4`)
+        if (res.ok) {
+          const data = await res.json()
+          setRecommendations(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch recommendations:', err)
+      } finally {
+        setLoadingRecs(false)
+      }
+    }
+    if (product?.id) {
+      fetchRecommendations()
+    }
+  }, [product?.id])
 
   const inStock = product.isAvailable && Number(product.stock ?? 0) > 0
   const price = Number(product.price ?? 0)
@@ -91,7 +115,7 @@ export default function ProductDetailClient({ product }) {
 
             <div className="flex flex-wrap items-end gap-3 pt-1">
               <div className="flex items-end gap-2">
-                <p className="text-3xl font-black text-amber-600 dark:text-amber-500">${price.toFixed(2)}</p>
+                <p className="text-3xl font-black text-amber-600 dark:text-amber-500">{formatCurrency(price)}</p>
                 <p className="mb-1 text-[11px] font-bold text-[var(--bakery-text-muted)]">per treat</p>
               </div>
 
@@ -105,7 +129,7 @@ export default function ProductDetailClient({ product }) {
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500/80">Baker's Description</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500/80">Baker&apos;s Description</h3>
             <p className="text-base leading-relaxed text-[var(--bakery-text)] font-medium">
               {product.description || "Our artisanal creation, baked fresh daily using premium local ingredients and a secret family recipe passed down through generations."}
             </p>
@@ -134,6 +158,10 @@ export default function ProductDetailClient({ product }) {
                 <label className="text-[10px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)] opacity-60">Quantity</label>
                 {isLoading ? (
                   <div className="h-10 w-24 animate-pulse rounded-xl bg-amber-100/80" />
+                ) : isFullyStockedInCart ? (
+                  <div className="flex items-center rounded-xl border-2 border-amber-500/20 bg-amber-500/10 px-3 py-1.5 w-fit">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-500">Maximum stock in cart</span>
+                  </div>
                 ) : (
                   <div className="flex items-center rounded-xl border-2 border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-0.5 w-fit">
                     <button
@@ -143,7 +171,7 @@ export default function ProductDetailClient({ product }) {
                     >
                       <Minus size={14} />
                     </button>
-                    <span className="min-w-8 text-center text-sm font-black text-[var(--bakery-text)]">{isFullyStockedInCart ? 0 : quantity}</span>
+                    <span className="min-w-8 text-center text-sm font-black text-[var(--bakery-text)]">{quantity}</span>
                     <button
                       onClick={() => setQuantity(Math.min(remainingStock, quantity + 1))}
                       disabled={isFullyStockedInCart || quantity >= remainingStock}
@@ -162,8 +190,8 @@ export default function ProductDetailClient({ product }) {
                 <p className="text-[10px] font-bold text-[var(--bakery-text-muted)]">
                   {inStock 
                     ? (isFullyStockedInCart 
-                        ? 'All available stock is in your basket' 
-                        : `${remainingStock} more available`) 
+                      ? 'All available stock is in your basket' 
+                      : `${remainingStock} more available`) 
                     : 'Baking more soon!'}
                 </p>
               </div>
@@ -182,13 +210,41 @@ export default function ProductDetailClient({ product }) {
 
           {/* Baker's Note Box */}
           <div className="rounded-2xl bg-amber-50 dark:bg-zinc-800/50 p-5 border-2 border-white dark:border-zinc-800 shadow-sm">
-            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Baker's Note</p>
+            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Baker&apos;s Note</p>
             <p className="text-xs font-medium italic text-[var(--bakery-text)]">
-              "This treat is best enjoyed warm with a cup of our signature honey tea. Keep stored in a cool, dry place for up to 3 days."
+              &ldquo;This treat is best enjoyed warm with a cup of our signature honey tea. Keep stored in a cool, dry place for up to 3 days.&rdquo;
             </p>
           </div>
         </div>
       </div>
+
+      {/* Related Products Section */}
+      {!loadingRecs && recommendations.length > 0 && (
+        <div className="mt-16 border-t border-amber-100/50 dark:border-zinc-800/50 pt-12">
+          <div className="mb-8 space-y-1">
+            <h2 className="text-2xl font-extrabold text-[var(--bakery-text)]">You May Also Like</h2>
+            <p className="text-sm text-[var(--bakery-text-muted)]">Delicious additions that complement this treat</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+            {recommendations.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
+        </div>
+      )}
+      {loadingRecs && (
+        <div className="mt-16 border-t border-amber-100/50 dark:border-zinc-800/50 pt-12">
+          <div className="mb-8 space-y-1">
+            <h2 className="text-2xl font-extrabold text-[var(--bakery-text)]">You May Also Like</h2>
+            <p className="text-sm text-[var(--bakery-text-muted)]">Delicious additions that complement this treat</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -5,10 +5,13 @@ import { response, handleApiError } from '@/lib/utils'
 
 export async function POST(request){
   try {
-    const {name, email, password} = await request.json()
+    const body = await request.json()
+    const name = body.name?.trim() ?? ''
+    const email = body.email?.trim() ?? ''
+    const password = body.password ?? '' // Passwords shouldn't be trimmed but shouldn't be only whitespace either
 
-    if (!name || !email || !password){
-      return response({ error: 'Missing required fields'}, 400)
+    if (!name || !email || !password || password.trim() === '') {
+      return response({ error: 'Missing required fields' }, 400)
     }
 
     // Basic email regex

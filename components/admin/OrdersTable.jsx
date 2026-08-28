@@ -5,6 +5,8 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useToast } from '@/context/ToastContext'
 import { ChevronLeft, ChevronRight, ChevronDown, Check, Loader2, Calendar, ShoppingBag, User, Hash } from 'lucide-react'
 import OrderModal from './OrderModal'
+import { usePusher } from '@/hooks/usePusher'
+import UserAvatar from '@/components/shared/UserAvatar'
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -57,8 +59,10 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
   const ref = useRef(null)
   const cfg = STATUS_CONFIG[currentStatus] ?? { bg: 'bg-gray-50', border: 'border-gray-100', text: 'text-gray-700', dot: 'bg-gray-400', label: currentStatus }
 
+  const isTerminal = currentStatus === 'CANCELLED' || currentStatus === 'DELIVERED'
+
   useEffect(() => {
-    if (!open) return
+    if (!open || isTerminal) return
     
     // Check if we should open upwards
     if (ref.current) {
@@ -79,7 +83,7 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
       document.removeEventListener('mousedown', handler)
       window.removeEventListener('scroll', scrollHandler, true)
     }
-  }, [open, onOpenChange])
+  }, [open, onOpenChange, isTerminal])
 
   const handleSelect = (status) => {
     setOpen(false)
@@ -90,19 +94,20 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
     <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
-        disabled={isUpdating}
+        disabled={isUpdating || isTerminal}
         onClick={() => setOpen((v) => !v)}
         className={`
           inline-flex items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-xs font-bold
+          min-w-[130px]
           transition-all active:scale-95
           disabled:cursor-not-allowed disabled:opacity-60
           ${cfg.bg} ${cfg.border} ${cfg.text}
           ${open ? 'ring-2 ring-amber-100' : ''}
         `}
       >
-        {isUpdating ? <Loader2 size={12} className="animate-spin" /> : <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />}
-        <span>{cfg.label}</span>
-        <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        {isUpdating ? <Loader2 size={12} className="animate-spin" /> : <span className={`h-2 w-2 shrink-0 rounded-full ${cfg.dot}`} />}
+        <span className="flex-1 text-left">{cfg.label}</span>
+        {!isTerminal && <ChevronDown size={12} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />}
       </button>
 
       {open && (
@@ -111,7 +116,11 @@ function StatusDropdown({ orderId, currentStatus, onStatusChange, isUpdating, on
           ${openUp ? 'bottom-full mb-2' : 'top-full mt-1.5'}
         `}>
           <div className="p-1.5 space-y-0.5">
-            {ALL_STATUSES.map((status) => {
+            {ALL_STATUSES.filter(status => {
+              // Cannot revert back to PENDING once the order has moved past it
+              if (currentStatus !== 'PENDING' && status === 'PENDING') return false
+              return true
+            }).map((status) => {
               const c = STATUS_CONFIG[status]
               const isSelected = status === currentStatus
               return (
@@ -246,6 +255,50 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
   // Modal state
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [recentOrderIds, setRecentOrderIds] = useState([])
+
+  // Real-time listener for customer updates
+  const { client } = usePusher()
+
+  useEffect(() => {
+    if (!client) return
+    const channel = client.subscribe('private-admin')
+
+    const handleCancel = (data) => {
+      // 1. Update the table status in-place instantly
+      setLocalStatus((prev) => ({ ...prev, [data.id]: 'CANCELLED' }))
+
+      // 2. If the modal is currently open for this order, update the modal status
+      setSelectedOrder((prev) => {
+        if (prev && prev.id === data.id) {
+          return { ...prev, status: 'CANCELLED' }
+        }
+        return prev
+      })
+
+      // 3. Re-sync with server
+      router.refresh()
+    }
+
+    const handleNewOrder = (data) => {
+      if (data?.id) {
+        setRecentOrderIds((prev) => [...prev, data.id])
+        setTimeout(() => {
+          setRecentOrderIds((prev) => prev.filter((id) => id !== data.id))
+        }, 6000)
+      }
+      // Re-sync with server to pull the new order row
+      router.refresh()
+    }
+
+    channel.bind('order-cancelled', handleCancel)
+    channel.bind('new-order', handleNewOrder)
+
+    return () => {
+      channel.unbind('order-cancelled', handleCancel)
+      channel.unbind('new-order', handleNewOrder)
+    }
+  }, [client, router])
 
   // Current filter values from URL
   const currentMonth = searchParams.get('month') || ''
@@ -289,6 +342,12 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
   const normalizedOrders = useMemo(() => (Array.isArray(orders) ? orders : []), [orders])
 
   const handleStatusChange = async (orderId, newStatus) => {
+    if (newStatus === 'CANCELLED') {
+      if (!window.confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+        return;
+      }
+    }
+    
     const prevStatus = localStatus[orderId] ?? normalizedOrders.find(o => o.id === orderId)?.status
     setPendingOrderId(orderId)
     setLocalStatus((prev) => ({ ...prev, [orderId]: newStatus }))
@@ -323,6 +382,19 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
 
   return (
     <div className="space-y-4">
+      <style>{`
+        @keyframes highlightFade {
+          0% {
+            background-color: rgba(245, 158, 11, 0.25);
+          }
+          100% {
+            background-color: transparent;
+          }
+        }
+        .animate-row-highlight {
+          animation: highlightFade 6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
       {!compact && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1">
           <div className="flex items-baseline gap-2">
@@ -352,16 +424,16 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
 
       <div className="rounded-3xl border border-amber-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-900/5">
         <div className={`overflow-x-auto rounded-3xl ${normalizedOrders.length > 0 && normalizedOrders.length < 5 ? 'min-h-[420px]' : ''}`}>
-          <table className="min-w-full text-left text-sm">
+          <table className="w-full min-w-[820px] table-fixed text-left text-sm">
             <thead className="bg-amber-50/40 dark:bg-zinc-800/50 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--bakery-text-muted)]">
               <tr>
-                <th className="px-6 py-4">Order ID</th>
-                <th className="px-6 py-4">Customer</th>
-                {!compact && <th className="px-6 py-4">Date</th>}
-                <th className="px-6 py-4 text-center">Items</th>
-                <th className="px-6 py-4">Total</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-center">Action</th>
+                <th className="px-6 py-4 w-[110px]">Order ID</th>
+                <th className="px-6 py-4 w-[210px]">Customer</th>
+                {!compact && <th className="px-6 py-4 w-[110px]">Date</th>}
+                <th className="px-6 py-4 text-center w-[70px]">Items</th>
+                <th className="px-6 py-4 w-[100px]">Total</th>
+                <th className="px-6 py-4 text-center w-[120px]">Status</th>
+                <th className="px-6 py-4 text-center w-[150px]">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-amber-50 dark:divide-zinc-800">
@@ -375,11 +447,21 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                 normalizedOrders.map((order) => {
                   const currentStatus = localStatus[order.id] ?? order.status
                   const isUpdating = pendingOrderId === order.id
+                  const isNew = recentOrderIds.includes(order.id)
                   return (
                     <tr
                       key={order.id}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`View order ${order.id.slice(0, 8).toUpperCase()} details`}
                       onClick={() => openOrderDetails({ ...order, status: currentStatus })}
-                      className={`group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30 ${openDropdownId === order.id ? 'relative z-50' : ''}`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          openOrderDetails({ ...order, status: currentStatus })
+                        }
+                      }}
+                      className={`group cursor-pointer transition-colors hover:bg-amber-50/40 dark:hover:bg-zinc-800/30 focus:outline-none focus:ring-2 focus:ring-amber-400 ${isNew ? 'animate-row-highlight' : ''} ${openDropdownId === order.id ? 'relative z-50' : ''}`}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -391,9 +473,7 @@ export default function OrdersTable({ orders = [], page = 1, totalPages = 1, tot
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-50 dark:bg-zinc-800 text-[10px] font-black text-amber-700 dark:text-amber-400">
-                            {order.user?.name?.charAt(0) || <User size={12} />}
-                          </div>
+                          <UserAvatar src={order.user?.image} name={order.user?.name} sizeClass="h-8 w-8 text-[10px]" />
                           <div>
                             <p className="font-black text-[var(--bakery-text)]">{order.user?.name || 'Guest'}</p>
                             <p className="text-[10px] font-bold text-[var(--bakery-text-muted)] lowercase">{order.user?.email}</p>

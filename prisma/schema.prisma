@@ -88,6 +88,9 @@ model Product {
 
   orderItems  OrderItem[]
   cartItems   CartItem[]
+
+  @@index([categoryId])
+  @@index([isAvailable])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,6 +114,10 @@ model Order {
   user      User        @relation(fields: [userId], references: [id])
 
   items     OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -131,6 +138,9 @@ model OrderItem {
 
   productId String
   product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -150,7 +160,8 @@ model CartItem {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+  @@index([userId])
 }

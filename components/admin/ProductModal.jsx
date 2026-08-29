@@ -20,11 +20,12 @@ function toSlug(value) {
 }
 
 // ── Custom Category Dropdown ────────────────────────────────────────────────
-function CategoryDropdown({ categories, value, onChange, error }) {
+function CategoryDropdown({ categories = [], value, onChange, error }) {
   const [open, setOpen] = useState(false)
   const [openUp, setOpenUp] = useState(false)
   const ref = useRef(null)
-  const selected = categories.find((c) => c.id === value)
+  const categoryList = Array.isArray(categories) ? categories : []
+  const selected = categoryList.find((c) => c.id === value)
 
   useEffect(() => {
     if (!open) return
@@ -65,7 +66,7 @@ function CategoryDropdown({ categories, value, onChange, error }) {
           ${openUp ? 'bottom-full mb-2' : 'top-full mt-1.5'}
         `}>
           <div className="max-h-48 overflow-y-auto p-1.5 space-y-0.5">
-            {categories.map((cat) => {
+            {categoryList.map((cat) => {
               const isSelected = cat.id === value
               return (
                 <button
@@ -132,7 +133,14 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
     }
   }, [isOpen, product, reset, defaultValues])
 
-  if (!isOpen || !mounted) return null
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
 
   const onSubmit = async (values) => {
     setFormError('')
@@ -170,15 +178,6 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
       addToast('Network error.', 'error')
     }
   }
-
-  useEffect(() => {
-    if (!isOpen) return
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
 
   if (!isOpen || !mounted) return null
 
@@ -225,9 +224,10 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
               <label className="block space-y-1">
                 <span className="text-xs font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Slug</span>
                 <input
-                  {...register('slug', { required: 'Slug is required', validate: slugPattern })}
+                  {...register('slug', { required: 'Slug is required', validate: (v) => slugPattern(v) || 'Only lowercase letters, numbers, and hyphens allowed' })}
                   className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                 />
+                {errors.slug && <p className="text-[10px] font-bold text-red-500">{errors.slug.message}</p>}
               </label>
 
               <div className="grid grid-cols-2 gap-4">
@@ -235,17 +235,19 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                   <span className="text-xs font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Price ($)</span>
                   <input
                     type="number" step="0.01"
-                    {...register('price', { required: true, min: 0.01 })}
+                    {...register('price', { required: 'Price is required', min: { value: 0.01, message: 'Min price is $0.01' } })}
                     className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                   />
+                  {errors.price && <p className="text-[10px] font-bold text-red-500">{errors.price.message}</p>}
                 </label>
                 <label className="block space-y-1">
                   <span className="text-xs font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Stock</span>
                   <input
                     type="number"
-                    {...register('stock', { required: true, min: 0 })}
+                    {...register('stock', { required: 'Stock is required', min: { value: 0, message: 'Min stock is 0' } })}
                     className="w-full rounded-xl border-2 border-amber-100 dark:border-zinc-700 bg-amber-50/30 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                   />
+                  {errors.stock && <p className="text-[10px] font-bold text-red-500">{errors.stock.message}</p>}
                 </label>
               </div>
 
@@ -254,11 +256,12 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
                 <Controller
                   name="categoryId"
                   control={control}
-                  rules={{ required: true }}
+                  rules={{ required: 'Please select a category' }}
                   render={({ field }) => (
                     <CategoryDropdown categories={categories} value={field.value} onChange={field.onChange} error={errors.categoryId} />
                   )}
                 />
+                {errors.categoryId && <p className="text-[10px] font-bold text-red-500">{errors.categoryId.message}</p>}
               </div>
             </div>
 
@@ -296,10 +299,11 @@ export default function ProductModal({ isOpen, onClose, product, categories = []
               <label className="block space-y-1">
                 <span className="text-xs font-black uppercase tracking-widest text-[var(--bakery-text-muted)]">Description</span>
                 <textarea
-                  {...register('description', { required: true })}
+                  {...register('description', { required: 'Description is required' })}
                   rows={4}
                   className="w-full rounded-xl border-2 border-amber-50 dark:border-zinc-800 bg-amber-50/20 dark:bg-zinc-800/50 px-3 py-2 text-sm font-semibold text-[var(--bakery-text)] outline-none focus:border-amber-400 focus:bg-white dark:focus:bg-zinc-800"
                 />
+                {errors.description && <p className="text-[10px] font-bold text-red-500">{errors.description.message}</p>}
               </label>
 
               <label className="flex items-center gap-2 text-xs font-bold text-[var(--bakery-text-muted)]">

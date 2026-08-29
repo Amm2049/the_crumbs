@@ -220,6 +220,7 @@ const statusClasses = {
 | **#7 Final Launch Review — Phase 2: Honey & Cream Theme & WCAG AA** | `context/ToastContext.jsx`, `components/client/ShopProductsClient.jsx`, `components/shared/UserAvatar.jsx`, `components/client/Navbar.jsx`, `components/admin/AdminNavbar.jsx`, `components/client/OrderDetailModal.jsx`, `components/admin/ProductModal.jsx`, `components/admin/OrderModal.jsx`, `components/admin/CategoriesManager.jsx` |
 | **#8 Final Launch Review — Phase 3: Security Hardening & Error Masking** | `proxy.js`, `lib/utils.js`, `lib/api-helper.js`, `app/api/orders/route.js` |
 | **#9 API Helper Refactoring & Prisma Indexing** | `lib/api-helper.js`, `prisma/schema.prisma`, `app/api/products/route.js`, `app/api/orders/route.js`, `app/api/admin/customers/route.js` |
+| **#10 Admin Product Modal Hook & Validation Fix** | `components/admin/ProductModal.jsx`, `app/api/products/[id]/route.js` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -274,6 +275,7 @@ const statusClasses = {
 - **Phase 2 (Honey & Cream Theme & WCAG 2.1 AA)**: Added dark mode overrides (`dark:bg-zinc-900`, `dark:border-zinc-800`) to toast notifications and search reset controls. Unified profile avatars across storefront and admin navbars using `<UserAvatar />` for automatic Google OAuth picture error fallbacks. Upgraded all modals (`OrderDetailModal`, `ProductModal`, `OrderModal`, `CategoriesManager`) with WCAG `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, and `Escape` key dismissal listeners. Configured `ToastContext` with `aria-live="polite"` live region announcements.
 - **Phase 3 (Security Hardening & Error Masking)**: Configured Next.js 16 Edge proxy route protection (`proxy.js`) for `/admin/*`, `/cart`, `/orders/*`, `/profile`, and `/api/*` endpoints. Masked raw 500 server error stack traces in `lib/utils.js` (`console.error('[API Error]:', error)` returning generic 500 JSON). Added explicit session auth checks to `POST /api/orders` and `OwnershipCheck` in `lib/api-helper.js` returning clean 401 Unauthorized responses.
 - **API Helper Refactoring & Prisma Database Indexes**: Created `parsePagination`, `withAuth`, and `withAdmin` utilities in `lib/api-helper.js`. Added foreign key & filter indexes in `prisma/schema.prisma` (`Product.@@index([categoryId, isAvailable])`, `Order.@@index([userId, status, createdAt])`, `OrderItem.@@index([orderId, productId])`, `CartItem.@@index([userId])`) and enabled `onDelete: Cascade` on `CartItem.product`.
+- **Admin Product Modal Hook & Validation Fix**: Reorganized `ProductModal.jsx` hooks to strictly follow React Rules of Hooks, eliminating premature conditional returns before the `useEffect` Escape key handler. Added defensive `Array.isArray` guards for category dropdowns and inline form validation error messages for `slug`, `price`, `stock`, `categoryId`, and `description`. Removed stray `console.log(id)` from single product GET endpoint.
 
 ---
 
@@ -314,4 +316,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-08-28 — Final Product Launch Review (Phases 1-3) completed.
+> Last updated: 2026-08-29 — Admin Product Modal Hook & Validation Fix completed.

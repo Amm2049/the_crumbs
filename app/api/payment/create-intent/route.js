@@ -4,12 +4,18 @@ import db from '@/lib/db';
 import { APP_CONFIG } from '@/lib/config';
 import { response } from '@/lib/api-helper';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
 export async function POST(request) {
     try {
         const session = await auth()
         if (!session) return response({ error: 'Unauthorized' }, 401)
+
+        const secretKey = process.env.STRIPE_SECRET_KEY
+        if (!secretKey) {
+            console.error('[Stripe Config Error]: STRIPE_SECRET_KEY is missing from environment variables.')
+            return response({ error: 'Payment service is temporarily unavailable. Please try again later.' }, 500)
+        }
+
+        const stripe = new Stripe(secretKey)
 
         const { orderId } = await request.json()
         if (!orderId) return response({ error: 'Missing orderId' }, 400);

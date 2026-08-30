@@ -1,62 +1,81 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, RefreshCw, ShoppingBag, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import StripePaymentForm from '@/components/client/payment/StripePaymentForm';
 import { formatCurrency } from '@/lib/utils';
 import { useTheme } from 'next-themes';
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 export default function PayPage() {
     const router = useRouter();
     const { id: orderId } = useParams();
     const { resolvedTheme } = useTheme();
 
+    const [stripePromise, setStripePromise] = useState(null);
     const [clientSecret, setClientSecret] = useState(null);
     const [order, setOrder] = useState(null);
     const [error, setError] = useState(null);
+    const [devHint, setDevHint] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const isDark = resolvedTheme === 'dark';
 
-    useEffect(() => {
-        async function initCheckout() {
-            try {
-                // 1. Fetch Order Details from DB
-                const orderRes = await fetch(`/api/orders/${orderId}`);
-                if (!orderRes.ok) throw new Error('Order not found');
-                const orderData = await orderRes.json();
-                setOrder(orderData);
+    const initCheckout = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        setDevHint(null);
 
-                if (orderData.status !== 'PENDING') {
-                    router.push('/orders');
-                    return;
-                }
-
-                // 2. Fetch Payment Client Secret from Backend
-                const paymentRes = await fetch('/api/payment/create-intent', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderId }),
-                });
-
-                const data = await paymentRes.json();
-                if (!paymentRes.ok) throw new Error(data.error || 'Failed to initialize payment');
-
-                setClientSecret(data.clientSecret);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
+        try {
+            // 1. Fetch Order Details from DB
+            const orderRes = await fetch(`/api/orders/${orderId}`);
+            if (!orderRes.ok) {
+                const orderErr = await orderRes.json().catch(() => ({}));
+                throw new Error(orderErr.error || 'We could not find this order. It may have already been cancelled.');
             }
-        }
+            const orderData = await orderRes.json();
+            setOrder(orderData);
 
-        if (orderId) initCheckout();
+            if (orderData.status !== 'PENDING') {
+                router.push('/orders');
+                return;
+            }
+
+            // 2. Fetch Payment Client Secret & Publishable Key from Backend
+            const paymentRes = await fetch('/api/payment/create-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId }),
+            });
+
+            const data = await paymentRes.json();
+            if (!paymentRes.ok) {
+                throw new Error(data.error || 'Payment service is temporarily unavailable. Please try again later.');
+            }
+
+            const publishableKey = data.publishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+
+            if (!publishableKey || typeof publishableKey !== 'string') {
+                console.error('[Stripe Config Error]: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not configured in .env or Vercel environment variables.');
+                setDevHint('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is missing in your .env or Vercel environment variables.');
+                throw new Error('We are having trouble connecting to our payment provider right now. Please try again in a few moments.');
+            }
+
+            setStripePromise(loadStripe(publishableKey));
+            setClientSecret(data.clientSecret);
+        } catch (err) {
+            setError(err.message || 'Unable to load payment details.');
+        } finally {
+            setLoading(false);
+        }
     }, [orderId, router]);
+
+    useEffect(() => {
+        if (orderId) initCheckout();
+    }, [orderId, initCheckout]);
 
     if (loading) {
         return (
@@ -69,12 +88,43 @@ export default function PayPage() {
 
     if (error || !order) {
         return (
-            <div className="mx-auto max-w-md text-center py-20 px-6">
-                <h2 className="text-2xl font-black text-red-500 mb-4">Error</h2>
-                <p className="text-sm text-[var(--bakery-text-muted)] mb-8">{error || 'Unable to load payment details.'}</p>
-                <Link href="/orders" className="inline-flex rounded-xl bg-amber-500 text-white font-bold py-3 px-6 hover:bg-amber-600 transition-colors">
-                    Return to Orders
-                </Link>
+            <div className="mx-auto max-w-lg text-center py-16 px-6">
+                <div className="rounded-[2.5rem] border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 shadow-2xl shadow-amber-900/5">
+                    <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 dark:bg-zinc-800 text-amber-600 dark:text-amber-400">
+                        <AlertCircle size={32} />
+                    </div>
+
+                    <h2 className="text-2xl font-black text-[var(--bakery-text)] mb-3">
+                        Payment Temporarily Unavailable
+                    </h2>
+                    <p className="text-sm leading-relaxed text-[var(--bakery-text-muted)] mb-8">
+                        {error || 'We are having trouble preparing your payment at this moment. Please try again or check your orders.'}
+                    </p>
+
+                    {devHint && process.env.NODE_ENV === 'development' && (
+                        <div className="mb-6 rounded-xl border border-amber-200 dark:border-zinc-700 bg-amber-50/50 dark:bg-zinc-800/60 p-3.5 text-left text-xs font-mono text-amber-800 dark:text-amber-300">
+                            <span className="font-bold">🔧 Dev Hint:</span> {devHint}
+                        </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                            type="button"
+                            onClick={initCheckout}
+                            className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 py-3.5 text-sm font-black text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                            <RefreshCw size={16} />
+                            Try Again
+                        </button>
+                        <Link
+                            href="/orders"
+                            className="flex-1 flex items-center justify-center gap-2 rounded-2xl border-2 border-amber-100 dark:border-zinc-700 bg-white dark:bg-zinc-800 py-3.5 text-sm font-black text-[var(--bakery-text)] transition-all hover:bg-amber-50 dark:hover:bg-zinc-700"
+                        >
+                            <ShoppingBag size={16} />
+                            View Orders
+                        </Link>
+                    </div>
+                </div>
             </div>
         );
     }

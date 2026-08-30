@@ -14,6 +14,7 @@ const fetcher = async (url) => {
 
 // Module-level pending sync tracker for debounced quantity updates
 const pendingSyncs = new Map()
+const syncVersions = new Map()
 
 /** Main Cart Hook - Manages all basket operations */
 export function useCart() {
@@ -93,8 +94,13 @@ export function useCart() {
         clearTimeout(pendingSyncs.get(itemId).timer)
         pendingSyncs.delete(itemId)
       }
+      syncVersions.delete(itemId)
       return removeItem(itemId)
     }
+
+    // Increment version counter for this item to invalidate any in-flight older requests
+    const currentVersion = (syncVersions.get(itemId) || 0) + 1
+    syncVersions.set(itemId, currentVersion)
 
     // 1. Immediately update UI optimistically in SWR cache
     await mutate(
@@ -125,15 +131,21 @@ export function useCart() {
           }
 
           const updated = await response.json()
-          await mutate(
-            (current = []) =>
-              current.map(item => (item.id === itemId ? { ...item, ...updated } : item)),
-            { revalidate: false }
-          )
+
+          // Only merge server response into cache if no newer clicks have happened since
+          if (syncVersions.get(itemId) === currentVersion) {
+            await mutate(
+              (current = []) =>
+                current.map(item => (item.id === itemId ? { ...item, ...updated } : item)),
+              { revalidate: false }
+            )
+          }
         } catch (err) {
-          addToast(err.message || 'Could not update quantity. Please try again. 🍯', 'error')
-          // Rollback to authoritative server state on error
-          await mutate()
+          if (syncVersions.get(itemId) === currentVersion) {
+            addToast(err.message || 'Could not update quantity. Please try again. 🍯', 'error')
+            // Rollback to authoritative server state on error
+            await mutate()
+          }
         } finally {
           resolve()
         }
@@ -158,6 +170,7 @@ export function useCart() {
       clearTimeout(pendingSyncs.get(itemId).timer)
       pendingSyncs.delete(itemId)
     }
+    syncVersions.delete(itemId)
 
     try {
       await mutate(

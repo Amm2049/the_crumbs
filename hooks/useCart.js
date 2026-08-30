@@ -12,6 +12,9 @@ const fetcher = async (url) => {
   return Array.isArray(payload) ? payload : []
 }
 
+// Module-level pending sync tracker for debounced quantity updates
+const pendingSyncs = new Map()
+
 /** Main Cart Hook - Manages all basket operations */
 export function useCart() {
   const { data: session, status } = useSession()
@@ -22,6 +25,13 @@ export function useCart() {
     // prevents unnecessary background refreshes every time the user switches tabs
     { revalidateOnFocus: false }
   )
+
+  /** Flushes all pending debounced quantity syncs immediately to the server */
+  const flushCartSync = async () => {
+    if (pendingSyncs.size === 0) return
+    const executions = Array.from(pendingSyncs.values()).map(p => p.execute())
+    await Promise.all(executions)
+  }
 
   /** Adds an item to the basket or increases quantity */
   const addToCart = async (productId, quantity = 1) => {
@@ -76,39 +86,79 @@ export function useCart() {
     }
   }
 
-  /** Updates the quantity of a specific item */
+  /** Updates the quantity of a specific item with debounced server sync */
   const updateQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) {
+      if (pendingSyncs.has(itemId)) {
+        clearTimeout(pendingSyncs.get(itemId).timer)
+        pendingSyncs.delete(itemId)
+      }
       return removeItem(itemId)
     }
 
-    try {
-      await mutate(
-        async (current = []) => {
+    // 1. Immediately update UI optimistically in SWR cache
+    await mutate(
+      (current = []) =>
+        current.map(item => (item.id === itemId ? { ...item, quantity: newQuantity } : item)),
+      { revalidate: false }
+    )
+
+    // 2. Clear any previous pending debounce timer for this item
+    if (pendingSyncs.has(itemId)) {
+      clearTimeout(pendingSyncs.get(itemId).timer)
+    }
+
+    // 3. Setup debounced server sync
+    return new Promise((resolve) => {
+      const syncToServer = async () => {
+        pendingSyncs.delete(itemId)
+        try {
           const response = await fetch(`/api/cart/${itemId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ quantity: newQuantity }),
           })
 
-          if (!response.ok) throw new Error('Failed to update')
+          if (!response.ok) {
+            const errPayload = await response.json().catch(() => ({}))
+            throw new Error(errPayload.error || 'Failed to update quantity')
+          }
+
           const updated = await response.json()
-          return current.map(item => item.id === itemId ? { ...item, ...updated } : item)
-        },
-        {
-          optimisticData: (current = []) =>
-            current.map(item => item.id === itemId ? { ...item, quantity: newQuantity } : item),
-          rollbackOnError: true,
-          revalidate: false,
+          await mutate(
+            (current = []) =>
+              current.map(item => (item.id === itemId ? { ...item, ...updated } : item)),
+            { revalidate: false }
+          )
+        } catch (err) {
+          addToast(err.message || 'Could not update quantity. Please try again. 🍯', 'error')
+          // Rollback to authoritative server state on error
+          await mutate()
+        } finally {
+          resolve()
         }
-      )
-    } catch (err) {
-      addToast('Could not update quantity. Please try again. 🍯', 'error')
-    }
+      }
+
+      const timer = setTimeout(syncToServer, 400)
+
+      pendingSyncs.set(itemId, {
+        timer,
+        targetQuantity: newQuantity,
+        execute: async () => {
+          clearTimeout(timer)
+          return syncToServer()
+        },
+      })
+    })
   }
 
   /** Removes an item completely from the basket */
   const removeItem = async (itemId) => {
+    if (pendingSyncs.has(itemId)) {
+      clearTimeout(pendingSyncs.get(itemId).timer)
+      pendingSyncs.delete(itemId)
+    }
+
     try {
       await mutate(
         async (current = []) => {
@@ -118,6 +168,7 @@ export function useCart() {
           return current.filter(item => item.id !== itemId)
         },
         {
+          optimisticData: (current = []) => current.filter(item => item.id !== itemId),
           rollbackOnError: true,
           revalidate: false,
         }
@@ -132,6 +183,7 @@ export function useCart() {
     addToCart,
     updateQuantity,
     removeItem,
+    flushCartSync,
     mutate,
     isLoading: (isLoading && !!session) || status === 'loading',
     isAuthenticated: !!session,

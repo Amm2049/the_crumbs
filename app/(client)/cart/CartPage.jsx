@@ -14,7 +14,7 @@ import { useToast } from '@/context/ToastContext'
 export default function CartPage() {
   const router = useRouter()
   const { addToast } = useToast()
-  const { cartItems, isLoading, removeItem, updateQuantity, mutate } = useCart()
+  const { cartItems, isLoading, removeItem, updateQuantity, flushCartSync, mutate } = useCart()
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [placeOrderError, setPlaceOrderError] = useState('')
@@ -52,7 +52,7 @@ export default function CartPage() {
   const totalItems = cartItems.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0)
 
   // Step 1: validate, then show confirmation modal
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (isPlacingOrder || isSuccess) return
     setPlaceOrderError('')
     setAddressError('')
@@ -60,6 +60,10 @@ export default function CartPage() {
     if (!address.trim()) {
       setAddressError('Please enter a delivery address before placing your order.')
       return
+    }
+
+    if (flushCartSync) {
+      await flushCartSync()
     }
 
     const invalidItems = cartItems.filter(item => {
@@ -81,6 +85,10 @@ export default function CartPage() {
     setIsPlacingOrder(true)
 
     try {
+      if (flushCartSync) {
+        await flushCartSync()
+      }
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

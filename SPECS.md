@@ -281,6 +281,7 @@ const statusClasses = {
 ### Debounced Optimistic Cart Quantity Updates — Key Details
 - **Optimistic SWR Cache Updates**: Increments and decrements immediately update local cache with `{ revalidate: false }`, dynamically recalculating item totals and order totals at 60fps.
 - **400ms Debounce Sync**: Debounces `PATCH /api/cart/[id]` requests using a module-level tracker, resetting the timer on rapid consecutive clicks and transmitting only the final accumulated quantity.
+- **In-Flight Race Condition Protection**: Employs an incremental version counter (`syncVersions`) per item so that responses from earlier in-flight requests that resolve after newer rapid clicks cannot overwrite or bounce back the local optimistic state.
 - **Error Rollback**: Reverts local UI state and alerts the user with a toast message if the server rejects the quantity (e.g. stock unavailability).
 - **Flushing Sync on Order**: Employs `flushCartSync()` before order placement or confirmation to commit pending updates before checking out.
 - **Non-blocking Stepper Controls**: Removed loading lockouts on `+` and `-` buttons in `CartItemRow.jsx` while respecting stock boundaries (`quantity >= maxStock` and `quantity <= 1`).

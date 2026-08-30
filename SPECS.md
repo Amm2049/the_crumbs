@@ -222,6 +222,7 @@ const statusClasses = {
 | **#9 API Helper Refactoring & Prisma Indexing** | `lib/api-helper.js`, `prisma/schema.prisma`, `app/api/products/route.js`, `app/api/orders/route.js`, `app/api/admin/customers/route.js` |
 | **#10 Admin Product Modal Hook & Validation Fix** | `components/admin/ProductModal.jsx`, `app/api/products/[id]/route.js` |
 | **#11 Debounced Optimistic Cart Quantity Updates** | `hooks/useCart.js`, `components/client/CartItemRow.jsx`, `app/(client)/cart/CartPage.jsx` |
+| **#12 Stripe Safe Dynamic Initialization & Error Hardening** | `app/(client)/checkout/[id]/pay/page.js`, `app/api/payment/create-intent/route.js` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -262,6 +263,11 @@ const statusClasses = {
 - Full Stripe integration supporting Credit Cards and PromptPay QR codes.
 - Server-side Payment Intent generation at `/api/payment/create-intent` calculating amount from DB order totals.
 - Webhook handling at `/api/payment/webhook` with raw body signature verification and idempotency locks.
+
+### Stripe Safe Dynamic Initialization & Error Hardening — Key Details
+- **Dynamic Publishable Key Injection**: Removes static top-level `loadStripe(undefined)` execution on module load, initializing `loadStripe(key)` dynamically upon receiving configuration from the backend `/api/payment/create-intent`.
+- **Graceful Customer Error State**: Replaces blank placeholders and raw uncaught promise crashes with a warm, user-friendly Honey & Cream themed *"Payment Temporarily Unavailable"* card equipped with non-reload retry (`[Try Again]`) and order navigation buttons.
+- **Backend Environment Guards**: Added validation in `/api/payment/create-intent` checking `STRIPE_SECRET_KEY` prior to Stripe initialization to prevent unhandled 500 server crashes.
 
 ### Product Recommendations — Key Details
 - **Intelligent Routing API**: Secure endpoint at `/api/products/recommendations` that processes dynamic category, cart, and user-personalized recommendations.
@@ -325,4 +331,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-08-30 — Debounced Optimistic Cart Quantity Updates completed.
+> Last updated: 2026-08-30 — Stripe Safe Dynamic Initialization & Error Hardening completed.

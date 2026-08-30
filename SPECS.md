@@ -221,6 +221,7 @@ const statusClasses = {
 | **#8 Final Launch Review — Phase 3: Security Hardening & Error Masking** | `proxy.js`, `lib/utils.js`, `lib/api-helper.js`, `app/api/orders/route.js` |
 | **#9 API Helper Refactoring & Prisma Indexing** | `lib/api-helper.js`, `prisma/schema.prisma`, `app/api/products/route.js`, `app/api/orders/route.js`, `app/api/admin/customers/route.js` |
 | **#10 Admin Product Modal Hook & Validation Fix** | `components/admin/ProductModal.jsx`, `app/api/products/[id]/route.js` |
+| **#11 Debounced Optimistic Cart Quantity Updates** | `hooks/useCart.js`, `components/client/CartItemRow.jsx`, `app/(client)/cart/CartPage.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -277,6 +278,13 @@ const statusClasses = {
 - **API Helper Refactoring & Prisma Database Indexes**: Created `parsePagination`, `withAuth`, and `withAdmin` utilities in `lib/api-helper.js`. Added foreign key & filter indexes in `prisma/schema.prisma` (`Product.@@index([categoryId, isAvailable])`, `Order.@@index([userId, status, createdAt])`, `OrderItem.@@index([orderId, productId])`, `CartItem.@@index([userId])`) and enabled `onDelete: Cascade` on `CartItem.product`.
 - **Admin Product Modal Hook & Validation Fix**: Reorganized `ProductModal.jsx` hooks to strictly follow React Rules of Hooks, eliminating premature conditional returns before the `useEffect` Escape key handler. Added defensive `Array.isArray` guards for category dropdowns and inline form validation error messages for `slug`, `price`, `stock`, `categoryId`, and `description`. Removed stray `console.log(id)` from single product GET endpoint.
 
+### Debounced Optimistic Cart Quantity Updates — Key Details
+- **Optimistic SWR Cache Updates**: Increments and decrements immediately update local cache with `{ revalidate: false }`, dynamically recalculating item totals and order totals at 60fps.
+- **400ms Debounce Sync**: Debounces `PATCH /api/cart/[id]` requests using a module-level tracker, resetting the timer on rapid consecutive clicks and transmitting only the final accumulated quantity.
+- **Error Rollback**: Reverts local UI state and alerts the user with a toast message if the server rejects the quantity (e.g. stock unavailability).
+- **Flushing Sync on Order**: Employs `flushCartSync()` before order placement or confirmation to commit pending updates before checking out.
+- **Non-blocking Stepper Controls**: Removed loading lockouts on `+` and `-` buttons in `CartItemRow.jsx` while respecting stock boundaries (`quantity >= maxStock` and `quantity <= 1`).
+
 ---
 
 ## 📋 Features Pending (Current Roadmap)
@@ -316,4 +324,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-08-29 — Admin Product Modal Hook & Validation Fix completed.
+> Last updated: 2026-08-30 — Debounced Optimistic Cart Quantity Updates completed.

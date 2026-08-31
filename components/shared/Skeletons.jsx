@@ -9,12 +9,12 @@ export function Skeleton({ className, ...props }) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-      <div className="aspect-square w-full rounded-t-3xl bg-amber-50 dark:bg-zinc-800/50">
-        <Skeleton className="h-full w-full rounded-none rounded-t-3xl" />
+    <div className="flex flex-col overflow-hidden rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+      <div className="relative aspect-square w-full bg-amber-50 dark:bg-zinc-800/50">
+        <Skeleton className="h-full w-full rounded-none" />
       </div>
-      <div className="space-y-1.5 p-5">
-        <div className="flex justify-between">
+      <div className="space-y-1.5 p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-2">
           <Skeleton className="h-3 w-16" />
           <Skeleton className="h-4 w-12" />
         </div>
@@ -102,17 +102,19 @@ export function CartSkeleton() {
       <div className="grid gap-8 lg:grid-cols-[1fr_350px] items-start">
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-3xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <Skeleton className="h-20 w-20 shrink-0 rounded-2xl" />
-                <div className="min-w-0 flex-1 space-y-2">
-                  <Skeleton className="h-5 w-48 max-w-full" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-10 w-28 rounded-xl" />
-                  <Skeleton className="h-5 w-16" />
-                  <Skeleton className="h-9 w-9 rounded-lg" />
+            <div key={i} className="rounded-2xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+              <div className="flex gap-4">
+                <Skeleton className="h-24 w-24 sm:h-20 sm:w-20 shrink-0 rounded-xl" />
+                <div className="flex flex-1 flex-col justify-between min-w-0 sm:flex-row sm:items-center sm:gap-4">
+                  <div className="space-y-1.5 min-w-0 flex-1">
+                    <Skeleton className="h-5 w-48 max-w-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-3 sm:mt-0 sm:justify-end">
+                    <Skeleton className="h-9 w-28 rounded-xl" />
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -126,7 +128,7 @@ export function CartSkeleton() {
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-12" />
             </div>
-            <div className="pt-4 border-t border-amber-50 flex justify-between items-center">
+            <div className="pt-4 border-t border-amber-50 dark:border-zinc-800 flex justify-between items-center">
               <Skeleton className="h-5 w-28" />
               <Skeleton className="h-8 w-20" />
             </div>
@@ -140,27 +142,32 @@ export function CartSkeleton() {
 
 export function OrdersSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-4 px-4 py-8 sm:px-6 lg:px-8">
-      <Skeleton className="h-9 w-48" />
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-2xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-3 w-28" />
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="space-y-1">
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-2xl border border-amber-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2 flex-1 min-w-0">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-3 w-28" />
+                <div className="mt-3 flex gap-2">
+                  <Skeleton className="h-6 w-24 rounded-lg" />
+                  <Skeleton className="h-6 w-20 rounded-lg" />
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-4 w-24" />
+              </div>
             </div>
-            <Skeleton className="h-6 w-24 rounded-full" />
           </div>
-          <div className="mt-4 space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-11/12" />
-          </div>
-          <div className="mt-4 border-t border-amber-100 pt-3 text-right">
-            <Skeleton className="ml-auto h-3 w-12" />
-            <Skeleton className="ml-auto mt-1 h-6 w-20" />
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -249,8 +256,8 @@ export function FeaturedProductsSkeleton() {
         </div>
         <Skeleton className="h-4 w-32" />
       </div>
-      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
           <ProductCardSkeleton key={i} />
         ))}
       </div>

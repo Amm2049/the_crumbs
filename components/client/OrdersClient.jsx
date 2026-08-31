@@ -9,6 +9,7 @@ import OrderDetailModal from '@/components/client/OrderDetailModal'
 import { useSession } from 'next-auth/react'
 import { formatCurrency } from '@/lib/utils'
 import { usePusher } from '@/hooks/usePusher'
+import { OrdersSkeleton } from '@/components/shared/Skeletons'
 
 async function fetchJson(path) {
   const res = await fetch(path, {
@@ -147,16 +148,7 @@ export default function OrdersClient() {
   }
 
   if (isLoading) {
-    return (
-      <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="h-10 w-48 animate-pulse rounded-xl bg-amber-100 dark:bg-zinc-800" />
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-40 w-full animate-pulse rounded-2xl bg-amber-50 dark:bg-zinc-800/50" />
-          ))}
-        </div>
-      </div>
-    )
+    return <OrdersSkeleton />
   }
 
   if (error) {

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { ShoppingBag } from 'lucide-react';
+import { Skeleton } from '@/components/shared/Skeletons';
 
 export default function StripePaymentForm({ orderId }) {
     const stripe = useStripe();
@@ -37,7 +38,7 @@ export default function StripePaymentForm({ orderId }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="rounded-2xl border border-amber-50 dark:border-zinc-800 bg-amber-50/10 dark:bg-zinc-850/40 p-4">
-                {!isFormReady && <div className="h-40 w-full animate-pulse rounded-xl bg-amber-100/50" />}
+                {!isFormReady && <Skeleton className="h-40 w-full rounded-xl" />}
                 <div className={isFormReady ? 'block' : 'hidden'}>
                     <PaymentElement onReady={() => setIsFormReady(true)} />
                 </div>

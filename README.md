@@ -19,17 +19,6 @@ Built with Next.js 15 App Router, PostgreSQL (Neon), Prisma ORM, Auth.js, Pusher
 
 ---
 
-## 📑 Table of Contents
-- [Project Overview](#-project-overview)
-- [Key Features](#-key-features)
-- [Tech Stack & Architecture](#-tech-stack--architecture)
-- [Engineering Highlights](#-engineering-highlights)
-- [Demo Credentials](#-demo-credentials)
-- [Local Setup & Getting Started](#-local-setup--getting-started)
-- [Git Workflow](#-git-workflow)
-
----
-
 ## 🥐 Project Overview
 
 **The Crumbs** is an end-to-end bakery ordering platform built to provide a buttery-smooth customer shopping experience and a live operational dashboard for bakery staff.

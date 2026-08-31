@@ -49,6 +49,7 @@ export async function POST(request) {
         where: { userId_productId: { userId, productId } },
         create: { userId, productId, quantity },
         update: { quantity: { increment: quantity } },
+        include: { product: true },
     });
 }
 

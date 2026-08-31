@@ -38,51 +38,54 @@ export function useCart() {
   const addToCart = async (productId, quantity = 1) => {
     if (!session) return
 
+    const tempId = `temp-${productId}`
+
+    // 1. Instantly update the SWR cache optimistically
+    await mutate(
+      (current = []) => {
+        const existing = current.find(item => item.productId === productId)
+        if (existing) {
+          return current.map(item =>
+            item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item
+          )
+        }
+        return [...current, { id: tempId, productId, quantity, product: { id: productId } }]
+      },
+      { revalidate: false }
+    )
+
     try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity }),
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload.error || 'Failed to add to cart')
+      }
+
+      const updatedItem = await response.json()
+      addToast('Added to your basket! 🍯', 'success')
+
+      // 2. Atomically merge server response into live cache without replacing/wiping concurrent in-flight items
       await mutate(
-        async (current = []) => {
-          const response = await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId, quantity }),
-          })
-
-          if (!response.ok) {
-            const payload = await response.json().catch(() => ({}))
-            throw new Error(payload.error || 'Failed to add to cart')
-          }
-
-          const updatedItem = await response.json()
-          addToast('Added to your basket! 🍯', 'success')
-
-          // Cache Merging (add only updated one product)
-          const existing = current.find(item => item.productId === productId)
-          if (existing) {
-            return current.map(item =>
-              item.productId === productId ? { ...item, ...updatedItem } : item
-            )
+        (current = []) => {
+          const index = current.findIndex(item => item.productId === productId || item.id === tempId)
+          if (index !== -1) {
+            const updated = [...current]
+            updated[index] = { ...current[index], ...updatedItem }
+            return updated
           }
           return [...current, updatedItem]
         },
-        {
-          optimisticData: (current = []) => {
-            // Step A: Check if the product is already in our local cart
-            const existing = current.find(item => item.productId === productId)
-            if (existing) {
-              // Step B: If it exists, just show the increased number (e.g., 1 -> 2)
-              return current.map(item =>
-                item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item
-              )
-            }
-            // Step C: If it's new, add a "ghost" item so the UI shows it immediately.
-            return [...current, { productId, quantity, id: 'temp-id', product: { id: productId } }]
-          },
-          rollbackOnError: true,
-          revalidate: true, // Revalidate to get the full product info from server (all products updated to cache)
-        }
+        { revalidate: false }
       )
     } catch (err) {
       addToast(err.message || 'Something went wrong with your order. 🍯', 'error')
+      // Rollback on failure
+      await mutate()
       throw err
     }
   }

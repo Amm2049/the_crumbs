@@ -7,37 +7,56 @@
 [![Prisma](https://img.shields.io/badge/Prisma_ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Auth.js](https://img.shields.io/badge/Auth.js_v5-purple?style=for-the-badge&logo=auth0&logoColor=white)](https://authjs.dev/)
-[![Pusher](https://img.shields.io/badge/Pusher_WebSockets-300D4F?style=for-the-badge&logo=pusher&logoColor=white)](https://pusher.com/)
+[![Pusher](https://img.shields.io/badge/Pusher_Channels-300D4F?style=for-the-badge&logo=pusher&logoColor=white)](https://pusher.com/)
 [![Stripe](https://img.shields.io/badge/Stripe_Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
 
-**A modern, full-stack artisanal bakery e-commerce platform and real-time management dashboard.**  
-Featuring sub-second optimistic cart mutations, live WebSocket order tracking, intelligent product recommendations, and high-performance database analytics.
-
-[🌐 Live Demo](https://the-crumbs.vercel.app) • [📖 Architecture & Docs](#-engineering-highlights) • [🚀 Quickstart](#-getting-started)
+**A full-stack artisanal bakery e-commerce web application with customer storefront and real-time admin dashboard.**  
+Built with Next.js 15 App Router, PostgreSQL (Neon), Prisma ORM, Auth.js, Pusher Channels, and Stripe.
 
 </div>
 
 ---
 
-## 🌟 Key Highlights & Features
+## 📑 Table of Contents
+- [Project Overview](#-project-overview)
+- [Key Features](#-key-features)
+- [Tech Stack & Architecture](#-tech-stack--architecture)
+- [Engineering Highlights](#-engineering-highlights)
+- [Demo Credentials](#-demo-credentials)
+- [Local Setup & Getting Started](#-local-setup--getting-started)
+- [Git Workflow](#-git-workflow)
+
+---
+
+## 🥐 Project Overview
+
+**The Crumbs** is an end-to-end bakery ordering platform built to provide a buttery-smooth customer shopping experience and a live operational dashboard for bakery staff.
+
+- **Theme:** "Honey & Cream" — Warm ambers, creamy whites, and dark mode support.
+- **Storefront:** Browse artisanal products, manage cart with optimistic updates, personalized recommendations, Stripe checkout, and track order progress live.
+- **Admin Dashboard:** Real-time incoming order alerts with audio chimes, low-stock indicators, product/category management with Cloudinary uploads, and database analytics charts.
+
+---
+
+## 🌟 Key Features
 
 ### 🛍️ Customer Experience (Storefront)
-- **Fluid Product Discovery:** Fast server-paginated product catalog with instant category filtering, real-time stock status sync, and debounced search.
-- **Debounced Optimistic Cart (60fps):** Sub-second local cart updates powered by SWR with debounced server synchronization and incremental version counters to eliminate network race conditions.
-- **Intelligent Recommendation Engine:** Dynamic cross-selling in the cart, related category items on product pages, and personalized favorite recommendations for logged-in customers.
-- **Stripe & PromptPay Payments:** Seamless payment flows supporting Credit Cards and PromptPay QR codes with webhook verification and atomic inventory decrements.
-- **Live Order Progress Timeline:** Real-time visual timeline connected to private Pusher WebSocket channels for live order status updates without page refreshes.
-- **Customer Self-Service:** Customer-initiated order cancellation with automated inventory restocking for pending orders.
+- **Product Catalog & Search:** Server-paginated product listing with instant category filtering and search.
+- **Optimistic Cart Updates:** Sub-second quantity updates using SWR cache with 400ms server debouncing to prevent UI lag.
+- **Smart Recommendations:** Related products on item pages, cart cross-selling, and personalized category recommendations on the home page.
+- **Stripe Checkout:** Integrated credit card payments and PromptPay QR codes with server-side validation and stock verification.
+- **Live Order Tracking:** Real-time order progress timeline powered by Pusher Channels (`PENDING` → `PROCESSING` → `READY` → `DELIVERED`).
+- **Customer Cancellation:** Self-service cancellation for pending orders with automated inventory restocking.
 
-### 🛡️ Admin Operations & Analytics
-- **Live Order Dispatch Center:** Dedicated admin dashboard subscribing to private admin WebSocket channels — triggers audio chimes, toast notifications, and gold-highlighted row prepends on incoming orders.
-- **High-Performance Analytics:** Native PostgreSQL database aggregations (`$queryRaw`) rendering interactive Recharts visualizations:
-  - *Daily Revenue Trends* (Area Chart)
-  - *Order Volume by Status* (Stacked Bar)
-  - *Revenue by Category* (Donut Chart)
-  - *Top 5 Best-Selling Products* (Horizontal Bar)
-- **Full Inventory & Category Management:** Complete CRUD with Cloudinary image uploads, stock threshold monitoring, and automated low-stock warnings.
-- **Customer Directory:** Paginated overview of registered customers, purchase history totals, and account roles.
+### 🛡️ Admin Management
+- **Live Order Center:** Real-time event notifications via Pusher Channels (audio chime, toast alerts, and highlighted new order rows).
+- **Interactive Analytics:** Four dashboard charts powered by Recharts using query-optimized PostgreSQL raw queries (`$queryRaw`):
+  - Daily Revenue Trends (Area Chart)
+  - Order Volume by Status (Stacked Bar Chart)
+  - Revenue by Category (Donut Chart)
+  - Top 5 Best-Selling Products (Horizontal Bar Chart)
+- **Product & Category Management:** Complete CRUD with Cloudinary image uploads, slug auto-generation, and stock monitoring.
+- **Customer Directory:** Paginated list of registered customers and account roles.
 
 ---
 
@@ -45,102 +64,94 @@ Featuring sub-second optimistic cart mutations, live WebSocket order tracking, i
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Framework** | **Next.js 15 (App Router)** | Full-stack React framework with Server Components & Route Handlers |
-| **Styling & UI** | **Tailwind CSS v4 + shadcn/ui** | Custom "Honey & Cream" design system with dark mode & WCAG 2.1 AA accessibility |
-| **Database** | **PostgreSQL (Neon Serverless)** | Relational database with composite indexing for query optimization |
-| **ORM** | **Prisma ORM** | Type-safe database queries, schema migrations, and transaction management |
-| **Authentication** | **Auth.js v5 (NextAuth)** | Email/password (bcrypt) + Google OAuth with JWT session strategies & Edge proxy guards |
-| **Real-time WebSockets**| **Pusher Channels** | Event-driven server-to-client updates for stock, order alerts, and status changes |
-| **Payments** | **Stripe API** | Payment Intents, webhook signature verification, and idempotency checks |
-| **Media Hosting** | **Cloudinary** | Optimized asset storage with direct browser uploads via `CldUploadWidget` |
-| **State Management** | **SWR** | Stale-While-Revalidate caching for client-side data fetching and optimistic mutations |
+| **Framework** | **Next.js 15 (App Router)** | Full-stack framework with React Server Components & API Route Handlers |
+| **Styling & UI** | **Tailwind CSS v4 + shadcn/ui** | Design system with dark mode & WCAG 2.1 AA accessibility |
+| **Database** | **PostgreSQL (Neon Serverless)** | Relational database with composite indexing |
+| **ORM** | **Prisma ORM** | Schema migrations, type-safe queries, and transactions |
+| **Authentication** | **Auth.js v5 (NextAuth)** | Email/password (bcrypt) + Google OAuth with JWT session strategy |
+| **Real-time Events** | **Pusher Channels** | Managed cloud event broadcasting for live order tracking & admin alerts |
+| **Payments** | **Stripe API** | Payment Intents, card processing, and PromptPay QR codes |
+| **Media Storage** | **Cloudinary** | Image uploads via `CldUploadWidget` |
+| **State & Cache** | **SWR** | Client-side data fetching and optimistic mutations |
 
 ---
 
 ## 💡 Engineering Highlights
 
-### 1. Zero-Jank Optimistic UI & Race-Condition Protection
-*Problem:* Rapidly clicking quantity controls (`+` / `-`) or adding multiple items in quick succession can cause network responses to arrive out of order, resulting in UI jitter and stale cache overwrites.  
+### 1. Debounced Optimistic UI & Race-Condition Prevention
+*Challenge:* Rapidly clicking `+` / `-` buttons on cart items can cause out-of-order network responses, resulting in UI jitter or stale server data overwriting the latest user action.  
 *Solution:*
-- Configured local SWR cache mutations with `{ revalidate: false }` for instantaneous 60fps responsiveness.
-- Implemented a 400ms debounce buffer per cart item with an incremental `syncVersion` tracker, guaranteeing that older delayed network responses never overwrite newer optimistic user interactions.
+- Configured local SWR cache updates with `{ revalidate: false }` for instant 60fps responsiveness.
+- Implemented a 400ms debounce buffer per cart item with an incremental `syncVersion` counter so older in-flight requests never bounce back or overwrite newer clicks.
 
-### 2. Event-Driven Real-Time Ecosystem (WebSockets)
-- Subscribes customers to private channels (`private-user-{userId}`) to track order status transitions (`PENDING` → `PROCESSING` → `READY` → `DELIVERED`).
-- Broadcasts inventory availability updates to public storefront channels (`products`) whenever purchases or cancellations occur.
-- Pushes administrative events (`new-order`, `order-cancelled`, `low-stock`) to private admin channels with audio feedback and animated table updates.
+### 2. Real-Time Event Architecture with Pusher Channels
+*Implementation:*
+- Used **Pusher Channels** (a managed cloud real-time event service) to publish server events directly to client browsers without manual page reloading.
+- **Private Channels (`private-user-{userId}`):** Syncs customer order status updates securely.
+- **Private Admin Channel (`private-admin`):** Dispatches live order notifications, low-stock warnings, and sound alerts to bakery staff.
+- **Public Channel (`products`):** Updates stock availability on the customer catalog live.
 
-### 3. Query-Optimized Analytics via Native SQL Aggregations
-- Rather than loading entire datasets into memory on the Node.js layer, the analytics dashboard executes optimized PostgreSQL native queries (`$queryRaw`) with composite database indexes (`@@index([categoryId, isAvailable])`, `@@index([userId, status, createdAt])`).
+### 3. Query-Optimized Analytics via PostgreSQL Raw SQL
+- Instead of pulling thousands of records into memory and computing aggregates on the Node.js server, the analytics API executes native PostgreSQL queries (`$queryRaw`) utilizing composite database indexes (`@@index([categoryId, isAvailable])`, `@@index([userId, status, createdAt])`).
 
-### 4. Enterprise Security & WCAG 2.1 AA Accessibility
-- **Edge Route Protection:** Custom proxy routing layer validating role-based authorization for administrative endpoints and customer account routes.
-- **Error Masking:** Database and internal runtime stack traces are masked into generic 500 error responses with server-side correlation logs.
-- **Accessibility:** All interactive modals feature ARIA dialog specifications (`role="dialog"`, `aria-modal="true"`, `Escape` key dismissals), screen-reader live regions (`aria-live="polite"`), and high-contrast dark mode support.
+### 4. Security & Accessibility Hardening
+- **Edge Route Protection:** Role-based route middleware protecting `/admin/*` and customer account pages.
+- **Error Masking:** Database and internal runtime stack traces are masked into generic 500 error responses with server-side error logging.
+- **WCAG 2.1 AA Compliance:** Accessible modal dialogs (`role="dialog"`, `aria-modal="true"`, `Escape` key listeners) and high-contrast color tokens.
 
 ---
 
 ## 🔑 Demo Credentials
 
-To test the application without creating a new account, use the pre-configured credentials below:
+To test the application without creating a new account:
 
-| Role | Email | Password | Access Level |
+| Role | Email | Password | Access |
 | :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@thecrumbs.com` | `Admin123!` | Full Admin Dashboard, Analytics, Product/Category CRUD, Order Management |
-| **Customer** | *(Use Google OAuth or Register a new account)* | — | Storefront, Cart, Checkout, Order Tracking, Profile |
+| **Admin** | `admin@thecrumbs.com` | `Admin123!` | Admin Dashboard, Analytics, Product/Category CRUD, Order Management |
+| **Customer** | *(Use Google OAuth or register)* | — | Storefront, Cart, Stripe Checkout, Order History |
 
-> **Stripe Test Mode:** Use standard test card numbers (e.g., `4242 4242 4242 4242`, any future expiration date, CVC: `123`) on the checkout page.
+> **Stripe Test Cards:** Use test card `4242 4242 4242 4242`, any future date (e.g. `12/34`), and CVC `123` at checkout.
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18.18+ or 20+
-- A PostgreSQL database instance (local or hosted on Neon / Supabase)
-- Pusher, Cloudinary, and Stripe developer accounts
+## 🚀 Local Setup & Getting Started
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/your-username/the-crumbs.git
-cd the-crumbs
+git clone https://github.com/your-username/the_crumbs.git
+cd the_crumbs
 npm install
 ```
 
 ### 2. Configure Environment Variables
-Copy `.env.example` to `.env.local` and provide your credentials:
+Copy `.env.example` to `.env.local` and add your keys:
 ```bash
 cp .env.example .env.local
 ```
 
 ### 3. Database Setup & Seeding
 ```bash
-# Push schema to database
+# Push schema to PostgreSQL database
 npx prisma db push
 
 # Generate Prisma Client
 npx prisma generate
 
-# Seed sample categories, products, and admin account
+# Seed initial categories, products, and admin user
 node prisma/seed.js
 ```
 
-### 4. Run Development Server
+### 4. Start Development Server
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the storefront.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🌿 Git Flow & Branching Strategy
+## 🌿 Git Workflow
 
-This project follows standard **Git Flow** conventions:
-- `main` — Production-ready deployment branch (hosted on Vercel).
-- `develop` — Core integration branch. All feature branches originate from here.
-- `feature/*` — Isolated feature branches merged back into `develop` via pull requests.
-
----
-
-## 📄 License
-This project is open source and available under the [MIT License](LICENSE).
+This project adheres to **Git Flow**:
+- `main` — Production branch (deployed on Vercel).
+- `develop` — Active integration branch.
+- `feature/*` — Feature branches branched off and merged back into `develop`.

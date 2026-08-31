@@ -10,7 +10,7 @@ export async function GET() {
 
   return handleGetAll(db.category, {
     include: { _count: { select: { products: true } } },
-    orderBy: { name: "asc" },
+    orderBy: { createdAt: "desc" },
   });
 }
 

@@ -13,6 +13,8 @@
 **A full-stack artisanal bakery e-commerce web application with customer storefront and real-time admin dashboard.**  
 Built with Next.js 15 App Router, PostgreSQL (Neon), Prisma ORM, Auth.js, Pusher Channels, and Stripe.
 
+👉 **[Live Demo: the-crumbs-bice.vercel.app](https://the-crumbs-bice.vercel.app/)**
+
 </div>
 
 ---
@@ -107,7 +109,7 @@ To test the application without creating a new account:
 
 | Role | Email | Password | Access |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@thecrumbs.com` | `Admin123!` | Admin Dashboard, Analytics, Product/Category CRUD, Order Management |
+| **Admin** | `admin@thecrumbs.com` | `12345678` | Admin Dashboard, Analytics, Product/Category CRUD, Order Management |
 | **Customer** | *(Use Google OAuth or register)* | — | Storefront, Cart, Stripe Checkout, Order History |
 
 > **Stripe Test Cards:** Use test card `4242 4242 4242 4242`, any future date (e.g. `12/34`), and CVC `123` at checkout.

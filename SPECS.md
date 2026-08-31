@@ -223,6 +223,7 @@ const statusClasses = {
 | **#10 Admin Product Modal Hook & Validation Fix** | `components/admin/ProductModal.jsx`, `app/api/products/[id]/route.js` |
 | **#11 Debounced Optimistic Cart Quantity Updates** | `hooks/useCart.js`, `components/client/CartItemRow.jsx`, `app/(client)/cart/CartPage.jsx` |
 | **#12 Stripe Safe Dynamic Initialization & Error Hardening** | `app/(client)/checkout/[id]/pay/page.js`, `app/api/payment/create-intent/route.js` |
+| **#13 Multi-Item Add-to-Cart Race Condition Resolution & Skeleton Harmonization** | `hooks/useCart.js`, `app/api/cart/route.js`, `components/shared/Skeletons.jsx`, `components/client/OrdersClient.jsx`, `app/(client)/products/loading.jsx` |
 
 ### Order Cancellation — Key Details
 - Customer can only cancel **their own PENDING orders**
@@ -292,6 +293,16 @@ const statusClasses = {
 - **Flushing Sync on Order**: Employs `flushCartSync()` before order placement or confirmation to commit pending updates before checking out.
 - **Non-blocking Stepper Controls**: Removed loading lockouts on `+` and `-` buttons in `CartItemRow.jsx` while respecting stock boundaries (`quantity >= maxStock` and `quantity <= 1`).
 
+### Multi-Item Add-to-Cart Race Condition Resolution — Key Details
+- **Dual Race Condition Root Cause**:
+  1. *Stale Cache Snapshot Overwrite*: When adding multiple items in rapid succession, passing an async mutator function `mutate(async (current) => ...)` captured an initial cart snapshot before the second item was clicked. When the first item's network response arrived, its closure returned its stale snapshot (`[Item 1]`), completely overwriting the local cache and wiping Item 2, reverting Item 2's button from "In Cart" back to `+`.
+  2. *Premature Server Revalidation Race (`revalidate: true`)*: SWR revalidated the full cart (`GET /api/cart`) immediately after the first request completed. Because Item 2's `POST /api/cart` was still in flight on the network, the database returned only Item 1, overwriting the frontend cache and destroying Item 2's optimistic state.
+  3. *Static Temp ID Collision*: Static `id: 'temp-id'` assigned to all optimistic items collided when multiple items were added rapidly.
+- **Atomic Optimistic Mutations**: Immediate local cache updates with unique temporary keys (`temp-${productId}`) and `{ revalidate: false }`.
+- **Live Cache Response Merging**: When each `POST /api/cart` request completes, the confirmed item is atomically merged into the *live current* cache state via `mutate((current) => ...)`.
+- **Backend Product Inclusion**: Added `include: { product: true }` to `POST /api/cart` `handleUpsert` to provide full product metadata upon creation without requiring full cart revalidation.
+- **Skeleton UI Harmonization**: Aligned product grid loading skeletons across `loading.jsx` and `Skeletons.jsx` to `grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5` preventing Cumulative Layout Shift (CLS), and integrated `<OrdersSkeleton />` in `OrdersClient.jsx`.
+
 ---
 
 ## 📋 Features Pending (Current Roadmap)
@@ -331,4 +342,4 @@ git checkout -b feature/your-feature-name
 
 ---
 
-> Last updated: 2026-08-30 — Stripe Safe Dynamic Initialization & Error Hardening completed.
+> Last updated: 2026-08-31 — Multi-Item Add-to-Cart Race Condition Resolution & Skeleton Harmonization documented.
